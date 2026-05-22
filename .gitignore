@@ -1,0 +1,43 @@
+# LaTeX build outputs
+build/
+pdf/
+**/build/
+**/pdf/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*-blx.bib
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.lot
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.xdv
+
+# LaTeX glossary/index outputs
+*.acn
+*.acr
+*.alg
+*.glg
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.ist
+
+# Editor/OS local files
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+
+# Keep project VS Code settings, ignore local workspace state
+.vscode/*
+!.vscode/settings.json
