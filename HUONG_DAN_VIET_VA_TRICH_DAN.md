@@ -1,12 +1,12 @@
 # Hướng dẫn viết và trích dẫn cho báo cáo
 
-Ngày cập nhật: 2026-06-11
+Ngày cập nhật: 2026-06-12
 
 File này tóm tắt các lưu ý quan trọng từ `Chuong/1_Gioi_thieu.tex` và `Chuong/Phu_luc_A.tex`, đồng thời chuyển chúng thành checklist thực hành cho đồ án này.
 
 ## 1. Trạng thái template
 
-Repo báo cáo hiện mới thay tên bìa. Các chương vẫn còn nội dung hướng dẫn mẫu. Khi viết từng chương:
+Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt và abstract tiếng Anh ở mức bản nháp hoàn chỉnh. Các chương nội dung chính vẫn còn nội dung hướng dẫn mẫu. Khi viết từng chương:
 
 - Không giữ nguyên các đoạn "Sinh viên cần..." trong bản thảo cuối.
 - Không để các dòng `\textcolor{red}{Chú ý...}` của template trong bản nộp.
