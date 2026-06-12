@@ -12,6 +12,10 @@ Repo báo cáo hiện mới thay tên bìa. Các chương vẫn còn nội dung 
 - Không để các dòng `\textcolor{red}{Chú ý...}` của template trong bản nộp.
 - Không dùng cấu trúc mẫu một cách máy móc nếu không phù hợp; có thể đổi tên mục con miễn là vẫn đúng logic đồ án nghiên cứu.
 
+## 1.1. Vai trò biên tập khi viết cùng trợ lý
+
+Khi chỉnh báo cáo, trợ lý cần đóng vai trò hỗ trợ biên tập học thuật: đọc yêu cầu, kiểm tra mạch lập luận, chỉ ra điểm chưa hợp lý và đề xuất cách viết tốt hơn. Không sửa máy móc theo từng câu người viết nêu ra nếu thay đổi đó làm báo cáo kém rõ ràng hoặc kém chuẩn hơn. Với các góp ý mang tính chủ quan, cần cân nhắc theo mục tiêu cuối cùng của báo cáo: rõ vấn đề, đúng kỹ thuật, văn phong tự nhiên, và phù hợp chuẩn đồ án nghiên cứu.
+
 ## 2. Cách hành văn
 
 Các nguyên tắc cần bám:
@@ -115,4 +119,3 @@ Quy trình nên dùng:
 - Các kiến thức nền có citation hoặc TODO citation rõ ràng.
 - Không dùng từ cảm tính/phóng đại.
 - Có đoạn kết chương và câu nối sang chương tiếp theo.
-
