@@ -1,63 +1,60 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Lưu ý: Mẫu ĐATN này được thiết kế phù hợp với đồ án tốt nghiệp theo hướng nghiên cứu. Mẫu đề tài này là gợi ý tham khảo. Tuỳ từng đề tài, cấu trúc có thể thay đổi ít nhiều. Sinh viên cần tham khảo ý kiến của giáo viên hướng dẫn để đưa ra cấu trúc hợp lý nhất cho đề tài của mình. 
-
-Trước khi viết ĐATN, sinh viên cần đọc kỹ hướng dẫn và quy định chi tiết về cách viết ĐATN trong Phụ lục A. 
-
-Khi đóng quyển ĐATN, sinh viên cần lưu ý tuân thủ hướng dẫn ở phụ lục A.9
-
-SV cần đặc biệt lưu ý cách hành văn. Mỗi đoạn văn không được quá dài và cần có ý tứ rõ ràng, bao gồm duy nhất một ý chính và các ý phân tích bổ trợ để làm rõ hơn ý chính. Các câu văn trong đoạn phải đầy đủ chủ ngữ vị ngữ, cùng hướng đến chủ đề chung. Câu sau phải liên kết với câu trước, đoạn sau liên kết với đoạn trước. Trong văn phong khoa học, sinh viên không được dùng từ trong văn nói, không dùng các từ phóng đại, thái quá, các từ thiếu khách quan, thiên về cảm xúc, về quan điểm cá nhân như “tuyệt vời”, “cực hay”, “cực kỳ hữu ích”, v.v. Các câu văn cần được tối ưu hóa, đảm bảo rất khó để thể thêm hoặc bớt đi được dù chỉ một từ. Cách diễn đạt cần ngắn gọn, súc tích, không dài dòng.
-
-Chương 1 có độ dài từ 3 đến 6 trang với các nội dung sau đây
-
-
 \section{Đặt vấn đề}
 \label{sec:dvd}
-Phần này sinh viên mô tả bài toán cần giải quyết, lý do tại sao lại chọn bài toán đó, ý nghĩa/tầm quan trọng của bài toán.
 
-Tiêu đề của chương này có thể để là ``đặt vấn đề'', hoặc lấy chính tên của bài toán mà sinh viên định giải quyết, ví dụ có thể đặt tiêu đề là ``Bài toán dự đoán …” 
+Trong nhiều ứng dụng nhúng, dữ liệu được tạo ra trực tiếp từ cảm biến, camera hoặc giao diện người dùng, đồng thời kết quả xử lý cần được đưa ra trong thời gian ngắn. Vì vậy, mô hình suy luận ngày càng được đưa xuống thiết bị biên thay vì phụ thuộc hoàn toàn vào máy chủ. Cách triển khai này giúp giảm độ trễ, giảm lưu lượng truyền thông và hạn chế việc truyền dữ liệu thô ra ngoài thiết bị. Tuy nhiên, khác với máy chủ hoặc các bộ xử lý di động hiệu năng cao, thiết bị biên thường chỉ có bộ nhớ nhỏ, tần số hoạt động thấp và ngân sách năng lượng hạn chế. Nghiên cứu về TensorFlow Lite Micro cho thấy các bộ xử lý nhúng nhỏ có thể kém các nền tảng di động gần nhất khoảng 100--1,000 lần về năng lực tính toán, bộ nhớ và công suất, trong khi phần mềm suy luận vẫn phải vận hành được trong phạm vi bộ nhớ rất nhỏ \cite{david2021tflm}. Do đó, để triển khai AI trên hệ nhúng, cần quan tâm đồng thời đến việc mô hình có vừa với bộ nhớ hay không và quá trình suy luận có đủ hiệu quả trên phần cứng hạn chế hay không.
 
+Đối với ràng buộc bộ nhớ, lượng tử hóa là một hướng xử lý quan trọng. Thay vì lưu trọng số và kích hoạt bằng số thực dấu phẩy động, mô hình lượng tử hóa biểu diễn dữ liệu bằng số nguyên có độ rộng thấp, thường là 8 bit. Cách biểu diễn này làm giảm kích thước tham số, giảm lượng dữ liệu cần đọc ghi và cho phép nhiều phép toán được thực hiện bằng số học nguyên. Jacob và cộng sự chỉ ra rằng khi lượng tử hóa cả trọng số và kích hoạt về số nguyên 8 bit, mô hình có thể giảm gần bốn lần dung lượng so với biểu diễn dấu phẩy động 32 bit, đồng thời hỗ trợ suy luận bằng số học nguyên \cite{jacob2018integer}. Nhờ đó, lượng tử hóa giúp giảm đáng kể áp lực về lưu trữ mô hình và băng thông bộ nhớ, tạo điều kiện để các mô hình nhỏ có thể được đưa xuống hệ nhúng.
+
+Tuy nhiên, dữ liệu 8 bit không đồng nghĩa với việc quá trình suy luận trở nên đơn giản đối với bộ xử lý. Các lớp tích chập và lớp kết nối đầy đủ trong mạng nơ-ron vẫn chủ yếu dựa trên các phép nhân--cộng tích lũy lặp lại với số lượng lớn. Ngoài phép nhân--cộng, quá trình suy luận số nguyên còn cần áp dụng hàm kích hoạt, giới hạn miền giá trị, đọc dữ liệu tuần tự, cập nhật con trỏ và điều khiển vòng lặp. Trên một bộ xử lý vô hướng nhỏ, mỗi phép tính ở mức thuật toán thường phải được triển khai bằng nhiều lệnh máy rời rạc. Khi số phần tử đầu vào tăng, chi phí của các lệnh phụ, lệnh nhánh và cập nhật địa chỉ có thể chiếm phần đáng kể trong tổng thời gian chạy, ngay cả khi dữ liệu đã được rút gọn còn 8 bit.
+
+Do đó, bài toán đặt ra trong đồ án là tối ưu phần tính toán của suy luận AI lượng tử hóa trên bộ xử lý RISC-V nhúng. Trọng tâm của bài toán không nằm ở việc xây dựng một mô hình học máy mới, mà nằm ở việc làm cho các mẫu tính toán lặp lại trong suy luận INT8 được thực hiện với ít lệnh hơn và ít chi phí điều khiển hơn. Đây là một bài toán có ý nghĩa thực tế vì nhiều hệ thống nhúng vẫn cần bộ xử lý tổng quát để điều khiển ngoại vi, giao tiếp và chạy chương trình nhúng, nhưng đồng thời cần tăng tốc một số đoạn tính toán AI xuất hiện thường xuyên. Việc cải thiện các đoạn tính toán này sẽ giúp hệ thống giữ được tính linh hoạt của bộ xử lý lập trình được, trong khi vẫn tăng hiệu quả suy luận trên nền tảng tài nguyên hạn chế.
 
 \section{Các giải pháp hiện tại và hạn chế}
 \label{sec:giaiphap}
-Sinh viên trước tiên cần trình bày tổng quan các kết quả của các nghiên cứu hiện nay cho bài toán giới thiệu ở phần \ref{sec:dvd}. Sau đấy, sinh viên đưa ra các hạn chế của các giải pháp hiện tại. 
+
+Một cách tiếp cận trực tiếp để cải thiện hiệu năng suy luận lượng tử hóa là tối ưu phần mềm trên tập lệnh hiện có. Người phát triển có thể viết lại các vòng lặp tính toán bằng kiểu số nguyên, sắp xếp lại truy cập bộ nhớ, trải vòng lặp, tối ưu trình biên dịch hoặc viết một số đoạn hợp ngữ cho các phép toán quan trọng. Cách làm này có ưu điểm là không yêu cầu thay đổi phần cứng và có thể áp dụng trên nhiều bộ xử lý khác nhau. Các thư viện suy luận nhúng như TensorFlow Lite Micro cũng đi theo hướng cung cấp một khung thực thi gọn nhẹ để chạy mô hình trên môi trường tài nguyên hạn chế \cite{david2021tflm}. Tuy nhiên, tối ưu phần mềm vẫn bị giới hạn bởi các phép xử lý mà tập lệnh của bộ xử lý cung cấp. Nếu bộ xử lý chỉ có các lệnh vô hướng cơ bản, một phép tính mức thuật toán như tích vô hướng INT8, nhân--cộng tích lũy có giới hạn miền giá trị hoặc cập nhật con trỏ dữ liệu vẫn phải được tách thành nhiều lệnh máy. Phần mềm có thể sắp xếp các lệnh này hiệu quả hơn, nhưng khó loại bỏ hoàn toàn chi phí do số lệnh lớn, phụ thuộc dữ liệu và nhánh vòng lặp.
+
+Một hướng khác là sử dụng các mở rộng xử lý song song dữ liệu, tiêu biểu là SIMD hoặc mở rộng véc-tơ. Các mở rộng này cho phép một lệnh xử lý nhiều phần tử dữ liệu, nhờ đó phù hợp với các phép toán lặp lại trong mạng nơ-ron. Trong hệ sinh thái RISC-V, mở rộng véc-tơ là một hướng chuẩn hóa quan trọng cho các bài toán có tính song song dữ liệu \cite{riscv_unpriv_2026}. Hạn chế của hướng này nằm ở chi phí phần cứng và điều kiện triển khai. Bộ xử lý có hỗ trợ véc-tơ cần thêm tập thanh ghi, đường dữ liệu và logic điều khiển, làm tăng tài nguyên và độ phức tạp tích hợp. Với các thiết kế trên FPGA cỡ nhỏ hoặc với các bộ xử lý nhúng tối giản, chi phí đó có thể vượt quá mục tiêu của hệ thống. Ngoài ra, không phải nền tảng RISC-V nào cũng hỗ trợ mở rộng véc-tơ, nên việc phụ thuộc vào hướng này có thể làm giảm tính khả thi khi triển khai trên một lõi xử lý cụ thể đã được chọn trước.
+
+Một nhóm giải pháp mạnh hơn là dùng bộ tăng tốc phần cứng chuyên dụng cho mạng nơ-ron. Bộ tăng tốc có thể khai thác song song ở mức cao, tái sử dụng dữ liệu tốt hơn và đạt hiệu suất năng lượng cao trong các phép nhân ma trận hoặc tích chập. Tuy nhiên, đối với hệ nhúng nhỏ, bộ tăng tốc riêng kéo theo nhiều chi phí hệ thống: cần giao tiếp giữa bộ xử lý và bộ tăng tốc, cần cơ chế truyền dữ liệu, cần phần mềm điều khiển, và cần kiểm chứng thêm ở mức hệ thống. Khi mô hình không lớn hoặc khi dữ liệu vào ra nhỏ, phần chi phí di chuyển dữ liệu và khởi động bộ tăng tốc có thể làm giảm lợi ích thực tế. Bộ tăng tốc cũng thường kém linh hoạt hơn khi cần thay đổi nhanh tập toán tử hoặc cần tích hợp với các chương trình nhúng điều khiển ngoại vi.
+
+Nhìn chung, các hướng hiện tại tạo ra các đánh đổi khác nhau giữa tính linh hoạt, hiệu năng và chi phí phần cứng. Tối ưu phần mềm dễ triển khai nhưng vẫn bị giới hạn bởi tập lệnh sẵn có. Mở rộng véc-tơ và bộ tăng tốc chuyên dụng có thể đem lại hiệu năng cao hơn, nhưng đòi hỏi thêm tài nguyên và thay đổi đáng kể ở phần cứng hoặc hệ thống phần mềm. Các hạn chế này cho thấy vẫn còn khoảng trống cho một hướng tiếp cận trung gian: bổ sung các lệnh chuyên biệt cho một số mẫu tính toán INT8 thường gặp ngay trong bộ xử lý, nhưng vẫn tránh chi phí của một bộ tăng tốc chuyên dụng tách rời.
 
 \section{Mục tiêu và định hướng giải pháp}
-Trong chương này, sinh viên trước hết trình bày mục tiêu của đồ án là gì, sau đấy sinh viên đề xuất định hướng giải pháp của mình. Tốt nhất là với trình bày từng giải pháp đối với mỗi vấn đề nêu ra trong chương \ref{sec:giaiphap}. 
+
+Xuất phát từ khoảng trống trên, đồ án lựa chọn hướng tiếp cận ở mức tập lệnh. Mục tiêu chính là thiết kế, triển khai và đánh giá một nhóm lệnh mở rộng RISC-V cho các mẫu tính toán thường gặp trong suy luận AI lượng tử hóa trên hệ nhúng. Nhóm lệnh này hướng tới các phép xử lý xuất hiện nhiều trong đường suy luận INT8, gồm nhân--cộng tích lũy, tích vô hướng trên các phần tử đóng gói, kích hoạt, giới hạn miền giá trị, tải dữ liệu kèm cập nhật địa chỉ và hỗ trợ vòng lặp. Việc lựa chọn phạm vi này nhằm giảm số lệnh và chi phí điều khiển ở các đoạn tính toán lặp lại, trong khi vẫn giữ mô hình lập trình của bộ xử lý RISC-V.
+
+Để thực hiện mục tiêu đó, đồ án trước hết đặc tả ngữ nghĩa của từng lệnh. Mỗi lệnh được xác định theo toán hạng đầu vào, kết quả đầu ra, kiểu dữ liệu, quy tắc tính toán và tác động lên thanh ghi hoặc con trỏ dữ liệu. Từ đặc tả này, đồ án xây dựng mô hình mô phỏng trong gem5 để kiểm tra tính đúng của chương trình sử dụng lệnh mở rộng và quan sát xu hướng thay đổi số chu kỳ trên các bài đo nhỏ. gem5 là một bộ mô phỏng kiến trúc máy tính mã nguồn mở, hỗ trợ mô hình hóa hệ thống xử lý và được sử dụng rộng rãi trong nghiên cứu kiến trúc máy tính \cite{binkert2011gem5}. Trong đồ án, mô phỏng giữ vai trò kiểm chứng ngữ nghĩa và hỗ trợ phân tích trước khi chuyển sang triển khai phần cứng.
+
+Song song với mô phỏng, đồ án triển khai một hệ thống SoC tối giản trên kit FPGA DE2i-150, sử dụng lõi CV32E40P làm bộ xử lý trung tâm. CV32E40P là một lõi RISC-V 32 bit hướng nhúng thuộc dự án OpenHW CORE-V \cite{openhw_cv32e40p_um_2024}. Hệ thống SoC được xây dựng với các thành phần cần thiết cho chương trình nhúng cơ bản, gồm lõi xử lý, bộ nhớ nội bộ và giao tiếp UART. Trên nền tảng này, các chương trình nhúng không có hệ điều hành được biên dịch và chạy trực tiếp trên kit để thực thi các đoạn tính toán INT8, từ đó đo số chu kỳ và kiểm tra khả năng tích hợp của hướng tiếp cận trong một hệ nhúng cụ thể. Các tiêu chí, chương trình đo và kết quả cụ thể được trình bày ở Chương~\ref{chap:thuc-nghiem}.
+
+Như vậy, định hướng giải pháp của đồ án là rút gọn các mẫu tính toán INT8 lặp lại ở mức tập lệnh, kiểm chứng bằng mô phỏng, rồi triển khai trên SoC FPGA để đánh giá trong điều kiện thực thi cụ thể. Hướng tiếp cận này giải quyết sự đánh đổi đã nêu ở Mục \ref{sec:giaiphap}: nó vượt qua giới hạn hiệu năng của phần mềm thuần túy, nhưng vẫn giữ được sự linh hoạt và tốn ít tài nguyên phần cứng hơn so với việc tích hợp bộ véc-tơ hay bộ tăng tốc chuyên dụng.
 
 \section{Đóng góp của đồ án}
-Trong phần này sinh viên liệt kê cụ thể, ngắn gọn các đóng góp của đồ án. Ví dụ: 
 
-Đồ án này có 3 đóng góp chính như sau:
+Trên cơ sở mục tiêu và định hướng giải pháp đã nêu, đồ án có bốn đóng góp chính.
 
-\begin{enumerate}
-\item Đồ án đề xuất một phương pháp tiền xử lý dữ liệu nhằm loại bỏ nhiễu và dữ liệu ngoại lai trước khi đưa vào huấn luyện mô hình.
-\item \ldots
-\item \ldots 
-\end{enumerate}
+Thứ nhất, đồ án thiết kế và đặc tả một nhóm lệnh mở rộng RISC-V phục vụ suy luận AI lượng tử hóa, bao gồm các lệnh cho nhân--cộng tích lũy, tích vô hướng trên dữ liệu INT8 đóng gói, kích hoạt, giới hạn miền giá trị, tải dữ liệu kèm cập nhật địa chỉ và hỗ trợ vòng lặp.
+
+Thứ hai, đồ án hiện thực hóa và kiểm chứng nhóm lệnh này trong môi trường gem5 thông qua việc bổ sung mô hình lệnh, bộ giải mã, ngữ nghĩa thực thi, trạng thái vòng lặp phần cứng và các bài kiểm thử chức năng.
+
+Thứ ba, đồ án xây dựng nền tảng SoC thực nghiệm trên kit FPGA DE2i-150 với lõi CV32E40P, kèm môi trường chương trình nhúng không có hệ điều hành, các hàm bao cho lệnh mở rộng và các chương trình đo hiệu năng ở mức nhân tính toán.
+
+Thứ tư, đồ án triển khai mô hình suy luận lượng tử hóa bằng TensorFlow Lite Micro trên SoC FPGA, qua đó kiểm tra khả năng đưa nhóm lệnh mở rộng vào một luồng suy luận INT8 hoàn chỉnh.
 
 \section{Bố cục đồ án}
-Phần còn lại của báo cáo đồ án tốt nghiệp này được tổ chức như sau. 
 
-Chương 2 trình bày về v.v. 
+Phần còn lại của báo cáo đồ án tốt nghiệp này được tổ chức như sau. Chương 2 trình bày các kết quả nghiên cứu và hướng tiếp cận liên quan đến tối ưu suy luận AI lượng tử hóa trên hệ nhúng, từ đó làm rõ vị trí của đồ án so với các giải pháp hiện có. Chương này cũng trình bày các kiến thức nền tảng cần thiết về suy luận INT8, tập lệnh RISC-V, lõi CV32E40P, mô phỏng kiến trúc bằng gem5, hệ thống SoC nhúng và TensorFlow Lite Micro.
 
-Trong Chương 3, em/tôi giới thiệu về v.v.
+Chương 3 trình bày phương pháp đề xuất của đồ án. Nội dung chính của chương là thiết kế và đặc tả nhóm lệnh mở rộng phục vụ suy luận INT8, gồm các lệnh nhân--cộng tích lũy, tích vô hướng đóng gói, kích hoạt, giới hạn miền giá trị, tải dữ liệu kèm cập nhật địa chỉ và hỗ trợ vòng lặp. Chương này cũng làm rõ cách nhóm lệnh được triển khai trong hai môi trường của đồ án: mô phỏng bằng gem5 và thực nghiệm trên lõi CV32E40P.
 
-Chú ý: Sinh viên cần viết mô tả thành đoạn văn đầy đủ về nội dung chương. Tuyệt đối không viết ý hay gạch đầu dòng. Chương 1 không cần mô tả trong phần này. 
+Chương 4 trình bày phần đánh giá qua mô phỏng bằng gem5. Chương này mô tả các kịch bản kiểm thử và đo hiệu năng trong môi trường mô phỏng, bao gồm kiểm tra ngữ nghĩa của nhóm lệnh, các bài đo cho từng nhân tính toán đại diện và các cấu hình dùng để quan sát xu hướng hiệu năng. Từ các kết quả thu được, chương phân tích tác động của nhóm lệnh mở rộng đến số chu kỳ thực thi và nêu rõ giới hạn của mô phỏng gem5 khi đối chiếu với phần cứng thực tế.
 
-Ví dụ tham khảo mô tả chương trong phần bố cục đồ án tốt nghiệp: Chương *** trình bày đóng góp chính của đồ án, đó là một nền tảng ABC cho phép khai phá và tích hợp nhiều nguồn dữ liệu, trong đó mỗi nguồn dữ liệu lại có định dạng đặc thù riêng. Nền tảng ABC được phát triển dựa trên khái niệm DEF, là các module ngữ nghĩa trợ giúp người dùng tìm kiếm, tích hợp và hiển thị trực quan dữ liệu theo mô hình cộng tác và mô hình phân tán.  
+Chương 5 trình bày phần đánh giá thực nghiệm trên phần cứng thật. Nội dung chương bao gồm môi trường SoC tối giản sử dụng lõi CV32E40P trên kit FPGA DE2i-150, các kịch bản đo hiệu năng trên chương trình nhúng không có hệ điều hành và quá trình triển khai mô hình suy luận lượng tử hóa với TensorFlow Lite Micro. Chương này tập trung vào các số liệu thu được trên kit, so sánh với đường phần mềm tham chiếu và phân tích nguyên nhân dẫn đến mức cải thiện hoặc giới hạn trong từng nhóm thí nghiệm.
 
-Chú ý: Trong phần nội dung chính, mỗi chương của đồ án nên có phần Tổng quan và Kết chương. Hai phần này đều có định dạng văn bản “Normal”, sinh viên không cần tạo định dạng riêng, ví dụ như không in đậm/in nghiêng, không đóng khung, v.v... 
-
-Trong phần Tổng quan của chương N, sinh viên nên có sự liên kết với chương N-1 rồi trình bày sơ qua lý do có mặt của chương N và sự cần thiết của chương này trong đồ án. Sau đó giới thiệu những vấn đề sẽ trình bày trong chương này là gì, trong các đề mục lớn nào.
-
-Ví dụ về phần Tổng quan: Chương 3 đã thảo luận về nguồn gốc ra đời, cơ sở lý thuyết và các nhiệm vụ chính của bài toán tích hợp dữ liệu. Chương 4 này sẽ trình bày chi tiết các công cụ tích hợp dữ liệu theo hướng tiếp cận “mashup”. Với mục đích và phạm vi của đề tài, sáu nhóm công cụ tích hợp dữ liệu chính được trình bày bao gồm: (i) nhóm công cụ ABC trong phần 4.1, (ii) nhóm công cụ DEF trong phần 4.2, nhóm công cụ GHK trong phần 4.3, v.v...
-
-Trong phần Kết chương, sinh viên đưa ra một số kết luận quan trọng của chương. Những vấn đề mở ra trong Tổng quan cần được tóm tắt lại nội dung và cách giải quyết/thực hiện như thế nào. Sinh viên lưu ý không viết Kết chương giống hệt Tổng quan. Sau khi đọc phần Kết chương, người đọc sẽ nắm được sơ bộ nội dung và giải pháp cho các vấn đề đã trình bày trong chương. Trong Kết chương, Sinh viên nên có thêm câu liên kết tới chương tiếp theo.
-
-Ví dụ về phần Kết chương: Chương này đã phân tích chi tiết sáu nhóm công cụ tích hợp dữ liệu. Nhóm công cụ ABC và DEF thích hợp với những bài toán tích hợp dữ liệu phạm vi nhỏ. Trong khi đó, nhóm công cụ GHK lại chứng tỏ thế mạnh của mình với những bài toán cần độ chính xác cao, v.v. Từ kết quả nghiên cứu và phân tích về sáu nhóm công cụ tích hợp dữ liệu này, tôi đã thực hiện phát triển phần mềm tự động bóc tách và tích hợp dữ liệu sử dụng nhóm công cụ GHK. Phần này được trình bày trong chương tiếp theo – Chương 5.
-
-
+Chương 6 tổng kết các kết quả đạt được của đồ án, nhắc lại các đóng góp chính và phân tích những hạn chế còn tồn tại. Trên cơ sở đó, chương đưa ra một số hướng phát triển tiếp theo cho hướng mở rộng tập lệnh RISC-V phục vụ suy luận AI lượng tử hóa.
 
 \end{document}

@@ -1,12 +1,12 @@
 # Hướng dẫn viết và trích dẫn cho báo cáo
 
-Ngày cập nhật: 2026-06-12
+Ngày cập nhật: 2026-06-13
 
 File này tóm tắt các lưu ý quan trọng từ `Chuong/1_Gioi_thieu.tex` và `Chuong/Phu_luc_A.tex`, đồng thời chuyển chúng thành checklist thực hành cho đồ án này.
 
 ## 1. Trạng thái template
 
-Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt và abstract tiếng Anh ở mức bản nháp hoàn chỉnh. Các chương nội dung chính vẫn còn nội dung hướng dẫn mẫu. Khi viết từng chương:
+Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và Chương 1 ở mức nội dung hoàn chỉnh ban đầu. Các chương nội dung chính từ Chương 2 trở đi vẫn còn nội dung hướng dẫn mẫu. Khi viết từng chương:
 
 - Không giữ nguyên các đoạn "Sinh viên cần..." trong bản thảo cuối.
 - Không để các dòng `\textcolor{red}{Chú ý...}` của template trong bản nộp.
@@ -90,16 +90,14 @@ Các nguyên tắc từ phụ lục:
 
 ## 7. Trạng thái `.bib` hiện tại
 
-Hiện chưa nên giả định `.bib` đã có đủ nguồn liên quan. Khi viết Chương 2 và các phần lý thuyết, cần tạo dần danh sách citation.
+`.bib` hiện đã có một số nguồn nền tảng dùng cho Chương 1, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro và lượng tử hóa INT8. Tuy nhiên, chưa nên giả định `.bib` đã đủ nguồn cho toàn bộ báo cáo. Khi viết Chương 2 và các phần lý thuyết, cần tiếp tục tạo dần danh sách citation.
 
 Nhóm tài liệu cần bổ sung:
 
-- RISC-V ISA manual.
-- CV32E40P/OpenHW documentation.
+- Tài liệu RISC-V liên quan tới mở rộng tập lệnh, custom extension hoặc vector nếu cần trình bày sâu hơn.
 - CORE-V/PULP instruction documentation nếu dùng làm nguồn giải thích instruction.
-- gem5 documentation hoặc paper liên quan.
-- TensorFlow Lite Micro documentation.
-- Tài liệu quantization INT8/integer-only neural network inference.
+- Tài liệu TensorFlow Lite Micro chi tiết hơn cho phần triển khai thực nghiệm.
+- Các bài nghiên cứu liên quan đến suy luận lượng tử hóa trên hệ nhúng.
 - Tài liệu về benchmark/performance metrics nếu cần giải thích cách đo cycles, speedup.
 
 Quy trình nên dùng:

@@ -1,10 +1,10 @@
 # Bản đồ tài liệu phục vụ viết báo cáo đồ án
 
-Ngày cập nhật: 2026-06-12
+Ngày cập nhật: 2026-06-13
 
 Đồ án: Mở rộng tập lệnh RISC-V cho các phép toán AI lượng tử hóa, mô phỏng trên gem5 và triển khai thực nghiệm trên kit FPGA DE2i-150/CV32E40P.
 
-File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt và abstract tiếng Anh ở mức bản nháp hoàn chỉnh; các chương nội dung chính vẫn cần được viết tiếp từ template. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
+File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và Chương 1 ở mức nội dung hoàn chỉnh ban đầu. Các chương nội dung chính phía sau vẫn cần được viết tiếp từ template. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
 
 ## 1. Bộ file hỗ trợ viết báo cáo
 
@@ -19,8 +19,9 @@ Khi bắt đầu viết một chương, đọc file này trước để xác đ�
 ## 2. Trạng thái hiện tại cần nhớ
 
 - Các phần đầu báo cáo đã có nội dung: `0_2_Loi_cam_on.tex`, `0_3_Tom_tat_noi_dung.tex` và `0_4_Tom_tat_noi_dung_eng.tex`.
-- Các chương nội dung chính từ Chương 1 đến Chương 6 vẫn còn nhiều nội dung mẫu. Khi viết thật cần xóa hoặc thay toàn bộ đoạn hướng dẫn mẫu bằng nội dung đồ án.
-- `Danh_sach_tai_lieu_tham_khao.bib` hiện chưa được xem như đã có đủ tài liệu liên quan cho đề tài. Những mục như RISC-V ISA, CV32E40P, gem5, TFLM, quantization INT8 là danh sách tài liệu cần bổ sung và trích dẫn sau, không phải tài liệu đã sẵn sàng.
+- Chương 1 đã được thay nội dung theo hướng hoàn chỉnh, gồm đặt vấn đề, các giải pháp hiện tại và hạn chế, mục tiêu và định hướng giải pháp, đóng góp của đồ án và bố cục báo cáo.
+- Các chương nội dung chính từ Chương 2 đến Chương 6 vẫn còn nhiều nội dung mẫu. Khi viết thật cần xóa hoặc thay toàn bộ đoạn hướng dẫn mẫu bằng nội dung đồ án.
+- `Danh_sach_tai_lieu_tham_khao.bib` đã có các nguồn nền tảng dùng trong Chương 1 cho RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro và lượng tử hóa INT8. Khi viết Chương 2 trở đi vẫn cần tiếp tục bổ sung nguồn chính thức hoặc bài báo phù hợp với từng claim lý thuyết.
 - Các file README/HANDOFF trong repo gem5 và SoC là nguồn nội bộ để hiểu đồ án và lấy số liệu/log. Chúng không thay thế tài liệu tham khảo học thuật hoặc tài liệu chính thức trong `.bib`.
 - Phần gem5 không chỉ nằm trong `tests/gem5/riscv_ai_ext`. Đồ án đã chỉnh cả phần ISA, decoder, instruction semantics, memory format, misc registers, redirect hardware loop và một số đường O3/front-end. Khi viết Chương 4 phải làm rõ điểm này.
 - Phần thực nghiệm trên kit là nguồn kết quả chính. gem5 dùng để phân tích/mô phỏng/sensitivity và hỗ trợ câu chuyện kỹ thuật, không khẳng định là mô hình cycle-for-cycle của CV32E40P.
@@ -38,6 +39,8 @@ Các file liên quan:
 - `/home/duydonv/Downloads/20225608_PhamDuyDong_20252/Chuong/0_4_Tom_tat_noi_dung_eng.tex`
 
 ### Chương 1: Giới thiệu
+
+Trạng thái hiện tại: đã có nội dung hoàn chỉnh ban đầu trong `Chuong/1_Gioi_thieu.tex`. Khi các chương sau ổn định, cần quay lại rà soát thuật ngữ và mức độ khớp giữa phần đóng góp, bố cục đồ án và nội dung thực tế của Chương 3, Chương 4, Chương 5.
 
 Mục tiêu: nêu vấn đề, động lực, hạn chế của xử lý scalar cho AI lượng tử hóa trên hệ nhúng, mục tiêu đồ án, đóng góp và bố cục báo cáo.
 
@@ -77,7 +80,7 @@ Tài liệu nội bộ nên đọc:
 - `/home/duydonv/de2i150_cv32e40p_soc/firmware/TFLM.md`
 - `/home/duydonv/de2i150_cv32e40p_soc/firmware/mnist_fc/README.md`
 
-Tài liệu ngoài cần bổ sung sau vào `.bib`: RISC-V ISA manual, CV32E40P/OpenHW documentation, gem5 documentation/paper, TensorFlow Lite Micro documentation, tài liệu về integer-only/INT8 quantized inference.
+Tài liệu ngoài cần bổ sung sau vào `.bib`: tài liệu RISC-V liên quan tới custom extension/vector nếu cần trình bày sâu hơn, tài liệu CORE-V/PULP instruction nếu dùng làm nguồn giải thích instruction, tài liệu TensorFlow Lite Micro chi tiết hơn cho phần triển khai, và các bài nghiên cứu liên quan đến suy luận lượng tử hóa trên hệ nhúng.
 
 ### Chương 3: Phương pháp, đặc tả các lệnh
 
