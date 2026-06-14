@@ -1,21 +1,95 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
-Chương này có độ dài không quá 10 trang. Chương này sinh viên trình bày về phân tích rõ ngữ cảnh bài toán cũng như các kết quả nghiên cứu tương tự. Đồng thời, sinh viên có thể trình bày thêm về các kiến thức nền tảng. Mỗi chương nên có đoạn mở đầu chươnggiới thiệu những nội dung sẽ trình bày trong chương.
+Chương~\ref{chap:gioi-thieu} đã xác định bài toán của đồ án là tối ưu các mẫu tính toán lặp lại trong suy luận AI lượng tử hóa trên bộ xử lý RISC-V nhúng. Để làm cơ sở cho việc đặc tả nhóm lệnh ở Chương~\ref{chap:de-xuat}, mô phỏng ở Chương~\ref{chap:phan-tich-ly-thuyet} và đánh giá thực nghiệm ở Chương~\ref{chap:thuc-nghiem}, chương này trình bày ngữ cảnh kỹ thuật của bài toán, các nghiên cứu và hướng tiếp cận liên quan, sau đó hệ thống hóa các nền tảng cần thiết về suy luận INT8, mở rộng tập lệnh RISC-V, lõi CV32E40P/CORE-V, gem5 và TensorFlow Lite Micro.
 
 \section{Ngữ cảnh của bài toán}
-\ldots
+\label{sec:ngu-canh-bai-toan}
+
+Trong phạm vi đồ án, ngữ cảnh bài toán là tối ưu phần tính toán của suy luận AI lượng tử hóa trên bộ xử lý RISC-V nhúng. Chương~\ref{chap:gioi-thieu} đã chỉ ra rằng suy luận trên hệ nhúng bị ràng buộc bởi bộ nhớ và tài nguyên tính toán, trong khi lượng tử hóa INT8 giúp giảm dung lượng mô hình nhưng không làm mất đi chi phí của các phép tính lặp lại. Các lớp tích chập và lớp kết nối đầy đủ vẫn chủ yếu dựa trên nhân--cộng tích lũy; ở mức thực thi, chương trình còn phải đọc dữ liệu, cập nhật con trỏ, điều khiển vòng lặp, áp dụng kích hoạt và giới hạn miền giá trị. Vì vậy, bài toán tập trung vào việc nhận diện các mẫu thao tác INT8 xuất hiện thường xuyên và xem xét cách hỗ trợ chúng hiệu quả hơn ở mức tập lệnh.
 
 \section{Các kết quả nghiên cứu tương tự}
-Trong phần này sinh viên trình bày các nghiên cứu liên quan (related work), chú ý phân tích rõ những ưu nhược điểm của chúng. Từ đó, nêu bật lên động lực để thực hiện nghiên cứu của đồ án này.
+\label{sec:nghien-cuu-tuong-tu}
+
+Dựa trên các hướng giải pháp đã nêu ở Chương~\ref{chap:gioi-thieu}, mục này phân tích một số công trình tiêu biểu thuộc ba nhóm: tối ưu phần mềm trên tập lệnh sẵn có, khai thác SIMD/véc-tơ và sử dụng bộ tăng tốc phần cứng chuyên dụng. Ba nhóm này đều hướng tới mục tiêu giảm thời gian và năng lượng cho suy luận mạng nơ-ron, nhưng khác nhau ở mức can thiệp vào hệ thống. Tối ưu phần mềm giữ nguyên phần cứng, SIMD/véc-tơ mở rộng năng lực xử lý song song dữ liệu của bộ xử lý, còn bộ tăng tốc chuyên dụng chuyển một phần lớn tính toán sang khối phần cứng riêng.
+
+Hướng tối ưu phần mềm tập trung vào việc tổ chức lại mô hình và chương trình suy luận để tận dụng tốt hơn phần cứng hiện có. Ở mức hệ thống phần mềm, TensorFlow Lite Micro cung cấp môi trường suy luận gọn cho thiết bị nhúng, nơi bộ nhớ, kích thước mã và khả năng chạy không có hệ điều hành là các ràng buộc quan trọng \cite{david2021tflm}. Ở mức tối ưu sâu hơn, MCUNet đồng thiết kế kiến trúc mạng TinyNAS với thư viện suy luận TinyEngine cho vi điều khiển. Theo kết quả được báo cáo tại NeurIPS 2020, TinyEngine giảm bộ nhớ khoảng 3.4 lần và tăng tốc 1.7--3.3 lần so với TensorFlow Lite Micro/CMSIS-NN trong các thí nghiệm của tác giả; MCUNet cũng đạt trên 70\% độ chính xác phân loại top-1 trên ImageNet với một vi điều khiển thương mại \cite{lin2020mcunet}. Ưu điểm của hướng này là không yêu cầu thay đổi phần cứng và có thể triển khai trên nhiều nền tảng sẵn có. Hạn chế là phần mềm vẫn bị ràng buộc bởi tập lệnh của lõi xử lý: nếu phần cứng chỉ có các lệnh vô hướng cơ bản, các thao tác INT8 như tích vô hướng, cập nhật địa chỉ và điều khiển vòng lặp vẫn phải được tách thành nhiều lệnh máy.
+
+Hướng SIMD/véc-tơ giải quyết bài toán bằng cách cho phép một lệnh xử lý nhiều phần tử dữ liệu. Trong RISC-V, đại diện chuẩn hóa của hướng này là RISC-V Vector Extension. Khác với một số thiết kế SIMD cố định độ rộng thanh ghi, RVV cho phép độ dài véc-tơ phụ thuộc vào triển khai phần cứng, trong khi chương trình vẫn có thể dùng cùng mô hình lập trình; đặc tả RVV cũng bổ sung 32 thanh ghi véc-tơ và các thanh ghi điều khiển liên quan \cite{riscv_unpriv_2026}. Cách tiếp cận này phù hợp với các phép toán dạng mảng trong suy luận mạng nơ-ron, đặc biệt là nhân--cộng trên nhiều phần tử INT8. Tuy nhiên, để hỗ trợ véc-tơ, bộ xử lý cần thêm tập thanh ghi véc-tơ, đường dữ liệu rộng hơn và logic thực thi tương ứng. Vì vậy, với các lõi RISC-V nhúng nhỏ hoặc SoC FPGA tài nguyên hạn chế, việc giả định có RVV đầy đủ có thể không phù hợp với nền tảng triển khai cụ thể.
+
+Hướng bộ tăng tốc chuyên dụng đưa các phép toán chiếm tỷ trọng lớn trong mạng nơ-ron sang phần cứng riêng. Khảo sát của Sze và cộng sự cho thấy hiệu quả của bộ tăng tốc phụ thuộc mạnh vào luồng dữ liệu, tổ chức bộ nhớ, khả năng tái sử dụng dữ liệu và các thước đo như thông lượng, năng lượng và diện tích \cite{sze2017efficient}. Một ví dụ tiêu biểu ở quy mô trung tâm dữ liệu là TPUv1, với khối nhân ma trận 65,536 MAC 8 bit, thông lượng đỉnh 92 TOPS và bộ nhớ trên chip 28 MiB. Trong các tải suy luận tại trung tâm dữ liệu, TPU được báo cáo nhanh hơn khoảng 15--30 lần và đạt hiệu quả TOPS/W cao hơn khoảng 30--80 lần so với CPU/GPU cùng thời \cite{jouppi2017tpu}. Các số liệu này cho thấy tiềm năng của phần cứng chuyên dụng, nhưng cũng phản ánh một hướng thiết kế có quy mô và điều kiện triển khai khác xa SoC nhúng nhỏ. Trong hệ nhúng, bộ tăng tốc riêng kéo theo chi phí tích hợp đáng kể: CPU phải điều phối truyền dữ liệu, phần mềm phải quản lý giao tiếp với bộ tăng tốc, và lợi ích có thể giảm nếu bài toán chỉ gồm các kernel nhỏ hoặc cần duy trì tính linh hoạt của chương trình nhúng.
+
+Từ các hướng trên, động lực của đồ án là lựa chọn một điểm trung gian. Đồ án không chỉ tối ưu phần mềm trên tập lệnh sẵn có, cũng không giả định có RVV đầy đủ hay một bộ tăng tốc tách rời. Thay vào đó, đồ án tập trung vào một nhóm thao tác xuất hiện thường xuyên trong suy luận INT8, mô tả chúng ở mức tập lệnh, kiểm chứng trong gem5 và đánh giá trên một SoC RISC-V nhúng dùng CV32E40P. Cách tiếp cận này giữ mô hình lập trình của bộ xử lý tổng quát, đồng thời hướng tới việc giảm số lệnh và chi phí điều khiển ở các đoạn tính toán có mật độ lặp cao.
 
 
-\section{Tên của kiến thức nền tảng số 1}
-Tiêu đề và nội dung của chương này sẽ thay đổi tuỳ thuộc vào từng đồ án. Chú ý trình bày những kiến thức có liên quan mật thiết nhất đối với đồ án của mình, Tránh trình bày lan man những kiến thức phổ thông không cần thiết. 
+\section{Suy luận AI lượng tử hóa}
+\label{sec:suy-luan-ai-luong-tu-hoa}
 
-\section{Tên của kiến thức nền tảng số 2}
-Tiêu đề và nội dung của chương này sẽ thay đổi tuỳ thuộc vào từng đồ án. Chú ý trình bày những kiến thức có liên quan mật thiết nhất đối với đồ án của mình, Tránh trình bày lan man những kiến thức phổ thông không cần thiết.
+Suy luận là giai đoạn sử dụng mô hình đã huấn luyện để tính đầu ra từ dữ liệu đầu vào, trong đó trọng số của mô hình không còn được cập nhật. Với mạng nơ-ron thông thường, nhiều phép toán được mô tả bằng số thực dấu phẩy động. Tuy nhiên, trên hệ nhúng tài nguyên hạn chế, biểu diễn số thực 32 bit làm tăng dung lượng mô hình, lượng dữ liệu cần truy cập và độ phức tạp của phần cứng tính toán. Lượng tử hóa giải quyết vấn đề này bằng cách xấp xỉ các giá trị số thực bằng số nguyên có độ rộng thấp hơn, thường là 8 bit, trong khi vẫn giữ chất lượng mô hình ở mức chấp nhận được cho nhiều bài toán suy luận \cite{jacob2018integer}.
 
+Một cách biểu diễn phổ biến trong suy luận INT8 là lượng tử hóa affine. Mỗi khối dữ liệu được gắn với một hệ số tỉ lệ \(s\) và một điểm không \(z\), qua đó giá trị số thực \(r\) và giá trị lượng tử \(q\) được liên hệ như sau:
 
-\textbf{Lưu ý}: Mỗi chương nên có đoạn kết thúc chương,  tổng kết lại các nội dung đã trình bày.
+\begin{equation}
+    r = s(q - z), \qquad
+    q = \operatorname{clamp}\left(\operatorname{round}\left(\frac{r}{s}\right) + z, q_{\min}, q_{\max}\right).
+    \label{eq:affine-quantization}
+\end{equation}
+
+Trong đặc tả lượng tử hóa 8 bit của LiteRT, kích hoạt/dữ liệu vào thường được biểu diễn bằng số nguyên có dấu 8 bit trong miền \([-128,127]\) với điểm không có thể khác 0, còn trọng số được biểu diễn trong miền \([-127,127]\) với điểm không bằng 0 \cite{google_litert_quant_spec}. Cách chọn trọng số đối xứng này giúp giảm một phần chi phí tính toán trong tích vô hướng, vì thành phần liên quan đến điểm không của trọng số không còn phải tính động ở mỗi lần suy luận. Với các phép tích chập và kết nối đầy đủ, độ lệch thường được biểu diễn bằng số nguyên 32 bit với hệ số tỉ lệ tương ứng với tích của hệ số tỉ lệ dữ liệu vào và hệ số tỉ lệ trọng số \cite{google_litert_quant_spec}.
+
+Phần tính toán chiếm tỷ trọng lớn trong nhiều lớp tích chập và lớp kết nối đầy đủ có thể quy về nhân--cộng tích lũy. Trong một lớp kết nối đầy đủ, mỗi phần tử đầu ra là tích vô hướng giữa véc-tơ đầu vào và một hàng trọng số. Vì vậy, một lớp có \(M\) phần tử đầu vào và \(K\) phần tử đầu ra cần \(M \times K\) phép nhân và các phép cộng tương ứng để tạo ra toàn bộ đầu ra. Chẳng hạn, với kích thước \(784 \rightarrow 32\) được dùng trong mô hình MNIST FC của đồ án, riêng lớp đầu tiên đã cần \(784 \times 32 = 25088\) phép nhân--cộng cho một lần suy luận. Với lớp tích chập, cùng một phép tổng tích được lặp lại trên nhiều vị trí không gian và nhiều bộ lọc, nên số phép nhân--cộng cũng tăng nhanh theo kích thước ảnh, kích thước nhân và số kênh.
+
+Với một tích vô hướng giữa véc-tơ kích hoạt \(x\) và véc-tơ trọng số \(w\), lõi tính toán trong miền lượng tử có dạng:
+
+\begin{equation}
+    acc = \sum_{i=0}^{N-1} (q_{x,i} - z_x) q_{w,i} + b_q,
+    \label{eq:int8-dot-product}
+\end{equation}
+
+trong đó \(q_{x,i}\) và \(q_{w,i}\) là các phần tử INT8, \(z_x\) là điểm không của kích hoạt, \(b_q\) là độ lệch đã được biểu diễn ở miền tích lũy, và \(acc\) thường được giữ bằng số nguyên 32 bit để tránh tràn trong quá trình cộng dồn. Sau khi tích lũy, kết quả cần được lượng tử hóa lại về miền đầu ra bằng một hệ số tỉ lệ phù hợp, cộng điểm không của đầu ra, làm tròn và giới hạn về miền INT8. Các thao tác như ReLU hoặc clamp có thể được thực hiện bằng cách chặn giá trị trong một khoảng hợp lệ ở miền số nguyên.
+
+Hình~\ref{fig:int8-inference-flow} tóm tắt luồng tính toán điển hình của một nhân suy luận INT8. Hình này được tự tổng hợp từ mô hình lượng tử hóa số nguyên trong \cite{jacob2018integer} và đặc tả INT8 của LiteRT \cite{google_litert_quant_spec}.
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        block/.style={draw, rounded corners=2pt, align=center, minimum height=0.85cm, text width=2.1cm, fill=gray!10},
+        compute/.style={block, fill=blue!8},
+        arrow/.style={-{Latex[length=2mm]}, thick}
+    ]
+        \node[block] (input) at (0, 0) {Dữ liệu vào\\INT8};
+        \node[block] (weight) at (0, -1.25) {Trọng số\\INT8};
+        \node[compute] (mac) at (3.0, -0.625) {MAC / tích\\vô hướng};
+        \node[compute] (acc) at (5.8, -0.625) {Tích lũy\\INT32};
+        \node[compute] (requant) at (8.6, -0.625) {Lượng tử\\hóa lại};
+        \node[compute] (clamp) at (11.4, -0.625) {Kích hoạt\\và clamp};
+        \node[block] (output) at (11.4, -2.05) {Đầu ra\\INT8};
+
+        \draw[arrow] (input.east) -- (mac.west);
+        \draw[arrow] (weight.east) -- (mac.west);
+        \draw[arrow] (mac.east) -- (acc.west);
+        \draw[arrow] (acc.east) -- (requant.west);
+        \draw[arrow] (requant.east) -- (clamp.west);
+        \draw[arrow] (clamp.south) -- (output.north);
+    \end{tikzpicture}
+    \caption{Luồng tính toán điển hình trong một nhân suy luận INT8}
+    \label{fig:int8-inference-flow}
+\end{figure}
+
+Từ góc nhìn tập lệnh, luồng trên cho thấy các điểm có thể tối ưu trên bộ xử lý nhúng. Nhân--cộng tích lũy cần các lệnh MAC hoặc tích vô hướng đóng gói để giảm số lệnh tính toán. Việc đọc tuần tự các phần tử từ bộ nhớ làm phát sinh nhu cầu tải dữ liệu kèm cập nhật địa chỉ. Các vòng lặp ngắn lặp lại nhiều lần tạo ra chi phí nhánh và cập nhật biến đếm. Cuối cùng, kích hoạt và clamp cần các thao tác giới hạn miền giá trị. Đây là cơ sở để Chương~\ref{chap:de-xuat} đặc tả nhóm thao tác gồm \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw} và \texttt{lp.setup}.
+
+\section{RISC-V và mở rộng tập lệnh}
+\label{sec:riscv-mo-rong-tap-lenh}
+
+\section{Lõi xử lý CV32E40P}
+\label{sec:cv32e40p}
+
+\section{Mô phỏng kiến trúc bằng gem5}
+\label{sec:gem5}
+
+\section{TensorFlow Lite Micro}
+\label{sec:tflm}
+
+Các nội dung trong chương này cung cấp nền tảng để chuyển sang Chương~\ref{chap:de-xuat}. Từ các đặc điểm của suy luận INT8, các hướng nghiên cứu liên quan và các nền tảng RISC-V, CV32E40P, gem5, TensorFlow Lite Micro, chương tiếp theo sẽ trình bày cụ thể nhóm thao tác được lựa chọn và cách ánh xạ chúng vào hai môi trường mô phỏng và thực nghiệm của đồ án.
 
 \end{document}
