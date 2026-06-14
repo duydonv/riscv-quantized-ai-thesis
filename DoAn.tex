@@ -5,8 +5,10 @@
 \usepackage[top=2cm, bottom=2cm, left=3.5cm, right=2.5cm]{geometry}
 \usepackage{xurl}
 \usepackage{appendix}
-\usepackage{babel}
+\usepackage[english]{babel}
 \usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
 \usepackage{outlines}
 \usepackage{graphicx} % Cho phép chèn hỉnh ảnh
 \usepackage{fancybox} % Tạo khung box
@@ -39,7 +41,16 @@
 
 \usepackage[nonumberlist, nopostdot, nogroupskip, acronym]{glossaries}
 \usepackage{glossary-superragged}
-\setglossarystyle{superraggedheaderborder}
+\newglossarystyle{hustacronymtable}{%
+  \setglossarystyle{superragged}%
+  \renewenvironment{theglossary}%
+    {\tablehead{\hline\bfseries \entryname &
+       \bfseries \descriptionname\tabularnewline\hline}%
+     \tabletail{\hline}%
+     \begin{supertabular}{|>{\raggedright\arraybackslash}p{0.26\textwidth}|>{\raggedright\arraybackslash}p{0.66\textwidth}|}}%
+    {\end{supertabular}}%
+}
+\setglossarystyle{hustacronymtable}
 \usepackage{setspace}
 \usepackage{parskip}
 
@@ -52,7 +63,14 @@
 % ===================================================
 
 \renewcommand{\bibname}{Danh_sach_tai_lieu_tham_khao} 
-\usepackage[backend=bibtex,style=ieee]{biblatex}  %backend=biber is 'better'
+\usepackage[backend=bibtex,style=ieee,urldate=iso,seconds=true]{biblatex}  %backend=biber is 'better'
+\urlstyle{tt}
+\setcounter{biburlnumpenalty}{100}
+\setcounter{biburllcpenalty}{100}
+\setcounter{biburlucpenalty}{100}
+\DefineBibliographyStrings{english}{
+    urlseen = {truy cập ngày}
+}
 
 \addbibresource{Danh_sach_tai_lieu_tham_khao.bib} % chèn file chứa danh mục tài liệu tham khảo vào 
 
@@ -261,22 +279,26 @@
 \fancyfoot[RE, LO]{\thepage}
 
 \chapter{GIỚI THIỆU ĐỀ TÀI}
+\label{chap:gioi-thieu}
 \subfile{Chuong/1_Gioi_thieu} % Phần mở đầu
 
 \newpage
 %\pagestyle{fancy} % Áp dụng header và footer
 \chapter{NỀN TẢNG LÝ THUYẾT}
+\label{chap:co-so-ly-thuyet}
 \subfile{Chuong/2_Co_so_ly_thuyet}
 
 
 \newpage
 %\pagestyle{fancy} % Áp dụng header và footer
 \chapter{PHƯƠNG PHÁP ĐỀ XUẤT}
+\label{chap:de-xuat}
 \subfile{Chuong/3_De_xuat}
 
 \newpage
 %\pagestyle{fancy} % Áp dụng header và footer
 \chapter{PHÂN TÍCH LÝ THUYẾT}
+\label{chap:phan-tich-ly-thuyet}
 \subfile{Chuong/4_Phan_tich_ly_thuyet}
 
 \newpage
@@ -287,39 +309,43 @@
 
 \newpage
 \chapter{KẾT LUẬN}
+\label{chap:ket-luan}
 \subfile{Chuong/6_Ket_luan}
 
 \newpage
 %\pagestyle{fancy} % Áp dụng header và footer
-\chapter*{MỘT SỐ LƯU Ý VỀ TÀI LIỆU THAM KHẢO} %Kết luận và hướng phát triển}
-\label{chapter:reference}
-\subfile{Chuong/7_Tai_lieu_tham_khao}
+% \chapter*{MỘT SỐ LƯU Ý VỀ TÀI LIỆU THAM KHẢO} %Kết luận và hướng phát triển}
+% \label{chapter:reference}
+% \subfile{Chuong/7_Tai_lieu_tham_khao}
 
 % ===================================================
 \newpage
 \renewcommand\bibname{TÀI LIỆU THAM KHẢO}
+\begingroup
+\emergencystretch=3em
 \printbibliography
+\endgroup
 \phantomsection\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
 
-\appendixpage
-\appendix
-\addappheadtotoc
+% \appendixpage
+% \appendix
+% \addappheadtotoc
 
-\titleformat{\chapter}[hang]{\centering\bfseries}{ \thechapter.\ }{0pt}{}[]
-\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+% \titleformat{\chapter}[hang]{\centering\bfseries}{ \thechapter.\ }{0pt}{}[]
+% \titlespacing*{\chapter}{0pt}{-20pt}{20pt}
 
-\titlecontents{chapter}
-    [0.0cm]             % left margin
-    {\bfseries\vspace{0.3cm}}                  % above code
-    {{\bfseries{\scshape} \thecontentslabel.\ }} % numbered format
-    {}         % unnumbered format
-    {\titlerule*[0.3pc]{.}\contentspage} 
-    
-\chapter{HƯỚNG DẪN VIẾT ĐATN}
-\subfile{Chuong/Phu_luc_A}
+% \titlecontents{chapter}
+%     [0.0cm]             % left margin
+%     {\bfseries\vspace{0.3cm}}                  % above code
+%     {{\bfseries{\scshape} \thecontentslabel.\ }} % numbered format
+%     {}         % unnumbered format
+%     {\titlerule*[0.3pc]{.}\contentspage}
 
-\newpage
-\chapter{ĐẶC TẢ USE CASE}
-\subfile{Chuong/Phu_luc_B}
+% \chapter{HƯỚNG DẪN VIẾT ĐATN}
+% \subfile{Chuong/Phu_luc_A}
+
+% \newpage
+% \chapter{ĐẶC TẢ USE CASE}
+% \subfile{Chuong/Phu_luc_B}
 
 \end{document}

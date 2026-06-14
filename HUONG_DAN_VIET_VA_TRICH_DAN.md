@@ -1,12 +1,12 @@
 # Hướng dẫn viết và trích dẫn cho báo cáo
 
-Ngày cập nhật: 2026-06-13
+Ngày cập nhật: 2026-06-14
 
 File này tóm tắt các lưu ý quan trọng từ `Chuong/1_Gioi_thieu.tex` và `Chuong/Phu_luc_A.tex`, đồng thời chuyển chúng thành checklist thực hành cho đồ án này.
 
 ## 1. Trạng thái template
 
-Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và Chương 1 ở mức nội dung hoàn chỉnh ban đầu. Các chương nội dung chính từ Chương 2 trở đi vẫn còn nội dung hướng dẫn mẫu. Khi viết từng chương:
+Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và Chương 1 ở mức nội dung hoàn chỉnh ban đầu. Chương 2 đã có bản thảo tạm cho phần ngữ cảnh, nghiên cứu liên quan và suy luận AI lượng tử hóa; các mục nền tảng còn lại của Chương 2 cùng Chương 3 đến Chương 6 vẫn cần viết tiếp từ template. Khi viết từng chương:
 
 - Không giữ nguyên các đoạn "Sinh viên cần..." trong bản thảo cuối.
 - Không để các dòng `\textcolor{red}{Chú ý...}` của template trong bản nộp.
@@ -90,7 +90,7 @@ Các nguyên tắc từ phụ lục:
 
 ## 7. Trạng thái `.bib` hiện tại
 
-`.bib` hiện đã có một số nguồn nền tảng dùng cho Chương 1, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro và lượng tử hóa INT8. Tuy nhiên, chưa nên giả định `.bib` đã đủ nguồn cho toàn bộ báo cáo. Khi viết Chương 2 và các phần lý thuyết, cần tiếp tục tạo dần danh sách citation.
+`.bib` hiện đã có một số nguồn nền tảng dùng cho Chương 1 và phần đầu Chương 2, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, đặc tả lượng tử hóa LiteRT/INT8 và các nghiên cứu liên quan về suy luận học sâu trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Các mục template không dùng đã được comment lại để tránh xuất hiện trong tài liệu tham khảo. Tuy nhiên, chưa nên giả định `.bib` đã đủ nguồn cho toàn bộ báo cáo. Khi viết tiếp Chương 2 và các chương sau, cần tiếp tục tạo dần danh sách citation.
 
 Nhóm tài liệu cần bổ sung:
 
@@ -100,12 +100,24 @@ Nhóm tài liệu cần bổ sung:
 - Các bài nghiên cứu liên quan đến suy luận lượng tử hóa trên hệ nhúng.
 - Tài liệu về benchmark/performance metrics nếu cần giải thích cách đo cycles, speedup.
 
+Ghi chú định dạng hiện tại:
+
+- Báo cáo dùng `biblatex-ieee` với `babel` tiếng Anh để các chuỗi như `et al.`, `vol.`, `pp.` và `url` được hiển thị đúng thay vì lộ khóa nội bộ của style.
+- URL trong danh mục tài liệu tham khảo đang để dạng monospace bằng `\urlstyle{tt}` và cho phép ngắt dòng bằng các `biburl...penalty`, nhằm giữ đúng chuẩn trình bày mà không làm link tràn lề.
+- Chuỗi `urlseen` được Việt hóa thành "truy cập ngày" để đồng bộ với báo cáo tiếng Việt. Nếu sau này chuyển toàn bộ bibliography sang tiếng Anh thì có thể bỏ override này.
+
 Quy trình nên dùng:
 
 1. Khi viết một claim lý thuyết, ghi ngay `TODO cite: ...` nếu chưa có BibTeX.
 2. Thêm BibTeX vào `Danh_sach_tai_lieu_tham_khao.bib`.
 3. Thay `TODO cite` bằng `\cite{key}`.
 4. Kiểm tra biên dịch LaTeX để đảm bảo citation hiện đúng.
+
+## 7.1. Danh mục thuật ngữ và từ viết tắt
+
+`Tu_viet_tat.tex` hiện đã được thay từ danh sách mẫu sang danh mục thuật ngữ phục vụ đồ án. Chỉ nên đưa các thuật ngữ thật sự hỗ trợ người đọc theo dõi mạch báo cáo, chẳng hạn MAC, SIMD, RVV, SoC, TensorFlow Lite Micro/LiteRT, MNIST, ReLU, TPU và TOPS. Không nên đưa các thuật ngữ quá phổ thông với người đọc kỹ thuật hoặc đã được giải thích ngay trong phần nội dung, ví dụ AI, RISC-V, INT8, INT32, gem5, CV32E40P, FPGA và UART.
+
+Style bảng thuật ngữ trong `DoAn.tex` đã được chỉnh để dùng gần hết chiều rộng trang. Nếu thêm thuật ngữ mới, cần kiểm tra lại PDF để bảo đảm bảng không tràn và mô tả không quá dài.
 
 ## 8. Checklist trước khi coi một chương là ổn
 

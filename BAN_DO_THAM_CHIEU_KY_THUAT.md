@@ -1,8 +1,8 @@
 # Bản đồ tham chiếu kỹ thuật
 
-Ngày cập nhật: 2026-06-11
+Ngày cập nhật: 2026-06-14
 
-File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM.
+File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 mới viết xong phần nền tảng về suy luận AI lượng tử hóa; các mục RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro sẽ dùng file này làm bản đồ đối chiếu khi viết tiếp.
 
 ## 1. Nguyên tắc diễn đạt kỹ thuật
 
@@ -186,4 +186,3 @@ make tflm_mnist_uart CROSS=/home/duydonv/tools/xpack-riscv-none-elf-gcc/xpack-ri
 python3 tflm_mnist_uart_runner.py /dev/ttyUSB0
 python3 tflm_mnist_uart_runner.py /dev/ttyUSB0 --images-dir --limit 10
 ```
-

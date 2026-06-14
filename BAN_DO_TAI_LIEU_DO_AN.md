@@ -1,10 +1,10 @@
 # Bản đồ tài liệu phục vụ viết báo cáo đồ án
 
-Ngày cập nhật: 2026-06-13
+Ngày cập nhật: 2026-06-14
 
 Đồ án: Mở rộng tập lệnh RISC-V cho các phép toán AI lượng tử hóa, mô phỏng trên gem5 và triển khai thực nghiệm trên kit FPGA DE2i-150/CV32E40P.
 
-File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và Chương 1 ở mức nội dung hoàn chỉnh ban đầu. Các chương nội dung chính phía sau vẫn cần được viết tiếp từ template. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
+File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và Chương 1 ở mức nội dung hoàn chỉnh ban đầu. Chương 2 đang có bản thảo tạm cho phần ngữ cảnh, nghiên cứu liên quan và suy luận AI lượng tử hóa; các mục nền tảng còn lại vẫn cần viết tiếp. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
 
 ## 1. Bộ file hỗ trợ viết báo cáo
 
@@ -20,8 +20,10 @@ Khi bắt đầu viết một chương, đọc file này trước để xác đ�
 
 - Các phần đầu báo cáo đã có nội dung: `0_2_Loi_cam_on.tex`, `0_3_Tom_tat_noi_dung.tex` và `0_4_Tom_tat_noi_dung_eng.tex`.
 - Chương 1 đã được thay nội dung theo hướng hoàn chỉnh, gồm đặt vấn đề, các giải pháp hiện tại và hạn chế, mục tiêu và định hướng giải pháp, đóng góp của đồ án và bố cục báo cáo.
-- Các chương nội dung chính từ Chương 2 đến Chương 6 vẫn còn nhiều nội dung mẫu. Khi viết thật cần xóa hoặc thay toàn bộ đoạn hướng dẫn mẫu bằng nội dung đồ án.
-- `Danh_sach_tai_lieu_tham_khao.bib` đã có các nguồn nền tảng dùng trong Chương 1 cho RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro và lượng tử hóa INT8. Khi viết Chương 2 trở đi vẫn cần tiếp tục bổ sung nguồn chính thức hoặc bài báo phù hợp với từng claim lý thuyết.
+- Chương 2 đã có bản tạm cho các phần `Ngữ cảnh của bài toán`, `Các kết quả nghiên cứu tương tự` và `Suy luận AI lượng tử hóa`, kèm hình tự vẽ về luồng tính toán INT8. Các mục `RISC-V và mở rộng tập lệnh`, `Lõi xử lý CV32E40P`, `Mô phỏng kiến trúc bằng gem5` và `TensorFlow Lite Micro` mới dừng ở đề mục/label để viết tiếp.
+- Các chương nội dung chính từ Chương 3 đến Chương 6 vẫn còn nhiều nội dung mẫu. Khi viết thật cần xóa hoặc thay toàn bộ đoạn hướng dẫn mẫu bằng nội dung đồ án.
+- `Danh_sach_tai_lieu_tham_khao.bib` đã có các nguồn nền tảng cho RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, đặc tả lượng tử hóa LiteRT/INT8 và một số nghiên cứu liên quan về suy luận trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Khi viết tiếp Chương 2 và các chương sau vẫn cần bổ sung nguồn chính thức hoặc bài báo phù hợp với từng claim lý thuyết mới.
+- `Tu_viet_tat.tex` đã được thay từ danh sách mẫu sang danh mục thuật ngữ của đồ án, chỉ giữ các mục cần hỗ trợ người đọc như MAC, SIMD, RVV, SoC, TFLM/LiteRT, MNIST, ReLU, TPU, TOPS. Các thuật ngữ quá phổ thông hoặc đã được giải thích ngay trong nội dung không nên đưa vào để tránh làm danh mục bị loãng.
 - Các file README/HANDOFF trong repo gem5 và SoC là nguồn nội bộ để hiểu đồ án và lấy số liệu/log. Chúng không thay thế tài liệu tham khảo học thuật hoặc tài liệu chính thức trong `.bib`.
 - Phần gem5 không chỉ nằm trong `tests/gem5/riscv_ai_ext`. Đồ án đã chỉnh cả phần ISA, decoder, instruction semantics, memory format, misc registers, redirect hardware loop và một số đường O3/front-end. Khi viết Chương 4 phải làm rõ điểm này.
 - Phần thực nghiệm trên kit là nguồn kết quả chính. gem5 dùng để phân tích/mô phỏng/sensitivity và hỗ trợ câu chuyện kỹ thuật, không khẳng định là mô hình cycle-for-cycle của CV32E40P.
@@ -62,6 +64,8 @@ Lưu ý viết: Chương này nên viết thành văn xuôi mạch lạc, tránh
 
 ### Chương 2: Cơ sở lý thuyết
 
+Trạng thái hiện tại: đã có bản thảo tạm cho phần dẫn nhập/ngữ cảnh, nghiên cứu liên quan và suy luận AI lượng tử hóa. Phần nghiên cứu liên quan đang trình bày theo ba hướng chính: tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng, có trích dẫn các nguồn học thuật/chính thức trong `.bib`. Phần suy luận AI lượng tử hóa đã có công thức lượng tử hóa, tích vô hướng INT8 và hình luồng tính toán tự vẽ. Các mục nền tảng còn lại đã có heading và label để viết tiếp.
+
 Mục tiêu: đặt nền cho người đọc hiểu vì sao cần các lệnh AI lượng tử hóa và vì sao chọn các nền tảng RISC-V/gem5/CV32E40P/TFLM.
 
 Các nhóm nội dung nên có:
@@ -80,7 +84,7 @@ Tài liệu nội bộ nên đọc:
 - `/home/duydonv/de2i150_cv32e40p_soc/firmware/TFLM.md`
 - `/home/duydonv/de2i150_cv32e40p_soc/firmware/mnist_fc/README.md`
 
-Tài liệu ngoài cần bổ sung sau vào `.bib`: tài liệu RISC-V liên quan tới custom extension/vector nếu cần trình bày sâu hơn, tài liệu CORE-V/PULP instruction nếu dùng làm nguồn giải thích instruction, tài liệu TensorFlow Lite Micro chi tiết hơn cho phần triển khai, và các bài nghiên cứu liên quan đến suy luận lượng tử hóa trên hệ nhúng.
+Tài liệu ngoài cần bổ sung sau vào `.bib`: tài liệu RISC-V liên quan tới custom extension/vector nếu cần trình bày sâu hơn, tài liệu CORE-V/PULP instruction nếu dùng làm nguồn giải thích instruction, và tài liệu TensorFlow Lite Micro chi tiết hơn cho phần triển khai nếu các mục sau cần claim cụ thể hơn nguồn hiện có.
 
 ### Chương 3: Phương pháp, đặc tả các lệnh
 
