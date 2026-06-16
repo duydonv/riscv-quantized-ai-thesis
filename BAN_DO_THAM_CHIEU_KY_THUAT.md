@@ -1,8 +1,8 @@
 # Bản đồ tham chiếu kỹ thuật
 
-Ngày cập nhật: 2026-06-14
+Ngày cập nhật: 2026-06-16
 
-File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 mới viết xong phần nền tảng về suy luận AI lượng tử hóa; các mục RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro sẽ dùng file này làm bản đồ đối chiếu khi viết tiếp.
+File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; file này tiếp tục đóng vai trò bản đồ đối chiếu khi viết Chương 3, Chương 4 và Chương 5.
 
 ## 1. Nguyên tắc diễn đạt kỹ thuật
 
@@ -10,6 +10,7 @@ File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. 
 - Không viết rằng board dùng đúng opcode custom-0 của gem5. gem5 dùng prototype custom-0 để mô phỏng semantics; board dùng mapping CORE-V/PULP trên CV32E40P.
 - Không viết rằng gem5 là mô hình cycle-for-cycle của kit. gem5 dùng để kiểm tra semantics, regression và phân tích xu hướng.
 - Khi nói "mở rộng tập lệnh", cần làm rõ phạm vi: đồ án đặc tả/đồng bộ semantics các operation AI và triển khai qua hai môi trường, trong đó phần cứng thực tế tận dụng các lệnh CORE-V/PULP có sẵn của CV32E40P.
+- Chương 2 chỉ trình bày nền tảng ở mức tổng quan; các chi tiết opcode, mapping cụ thể, smoke test, benchmark và số liệu cần để sang Chương 3--5.
 
 ## 2. Bản đồ gem5
 
