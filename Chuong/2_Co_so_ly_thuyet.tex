@@ -81,15 +81,85 @@ Từ góc nhìn tập lệnh, luồng trên cho thấy các điểm có thể t�
 \section{RISC-V và mở rộng tập lệnh}
 \label{sec:riscv-mo-rong-tap-lenh}
 
+RISC-V là một kiến trúc tập lệnh (Instruction Set Architecture - ISA) được thiết kế theo hướng mô-đun. Thay vì định nghĩa một tập lệnh lớn cố định cho mọi bộ xử lý, RISC-V bắt đầu từ một ISA số nguyên nền, chẳng hạn \texttt{RV32I}, \texttt{RV32E}, \texttt{RV64I} hoặc \texttt{RV64E}, rồi cho phép bổ sung các mở rộng tùy theo nhu cầu của hệ thống \cite{riscv_unpriv_2026}. Đây là đặc điểm quan trọng đối với hệ nhúng: một lõi điều khiển nhỏ có thể chỉ chọn các lệnh số nguyên cơ bản và nhân/chia, trong khi một hệ thống cần xử lý dữ liệu mạnh hơn có thể bổ sung thêm lệnh nén, lệnh nguyên tử, xử lý bit hoặc véc-tơ. Nhờ đó, RISC-V không chỉ là một tập lệnh cụ thể, mà còn là một khung ISA cho phép xây dựng cấu hình tập lệnh phù hợp với mục tiêu tài nguyên và ứng dụng.
+
+Ở mức khái niệm, ISA là lớp giao diện giữa phần mềm và phần cứng. ISA quy định chương trình nhìn thấy những thanh ghi nào, lệnh được mã hóa ra sao, mỗi lệnh đọc ghi toán hạng nào và kết quả kiến trúc phải có ý nghĩa gì. Vi kiến trúc, ngược lại, là cách một lõi xử lý cụ thể hiện thực ISA đó bằng pipeline, đường dữ liệu, bộ nhớ đệm, bộ dự đoán nhánh hoặc các cơ chế tối ưu khác. Vì vậy, việc bổ sung một lệnh trước hết là bổ sung ngữ nghĩa ở mức ISA; hiệu năng cụ thể của lệnh đó còn phụ thuộc vào cách nó được hiện thực trong từng lõi xử lý. Ở ISA nền \texttt{RV32I}, RISC-V định nghĩa 32 thanh ghi số nguyên \texttt{x0}--\texttt{x31}, trong đó \texttt{x0} luôn bằng 0, cùng các định dạng lệnh 32 bit có trường toán hạng như \texttt{rd}, \texttt{rs1} và \texttt{rs2} được bố trí nhất quán để thuận lợi cho giải mã \cite{riscv_unpriv_2026}.
+
+Khả năng mở rộng của RISC-V được thể hiện ở hai tầng. Tầng thứ nhất là các mở rộng chuẩn, tức các phần đã được đặc tả để dùng chung trong hệ sinh thái RISC-V, ví dụ \texttt{M} cho nhân/chia số nguyên, \texttt{A} cho lệnh nguyên tử, \texttt{C} cho lệnh nén và \texttt{V} cho xử lý véc-tơ. Tầng thứ hai là các mở rộng không chuẩn hoặc mở rộng tùy biến, phục vụ nhu cầu riêng của một nhóm hệ thống hoặc một miền ứng dụng hẹp hơn. Theo quy ước đặt tên, một chuỗi ISA bắt đầu bằng ISA nền, có thể đi kèm các mở rộng chuẩn và dùng tiền tố \texttt{X} cho các mở rộng không chuẩn \cite{riscv_unpriv_2026}. Nhờ cách tổ chức này, RISC-V vừa giữ được một phần lõi chung để phần mềm có thể dựa vào, vừa để lại không gian cho các thử nghiệm hoặc tối ưu chuyên biệt.
+
+Không gian mở rộng của RISC-V không chỉ nằm ở cách đặt tên, mà còn được phản ánh trực tiếp trong bản đồ opcode. Đặc tả RISC-V dành sẵn bốn vùng opcode cho các lệnh tùy biến; các vùng này được khuyến nghị cho mở rộng tùy biến và không được dùng cho các mở rộng chuẩn trong tương lai \cite{riscv_unpriv_2026}. Bảng~\ref{tab:riscv-custom-opcode} tóm tắt bốn vùng opcode đó, qua đó làm rõ phần không gian mã hóa mà RISC-V dành riêng cho các lệnh ngoài tập chuẩn.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        Vùng opcode & \texttt{inst[6:5]} & \texttt{inst[4:2]} & \texttt{opcode[6:0]} \\
+        \hline
+        \texttt{custom-0} & \texttt{00} & \texttt{010} & \texttt{0001011} / \texttt{0x0B} \\
+        \hline
+        \texttt{custom-1} & \texttt{01} & \texttt{010} & \texttt{0101011} / \texttt{0x2B} \\
+        \hline
+        \texttt{custom-2} & \texttt{10} & \texttt{110} & \texttt{1011011} / \texttt{0x5B} \\
+        \hline
+        \texttt{custom-3} & \texttt{11} & \texttt{110} & \texttt{1111011} / \texttt{0x7B} \\
+        \hline
+    \end{tabular}
+    \caption{Các vùng opcode dành cho lệnh tùy biến trong RISC-V}
+    \label{tab:riscv-custom-opcode}
+\end{table}
+
+Đối với suy luận AI lượng tử hóa, ý nghĩa của khả năng mở rộng này là có thể đưa một số mẫu thao tác lặp lại xuống gần phần cứng hơn mà vẫn giữ mô hình lập trình của bộ xử lý tổng quát. Các thao tác như nhân--cộng tích lũy, tích vô hướng trên nhiều phần tử INT8 đóng gói, tải dữ liệu kèm cập nhật địa chỉ hoặc điều khiển vòng lặp đều xuất hiện nhiều trong các nhân suy luận. Nếu những thao tác này được biểu diễn bằng lệnh phù hợp, chương trình có thể giảm số lệnh động, giảm chi phí điều khiển và giảm lượng mã lặp lại so với cách ghép từ nhiều lệnh vô hướng cơ bản. Đây là lý do mở rộng tập lệnh trở thành một hướng tiếp cận trung gian giữa tối ưu phần mềm thuần túy và bộ tăng tốc phần cứng chuyên dụng.
+
+Tuy nhiên, khả năng mở rộng cũng đi kèm yêu cầu thiết kế rõ ràng. Một lệnh mới cần có ngữ nghĩa xác định, mã hóa không xung đột, quy tắc đọc ghi thanh ghi rõ ràng và cách để phần mềm gọi được lệnh đó. Nếu một lệnh quá hẹp, lợi ích có thể không đủ bù cho chi phí kiểm chứng, mô phỏng và hỗ trợ công cụ. Vì vậy, khi sử dụng khả năng mở rộng của RISC-V, cần chọn các thao tác vừa đủ phổ biến trong miền ứng dụng, vừa đủ đơn giản để đặc tả và đánh giá. Trên cơ sở lý thuyết này, các chương sau sẽ trình bày cách đồ án lựa chọn một nhóm thao tác phục vụ suy luận INT8 và dùng vùng \texttt{custom-0} trong gem5 để kiểm chứng ngữ nghĩa của chúng.
+
 \section{Lõi xử lý CV32E40P}
 \label{sec:cv32e40p}
+
+CV32E40P là một lõi xử lý RISC-V 32 bit thuộc họ CORE-V của OpenHW Group. Theo tài liệu người dùng của OpenHW, lõi này có kiến trúc in-order với bốn tầng pipeline và có thể hỗ trợ một số mở rộng ngoài tập lệnh RISC-V chuẩn, bao gồm vòng lặp phần cứng (hardware loop), lệnh tải/lưu có hậu tăng địa chỉ, các lệnh ALU bổ sung và các lệnh SIMD \cite{openhw_cv32e40p_um_2024}. CV32E40P được công bố ở dạng Register Transfer Level (RTL) mở và có thể được tích hợp như một khối IP (Intellectual Property) trong thiết kế SoC; tuy nhiên, cấu hình cuối cùng vẫn phụ thuộc vào bus, bộ nhớ, ngoại vi và nền tảng triển khai cụ thể.
+
+Về tập lệnh, CV32E40P hỗ trợ tập lệnh nền \texttt{RV32I} và một số mở rộng chuẩn như \texttt{C} cho lệnh nén, \texttt{M} cho nhân/chia số nguyên, \texttt{Zicsr} cho truy cập thanh ghi điều khiển--trạng thái, \texttt{Zicntr} cho bộ đếm hiệu năng và \texttt{Zifencei} cho đồng bộ luồng nạp lệnh \cite{openhw_cv32e40p_um_2024}. Bên cạnh đó, lõi còn có nhóm mở rộng CORE-V/PULP không thuộc ISA chuẩn, được bật thông qua các tham số cấu hình như \texttt{COREV\_PULP}. Cách tổ chức này giữ phần nền của bộ xử lý tương thích với RISC-V, đồng thời cho phép bổ sung một số thao tác chuyên biệt cho các đoạn chương trình có vòng lặp ngắn, truy cập dữ liệu tuần tự hoặc thực hiện nhiều phép tính giống nhau trên các phần tử dữ liệu nhỏ.
+
+Hình~\ref{fig:cv32e40p-block-diagram} trình bày sơ đồ khối tổng quan của CV32E40P theo tài liệu OpenHW Group \cite{openhw_cv32e40p_um_2024}. Sơ đồ thể hiện các khối chính của lõi, gồm luồng nạp và giải mã lệnh, tập thanh ghi, điều khiển pipeline, Load-Store Unit (LSU), Control and Status Register (CSR), Arithmetic Logic Unit (ALU), bộ chia, bộ nhân, khối dot-product, cùng các giao diện dữ liệu, ngắt và debug ở mức top-level.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{Hinh_ve/CV32E40P_Block_Diagram.png}
+    \caption{Sơ đồ khối tổng quan của lõi CV32E40P}
+    \label{fig:cv32e40p-block-diagram}
+\end{figure}
+
+Pipeline của CV32E40P gồm bốn tầng: Instruction Fetch (IF), Instruction Decode (ID), Execute (EX) và Writeback (WB) \cite{openhw_cv32e40p_um_2024}. Tầng IF nạp lệnh và xử lý lệnh nén RVC, tầng ID giải mã lệnh và đọc tập thanh ghi, tầng EX thực hiện phần lớn thao tác tính toán và tạo địa chỉ cho LSU, còn tầng WB ghi kết quả của các lệnh load về tập thanh ghi. Với pipeline in-order, thứ tự hoàn tất lệnh nhìn chung bám sát thứ tự chương trình, trong khi số chu kỳ thực thi vẫn chịu ảnh hưởng bởi phụ thuộc dữ liệu, truy cập bộ nhớ và các lệnh nhiều chu kỳ.
+
+Từ góc nhìn tích hợp SoC, CV32E40P tách riêng giao diện nạp lệnh và giao diện dữ liệu; cả hai giao diện đều tuân theo Open Bus Interface (OBI) \cite{openhw_cv32e40p_um_2024}. Các truy cập dữ liệu được thực hiện thông qua LSU với độ rộng byte, halfword hoặc word, trong đó một số truy cập không căn chỉnh có thể cần nhiều hơn một giao dịch bus. Khi triển khai lõi trong một SoC cụ thể, đặc biệt trên FPGA, thiết kế còn phải xử lý các vấn đề hệ thống như ánh xạ bộ nhớ, kết nối ngoại vi, miền đồng hồ, reset và ràng buộc tài nguyên của thiết bị.
+
+Nhóm mở rộng CORE-V/PULP của CV32E40P bổ sung một số thao tác thường gặp trong các chương trình xử lý tín hiệu và xử lý dữ liệu nhúng. Khi được bật, nhóm này hỗ trợ vòng lặp phần cứng, tải/lưu có hậu tăng địa chỉ, các lệnh ALU bổ sung, multiply-accumulate và SIMD/dot-product \cite{openhw_cv32e40p_um_2024}. Những thao tác này có cùng dạng với một số mẫu tính toán trong suy luận INT8, chẳng hạn đọc dữ liệu tuần tự, nhân--cộng tích lũy, tích vô hướng trên dữ liệu đóng gói và lặp lại thân vòng lặp ngắn.
 
 \section{Mô phỏng kiến trúc bằng gem5}
 \label{sec:gem5}
 
+gem5 là một nền tảng mô phỏng kiến trúc máy tính mã nguồn mở, được thiết kế theo hướng mô-đun để phục vụ nghiên cứu kiến trúc hệ thống và vi kiến trúc bộ xử lý. Công trình giới thiệu gem5 mô tả nền tảng này như kết quả kế thừa từ M5 và GEMS, qua đó kết hợp khả năng mô phỏng hệ thống với các mô hình chi tiết về bộ xử lý và hệ thống bộ nhớ \cite{binkert2011gem5}. Theo tài liệu chính thức, gem5 hỗ trợ nhiều mô hình CPU, nhiều tổ chức bộ nhớ và nhiều kiến trúc tập lệnh, trong đó có RISC-V \cite{gem5_docs_2026}.
+
+Một mô phỏng gem5 được mô tả bằng script cấu hình Python. Script này tạo các đối tượng mô phỏng như CPU, bus, cache, bộ điều khiển bộ nhớ và workload, sau đó kết nối chúng thành một hệ thống hoàn chỉnh \cite{gem5_docs_2026}. Ở bên trong, các thành phần chính của hệ thống được biểu diễn bằng các \texttt{SimObject}; mỗi \texttt{SimObject} có tham số cấu hình, cổng kết nối và các thống kê riêng. Cách tổ chức này làm cho cùng một workload có thể được chạy trên nhiều cấu hình khác nhau, chẳng hạn thay đổi mô hình CPU, thêm hoặc bỏ cache, hoặc thay đổi độ trễ bộ nhớ.
+
+gem5 có hai chế độ chạy chính là syscall emulation (SE) và full-system (FS). Ở chế độ FS, gem5 mô phỏng một hệ thống phần cứng đầy đủ hơn và có thể chạy hệ điều hành khách; ngược lại, chế độ SE tập trung vào chương trình mức người dùng, mô phỏng các lời gọi hệ thống cần thiết thay vì mô phỏng toàn bộ thiết bị và hệ điều hành \cite{gem5_docs_2026}. Đối với các benchmark nhân tính toán nhỏ, SE thường giúp cấu hình đơn giản hơn và rút ngắn thời gian mô phỏng, trong khi vẫn cho phép quan sát hành vi thực thi của lệnh, số lệnh động và các thống kê liên quan tới CPU/bộ nhớ.
+
+Các mô hình CPU trong gem5 có mức độ chi tiết khác nhau. \texttt{AtomicSimpleCPU} ưu tiên tốc độ mô phỏng và thực thi theo mô hình chức năng đơn giản; \texttt{TimingSimpleCPU} là mô hình in-order đơn giản nhưng có tương tác thời gian với hệ thống bộ nhớ; \texttt{MinorCPU} mô phỏng pipeline in-order cấu hình được; còn \texttt{O3CPU} mô phỏng bộ xử lý out-of-order chi tiết hơn \cite{gem5_docs_2026}. Việc chọn mô hình CPU vì vậy phải phù hợp với câu hỏi nghiên cứu: kiểm tra đúng sai ngữ nghĩa lệnh có thể dùng mô hình đơn giản, còn khảo sát ảnh hưởng của pipeline, cache hoặc front-end cần mô hình chi tiết hơn.
+
+Đối với mở rộng tập lệnh, điểm quan trọng của gem5 là phần mô tả ISA được tách khỏi phần lớn mô hình CPU. Tài liệu gem5 cho biết ISA description language được dùng để sinh các lớp lệnh và hàm giải mã; phần decode mô tả cách tách trường trong mã lệnh và ánh xạ từng mẫu bit tới một định nghĩa lệnh cụ thể \cite{gem5_docs_2026}. Nhờ cơ chế này, một lệnh mới có thể được bổ sung bằng cách định nghĩa mã hóa, lớp lệnh, toán hạng và ngữ nghĩa thực thi ở mức mô phỏng.
+
+Sau mỗi lần chạy, gem5 sinh ra các tệp cấu hình và thống kê đầu ra. Các tệp cấu hình ghi lại những \texttt{SimObject} đã được khởi tạo cùng giá trị tham số tương ứng, còn \texttt{stats.txt} chứa các thống kê như số tick, số lệnh mô phỏng, số chu kỳ CPU, số truy cập bộ nhớ và các chỉ số cache/bộ nhớ nếu cấu hình có các thành phần tương ứng \cite{gem5_docs_2026}. Các tệp này cung cấp dữ liệu định lượng để so sánh các biến thể chương trình hoặc biến thể kiến trúc trong cùng một môi trường mô phỏng.
+
+Trong phạm vi đồ án, gem5 được sử dụng như một môi trường mô phỏng kiến trúc cho các thao tác AI lượng tử hóa trên RISC-V. Các lệnh thử nghiệm có thể được đặt trong vùng \texttt{custom-0} để kiểm chứng giải mã và ngữ nghĩa, đồng thời các benchmark nhỏ có thể được dùng để quan sát xu hướng thay đổi số lệnh, số chu kỳ mô phỏng và ảnh hưởng của cấu hình bộ nhớ. Cách dùng này cần được phân biệt với phần thực nghiệm trên CV32E40P/FPGA: gem5 hỗ trợ kiểm chứng logic và phân tích xu hướng, còn kết quả trên kit phản ánh hành vi của hệ thống RTL, bus, bộ nhớ và firmware cụ thể.
+
 \section{TensorFlow Lite Micro}
 \label{sec:tflm}
 
-Các nội dung trong chương này cung cấp nền tảng để chuyển sang Chương~\ref{chap:de-xuat}. Từ các đặc điểm của suy luận INT8, các hướng nghiên cứu liên quan và các nền tảng RISC-V, CV32E40P, gem5, TensorFlow Lite Micro, chương tiếp theo sẽ trình bày cụ thể nhóm thao tác được lựa chọn và cách ánh xạ chúng vào hai môi trường mô phỏng và thực nghiệm của đồ án.
+TensorFlow Lite Micro (TFLM) là môi trường thực thi suy luận học máy dành cho các hệ nhúng tài nguyên hạn chế. Theo David và cộng sự, TFLM được thiết kế cho bối cảnh TinyML, nơi bộ xử lý, bộ nhớ và năng lượng đều bị giới hạn mạnh, đồng thời hệ sinh thái phần cứng rất phân mảnh về kiến trúc tập lệnh, bộ nhớ và mức hỗ trợ phần mềm \cite{david2021tflm}. Theo tài liệu chính thức của Google, TFLM hiện thuộc nhóm LiteRT for Microcontrollers và hướng tới môi trường vi điều khiển với các ràng buộc như không giả định có hệ điều hành, không sử dụng cấp phát động và có thể hoạt động với dung lượng bộ nhớ rất nhỏ \cite{google_litert_micro_2026}. Vì vậy, TFLM phù hợp với các hệ bare-metal, trong đó chương trình firmware phải tự quản lý bộ nhớ và giao tiếp trực tiếp với phần cứng.
+
+Luồng triển khai điển hình của TFLM bắt đầu từ một mô hình đã huấn luyện, sau đó chuyển đổi sang định dạng LiteRT/TFLite và nhúng mô hình vào firmware dưới dạng mảng byte trong bộ nhớ chương trình \cite{google_litert_micro_2026}. Trong quá trình khởi tạo, chương trình tạo một interpreter, đăng ký các toán tử mà mô hình sử dụng thông qua op resolver, cấp phát một vùng bộ nhớ tĩnh thường gọi là tensor arena, rồi thực thi suy luận cho từng mẫu đầu vào. Cách tổ chức này giúp giảm kích thước môi trường thực thi vì firmware chỉ cần liên kết các kernel cần thiết cho mô hình đang xét. Ngược lại, việc lựa chọn toán tử, kích thước tensor arena và cách hiện thực kernel trở thành các quyết định quan trọng trong triển khai thực tế.
+
+Đối với suy luận INT8, TFLM cung cấp cả ý nghĩa thực thi của mô hình và một điểm tham chiếu phần mềm để so sánh các tối ưu ở mức thấp hơn. Các kernel tham chiếu của TFLM thường ưu tiên tính đúng đắn và tính di động, trong khi các nền tảng cụ thể có thể thay thế một số kernel bằng phiên bản tối ưu hơn nếu vẫn giữ đúng quy ước lượng tử hóa và kết quả đầu ra mong muốn. Trong đồ án, các thao tác như fully connected, nhân--cộng tích lũy, lượng tử hóa lại và kích hoạt không chỉ xuất hiện trong microbenchmark, mà còn xuất hiện trong luồng suy luận TFLM của mô hình MNIST INT8. Do đó, TFLM tạo ra một mức đánh giá gần với triển khai suy luận trên hệ nhúng hơn so với việc chỉ khảo sát các vòng lặp tính toán riêng lẻ.
+
+Chương này đã hệ thống hóa các nội dung cơ sở cho bài toán tối ưu suy luận AI lượng tử hóa trên RISC-V nhúng. Các phần đầu chương làm rõ động lực của bài toán, các hướng tiếp cận liên quan và đặc điểm tính toán của suy luận INT8. Các phần tiếp theo trình bày khả năng mở rộng của RISC-V, đặc điểm chính của lõi CV32E40P, vai trò của gem5 trong mô phỏng kiến trúc và vai trò của TFLM trong triển khai suy luận trên hệ nhúng. Trên cơ sở đó, Chương~\ref{chap:de-xuat} sẽ trình bày nhóm thao tác được lựa chọn và cách ánh xạ chúng vào hai môi trường mô phỏng và thực nghiệm của đồ án.
 
 \end{document}
