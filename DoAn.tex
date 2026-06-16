@@ -34,6 +34,8 @@
 % \usepackage[natbib,backend=biber,style=ieee]{biblatex} % Giúp chèn tài liệu tham khảo
 
 \usepackage[font=small,labelfont=bf]{caption}
+\captionsetup[figure]{name=Hình}
+\captionsetup[table]{name=Bảng}
 
 \usepackage{listings}
 \usepackage{float}
@@ -274,6 +276,7 @@
 
 \pagestyle{fancy}
 \fancyhf{}
+\renewcommand{\chaptermark}[1]{\markboth{CHƯƠNG \thechapter.\ #1}{}}
 \fancyhead[RE, LO]{\leftmark}
 %\fancyhead[LE]{\rightmark}
 \fancyfoot[RE, LO]{\thepage}
