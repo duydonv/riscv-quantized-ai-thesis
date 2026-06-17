@@ -1,16 +1,76 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
+Chương~\ref{chap:co-so-ly-thuyet} đã đặt nền tảng để xem xét bài toán tối ưu suy luận INT8 dưới góc nhìn tập lệnh. Trên cơ sở đó, chương này cụ thể hóa định hướng của đồ án bằng cách xác định nhóm thao tác cần hỗ trợ và mô tả chúng với ngữ nghĩa rõ ràng. Nội dung chương bắt đầu với tổng quan luồng giải pháp, sau đó trình bày cơ sở lựa chọn nhóm thao tác, đặc tả từng thao tác và cách ánh xạ đặc tả này ở mức tổng quan sang hai môi trường được sử dụng trong đồ án là gem5 và DE2i-150/CV32E40P.
+
 \section{Tổng quan giải pháp}
+\label{sec:tong-quan-giai-phap}
 
-Phần này mô tả tổng quan giải pháp gồm những bước chính nào, hoạt động ra sao. Mục tiêu của phần này là cho người đọc một cái nhìn tổng thể về giải pháp. Để cho dễ hiểu thì nên có một biểu đồ mô tả luồng hoạt động của giải pháp đề xuất. 
+Giải pháp của đồ án được xây dựng như một luồng công việc từ nhận diện mẫu tính toán đến đánh giá trên hai môi trường bổ trợ cho nhau. Điểm xuất phát là các phép xử lý xuất hiện thường xuyên trong suy luận INT8, bao gồm nhân--cộng tích lũy, tích vô hướng trên dữ liệu 8 bit đóng gói, tải dữ liệu tuần tự, cập nhật con trỏ, điều khiển vòng lặp và giới hạn miền giá trị. Từ các mẫu này, đồ án đặc tả một nhóm thao tác ở mức tập lệnh, gồm \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw} và \texttt{lp.setup}. Đặc tả chung này là điểm nối giữa nhánh mô phỏng bằng gem5 và nhánh triển khai thực nghiệm trên kit FPGA.
 
-\section{Tên của nội dung chi tiết thứ 1}
-Tên của các chương này đặt theo nội dung mà sinh viên sẽ trình bày trong từng chương. 
+Ở nhánh mô phỏng, đặc tả được hiện thực trong phần RISC-V của gem5 bằng mã hóa thử nghiệm trong vùng \texttt{custom-0}. Trên cơ sở mã hóa này, đồ án bổ sung đường giải mã, lớp lệnh và ngữ nghĩa thực thi cho các thao tác mở rộng. Với các thao tác không chỉ là tính toán ALU thông thường, cụ thể là \texttt{p.lw} và \texttt{lp.setup}, mô hình gem5 còn cần biểu diễn hành vi tải hậu tăng địa chỉ và trạng thái vòng lặp phần cứng. Sau khi kiểm thử chức năng, các benchmark mô phỏng được dùng để so sánh với đường vô hướng và phân tích xu hướng khi thay đổi cấu hình CPU/bộ nhớ. Kết quả của nhánh này được trình bày ở Chương~\ref{chap:phan-tich-ly-thuyet}.
 
-Các chương tiếp theo mô tả chi tiết về các bước, các thuật toán trong giải pháp đề xuất. Có thể trình bày pseudocode cho từng bước. Chú ý, pseudocode chỉ có tác dụng làm chi tiết hoá giải thuật chứ không thay thế được phần thuyết minh về giải thuật. Đối với những chi tiết kỹ thuật khó hiểu nên có các hình minh hoạ để người đọc dễ hiểu. Mỗi một thuật toán/bước thực hiện nên tách ra thành một chương. 
+Ở nhánh thực nghiệm, đồ án đưa lõi CV32E40P lên kit DE2i-150 và xây dựng một hệ thống SoC tối giản đủ để chạy chương trình bare-metal, giao tiếp UART và đo hiệu năng. Đây là một phần quan trọng của giải pháp vì CV32E40P không phải một hệ thống hoàn chỉnh có thể dùng trực tiếp trên kit, mà cần được tích hợp với bộ nhớ BRAM, ngoại vi UART, ràng buộc thời gian, firmware khởi động và các điều chỉnh phù hợp với FPGA. Trên nền tảng đó, nhóm thao tác của đồ án được ánh xạ sang các lệnh CORE-V/PULP tương ứng thông qua các hàm bao trong firmware. Việc đánh giá trên kit được tổ chức theo các mức tăng dần: trước hết là benchmark mức kernel, sau đó là mô hình fully connected nhỏ trên TensorFlow Lite Micro với kích thước \(64 \rightarrow 16 \rightarrow 4\), và cuối cùng là mô hình MNIST FC INT8 lớn hơn với kích thước \(784 \rightarrow 32 \rightarrow 10\). Cách tổ chức này giúp kiểm tra ý tưởng từ các vòng lặp tính toán riêng lẻ đến một luồng suy luận INT8 hoàn chỉnh hơn. Kết quả thực nghiệm được trình bày ở Chương~\ref{chap:thuc-nghiem}.
 
-\section{Tên của nội dung chi tiết thứ 2}
+Hình~\ref{fig:solution-overview} tóm tắt luồng thực hiện của đồ án. Các mốc trong hình được trình bày theo dạng công việc đã thực hiện: từ nhận diện mẫu tính toán, đặc tả thao tác, tách sang hai nhánh mô phỏng và thực nghiệm, rồi hội tụ ở phần đối chiếu kết quả. Hai nhánh này được đồng bộ theo ngữ nghĩa thao tác, nhưng không đồng nhất về opcode, mô hình thời gian hay loại số liệu thu được. Vì vậy, gem5 được dùng để kiểm chứng và phân tích xu hướng, còn DE2i-150/CV32E40P được dùng để đánh giá thực nghiệm trên một hệ thống nhúng cụ thể.
 
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        font=\scriptsize,
+        block/.style={draw, rounded corners=2pt, align=center, text width=3.7cm, minimum height=0.82cm, fill=gray!8},
+        root/.style={block, text width=5.9cm, fill=blue!7},
+        gem5/.style={block, fill=cyan!8},
+        board/.style={block, fill=green!8},
+        result/.style={block, text width=5.8cm, fill=yellow!12},
+        branch/.style={font=\bfseries\scriptsize, align=center},
+        arrow/.style={-{Latex[length=2mm]}, thick}
+    ]
+        \node[root] (patterns) at (0, 0) {Nhận diện mẫu tính toán INT8 cần hỗ trợ};
+        \node[root] (spec) at (0, -1.35) {Đặc tả nhóm thao tác: \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw}, \texttt{lp.setup}};
+
+        \node[gem5] (g1) at (-3.35, -4.05) {Mã hóa thử nghiệm trong vùng \texttt{custom-0}};
+        \node[gem5] (g2) at (-3.35, -5.50) {Bổ sung decoder, lớp lệnh và ngữ nghĩa thực thi};
+        \node[gem5] (g3) at (-3.35, -6.95) {Mô hình hóa tải hậu tăng và vòng lặp phần cứng};
+        \node[gem5] (g4) at (-3.35, -8.40) {Kiểm thử chức năng và đo benchmark mô phỏng};
+
+        \node[board] (b1) at (3.35, -3.10) {Tích hợp CV32E40P thành SoC trên DE2i-150};
+        \node[board] (b2) at (3.35, -4.45) {Tích hợp BRAM, UART và firmware bare-metal};
+        \node[board] (b3) at (3.35, -5.80) {Ánh xạ thao tác qua wrapper CORE-V/PULP};
+        \node[board] (b4) at (3.35, -7.15) {Đánh giá kernel bằng microbenchmark};
+        \node[board] (b5) at (3.35, -8.65) {Triển khai và đánh giá FC nhỏ trên TFLM\\\((64 \rightarrow 16 \rightarrow 4)\)};
+        \node[board] (b6) at (3.35, -10.35) {Triển khai và đánh giá MNIST FC INT8\\\((784 \rightarrow 32 \rightarrow 10)\)};
+
+        \node[result] (compare) at (0, -12.15) {Đối chiếu kết quả: kiểm chứng ngữ nghĩa, phân tích xu hướng và đánh giá thực nghiệm};
+
+        \draw[decorate, decoration={brace, amplitude=4pt, mirror}, thick, cyan!45!black]
+            (-5.75, -3.50) -- (-5.75, -8.95)
+            node[midway, left=0.18cm, branch] {Mô phỏng\\gem5};
+        \draw[decorate, decoration={brace, amplitude=4pt}, thick, green!35!black]
+            (5.75, -2.60) -- (5.75, -10.95)
+            node[midway, right=0.18cm, branch] {Triển khai\\thực tế};
+
+        \draw[arrow] (patterns) -- (spec);
+        \draw[arrow] (spec.south) -- ++(0, -0.35) -| (g1.north);
+        \draw[arrow] (spec.south) -- ++(0, -0.35) -| (b1.north);
+
+        \draw[arrow] (g1) -- (g2);
+        \draw[arrow] (g2) -- (g3);
+        \draw[arrow] (g3) -- (g4);
+
+        \draw[arrow] (b1) -- (b2);
+        \draw[arrow] (b2) -- (b3);
+        \draw[arrow] (b3) -- (b4);
+        \draw[arrow] (b4) -- (b5);
+        \draw[arrow] (b5) -- (b6);
+
+        \draw[arrow] (g4.south) |- (compare.west);
+        \draw[arrow] (b6.south) |- (compare.east);
+    \end{tikzpicture}
+    \caption{Tổng quan luồng thực hiện giải pháp trong đồ án}
+    \label{fig:solution-overview}
+\end{figure}
+
+Luồng trên cho thấy giải pháp không chỉ dừng ở việc thêm một vài lệnh trong môi trường mô phỏng hoặc gọi các lệnh có sẵn trên phần cứng. Trọng tâm của đồ án là xây dựng một chuỗi kiểm chứng tương đối đầy đủ cho nhóm thao tác được đề xuất: đặc tả ngữ nghĩa ở mức tập lệnh, mô hình hóa và phân tích trong gem5, sau đó đưa cùng nhóm thao tác vào một SoC chạy trên FPGA để đánh giá trên phần cứng thật. Ở nhánh thực nghiệm, việc đánh giá cũng không chỉ dừng ở các microbenchmark tự thiết kế, mà tiếp tục được mở rộng sang các mô hình suy luận INT8 cụ thể trên TensorFlow Lite Micro. Trên cơ sở tổng quan này, các mục tiếp theo sẽ trình bày cơ sở lựa chọn nhóm thao tác và đặc tả ngữ nghĩa của từng thao tác trước khi đi vào chi tiết mô phỏng và thực nghiệm ở các chương sau.
 
 \end{document}
