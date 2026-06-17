@@ -1,12 +1,12 @@
 # Hướng dẫn viết và trích dẫn cho báo cáo
 
-Ngày cập nhật: 2026-06-16
+Ngày cập nhật: 2026-06-17
 
 File này tóm tắt các lưu ý quan trọng từ `Chuong/1_Gioi_thieu.tex` và `Chuong/Phu_luc_A.tex`, đồng thời chuyển chúng thành checklist thực hành cho đồ án này.
 
 ## 1. Trạng thái template
 
-Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 2 đã hoàn thiện phần nền tảng về ngữ cảnh bài toán, nghiên cứu liên quan, suy luận INT8, RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro. Các chương từ Chương 3 đến Chương 6 vẫn còn nhiều nội dung mẫu và cần được thay bằng nội dung đồ án khi viết tiếp. Khi viết từng chương:
+Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 2 đã hoàn thiện phần nền tảng về ngữ cảnh bài toán, nghiên cứu liên quan, suy luận INT8, RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro. Chương 3 đã bắt đầu được viết với phần mở đầu chương và tổng quan giải pháp, trong đó có sơ đồ luồng thực hiện chia hai nhánh gem5 và triển khai thực tế. Các phần còn lại của Chương 3 và các chương từ Chương 4 đến Chương 6 vẫn còn nhiều nội dung mẫu và cần được thay bằng nội dung đồ án khi viết tiếp. Khi viết từng chương:
 
 - Không giữ nguyên các đoạn "Sinh viên cần..." trong bản thảo cuối.
 - Không để các dòng `\textcolor{red}{Chú ý...}` của template trong bản nộp.
@@ -58,6 +58,7 @@ Ví dụ áp dụng cho đồ án:
 
 - Kết Chương 3 nên dẫn sang Chương 4 bằng ý: sau khi đặc tả các operation và mapping, cần kiểm tra semantics và phân tích hiệu năng bằng mô phỏng gem5.
 - Kết Chương 4 nên dẫn sang Chương 5 bằng ý: mô phỏng cho thấy xu hướng và kiểm tra logic, còn hiệu quả thực tế cần đánh giá trên kit DE2i-150/CV32E40P.
+- Với Chương 3, phần tổng quan chương và tổng quan giải pháp đã có bản nháp ổn định; các mục viết tiếp nên giữ mạch từ đặc tả thao tác sang ánh xạ trong gem5 và trên CV32E40P, tránh làm người đọc hiểu rằng đồ án chỉ thêm vài lệnh mô phỏng hoặc chỉ gọi lại lệnh sẵn có trên phần cứng.
 
 ## 5. Hình, bảng, công thức
 

@@ -1,8 +1,8 @@
 # Bản đồ tham chiếu kỹ thuật
 
-Ngày cập nhật: 2026-06-16
+Ngày cập nhật: 2026-06-17
 
-File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; file này tiếp tục đóng vai trò bản đồ đối chiếu khi viết Chương 3, Chương 4 và Chương 5.
+File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; Chương 3 đã có phần tổng quan giải pháp và sơ đồ luồng thực hiện. File này tiếp tục đóng vai trò bản đồ đối chiếu khi viết tiếp các phần đặc tả ở Chương 3, phần mô phỏng ở Chương 4 và phần thực nghiệm ở Chương 5.
 
 ## 1. Nguyên tắc diễn đạt kỹ thuật
 
