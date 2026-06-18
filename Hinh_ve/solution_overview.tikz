@@ -1,0 +1,51 @@
+\begin{tikzpicture}[
+    font=\scriptsize,
+    block/.style={draw, rounded corners=2pt, align=center, text width=3.7cm, minimum height=0.82cm, fill=gray!8},
+    root/.style={block, text width=5.9cm, fill=blue!7},
+    gem5/.style={block, fill=cyan!8},
+    board/.style={block, fill=green!8},
+    result/.style={block, text width=5.8cm, fill=yellow!12},
+    branch/.style={font=\bfseries\scriptsize, align=center},
+    arrow/.style={-{Latex[length=2mm]}, thick}
+]
+    \node[root] (patterns) at (0, 0) {Nhận diện mẫu tính toán INT8 cần hỗ trợ};
+    \node[root] (spec) at (0, -1.35) {Đặc tả ngữ nghĩa nhóm lệnh: \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw}, \texttt{lp.setup}};
+
+    \node[gem5] (g1) at (-3.35, -4.05) {Mã hóa thử nghiệm trong vùng \texttt{custom-0}};
+    \node[gem5] (g2) at (-3.35, -5.50) {Bổ sung decoder, lớp lệnh và ngữ nghĩa thực thi};
+    \node[gem5] (g3) at (-3.35, -6.95) {Mô hình hóa tải hậu tăng và vòng lặp phần cứng};
+    \node[gem5] (g4) at (-3.35, -8.40) {Kiểm thử chức năng và đo benchmark mô phỏng};
+
+    \node[board] (b1) at (3.35, -3.10) {Tích hợp CV32E40P thành SoC trên DE2i-150};
+    \node[board] (b2) at (3.35, -4.45) {Tích hợp BRAM, UART và firmware bare-metal};
+    \node[board] (b3) at (3.35, -5.80) {Ánh xạ sang lệnh CORE-V/PULP qua hàm bao};
+    \node[board] (b4) at (3.35, -7.15) {Đánh giá kernel bằng microbenchmark};
+    \node[board] (b5) at (3.35, -8.65) {Triển khai và đánh giá FC nhỏ trên TFLM\\\((64 \rightarrow 16 \rightarrow 4)\)};
+    \node[board] (b6) at (3.35, -10.35) {Triển khai và đánh giá MNIST FC INT8\\\((784 \rightarrow 32 \rightarrow 10)\)};
+
+    \node[result] (compare) at (0, -12.15) {Đối chiếu kết quả: kiểm chứng ngữ nghĩa lệnh, phân tích xu hướng và đánh giá thực nghiệm};
+
+    \draw[decorate, decoration={brace, amplitude=4pt, mirror}, thick, cyan!45!black]
+        (-5.75, -3.50) -- (-5.75, -8.95)
+        node[midway, left=0.18cm, branch] {Mô phỏng\\gem5};
+    \draw[decorate, decoration={brace, amplitude=4pt}, thick, green!35!black]
+        (5.75, -2.60) -- (5.75, -10.95)
+        node[midway, right=0.18cm, branch] {Triển khai\\thực tế};
+
+    \draw[arrow] (patterns) -- (spec);
+    \draw[arrow] (spec.south) -- ++(0, -0.35) -| (g1.north);
+    \draw[arrow] (spec.south) -- ++(0, -0.35) -| (b1.north);
+
+    \draw[arrow] (g1) -- (g2);
+    \draw[arrow] (g2) -- (g3);
+    \draw[arrow] (g3) -- (g4);
+
+    \draw[arrow] (b1) -- (b2);
+    \draw[arrow] (b2) -- (b3);
+    \draw[arrow] (b3) -- (b4);
+    \draw[arrow] (b4) -- (b5);
+    \draw[arrow] (b5) -- (b6);
+
+    \draw[arrow] (g4.south) |- (compare.west);
+    \draw[arrow] (b6.south) |- (compare.east);
+\end{tikzpicture}

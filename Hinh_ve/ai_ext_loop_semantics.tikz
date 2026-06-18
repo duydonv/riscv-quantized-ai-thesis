@@ -1,0 +1,22 @@
+\begin{tikzpicture}[
+    font=\scriptsize,
+    block/.style={draw, rounded corners=2pt, align=center, minimum height=0.9cm, text width=2.35cm, fill=gray!8},
+    mem/.style={block, fill=cyan!8},
+    compute/.style={block, fill=blue!8},
+    limit/.style={block, fill=green!9},
+    ctrl/.style={block, fill=yellow!15, text width=2.55cm},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    looparrow/.style={-{Latex[length=2mm]}, thick, dashed}
+]
+    \node[ctrl] (setup) at (0, 1.45) {\texttt{lp.setup}\\thiết lập số lần lặp};
+    \node[mem] (load_a) at (0, 0) {\texttt{p.lw}\\tải kích hoạt\\cập nhật con trỏ};
+    \node[mem] (load_w) at (3.1, 0) {\texttt{p.lw}\\tải trọng số\\cập nhật con trỏ};
+    \node[compute] (dot) at (6.2, 0) {\texttt{dot4\_acc}\\hoặc \texttt{mac}\\cộng dồn};
+    \node[limit] (limit) at (9.3, 0) {\texttt{relu}\\\texttt{clamp}\\giới hạn giá trị};
+
+    \draw[arrow] (load_a) -- (load_w);
+    \draw[arrow] (load_w) -- (dot);
+    \draw[arrow] (dot) -- (limit);
+    \draw[arrow] (setup.south) -- (load_a.north);
+    \draw[looparrow] (dot.south) .. controls +(0,-0.8) and +(0,-0.8) .. node[below, align=center] {lặp lại đến\\\texttt{LPEND}} (load_a.south);
+\end{tikzpicture}

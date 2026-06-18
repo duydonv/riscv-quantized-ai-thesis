@@ -1,8 +1,8 @@
 # Bản đồ tham chiếu kỹ thuật
 
-Ngày cập nhật: 2026-06-17
+Ngày cập nhật: 2026-06-18
 
-File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; Chương 3 đã có phần tổng quan giải pháp và sơ đồ luồng thực hiện. File này tiếp tục đóng vai trò bản đồ đối chiếu khi viết tiếp các phần đặc tả ở Chương 3, phần mô phỏng ở Chương 4 và phần thực nghiệm ở Chương 5.
+File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; Chương 3 đã có bản hoàn chỉnh ban đầu cho phần thiết kế, đặc tả ngữ nghĩa và ánh xạ nhóm lệnh mở rộng sang gem5 và DE2i-150/CV32E40P. File này tiếp tục đóng vai trò bản đồ đối chiếu khi viết Chương 4 về mô phỏng gem5 và Chương 5 về thực nghiệm trên kit.
 
 ## 1. Nguyên tắc diễn đạt kỹ thuật
 
@@ -10,7 +10,7 @@ File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. 
 - Không viết rằng board dùng đúng opcode custom-0 của gem5. gem5 dùng prototype custom-0 để mô phỏng semantics; board dùng mapping CORE-V/PULP trên CV32E40P.
 - Không viết rằng gem5 là mô hình cycle-for-cycle của kit. gem5 dùng để kiểm tra semantics, regression và phân tích xu hướng.
 - Khi nói "mở rộng tập lệnh", cần làm rõ phạm vi: đồ án đặc tả/đồng bộ semantics các operation AI và triển khai qua hai môi trường, trong đó phần cứng thực tế tận dụng các lệnh CORE-V/PULP có sẵn của CV32E40P.
-- Chương 2 chỉ trình bày nền tảng ở mức tổng quan; các chi tiết opcode, mapping cụ thể, smoke test, benchmark và số liệu cần để sang Chương 3--5.
+- Chương 2 chỉ trình bày nền tảng ở mức tổng quan; Chương 3 đã chốt mức đặc tả và ánh xạ tổng quan. Các chi tiết opcode trong code, smoke test, benchmark, số liệu mô phỏng và số liệu thực nghiệm cần để sang Chương 4--5.
 
 ## 2. Bản đồ gem5
 
@@ -37,6 +37,8 @@ Semantics cần ghi trong báo cáo:
 | `clamp` | chặn signed `rs1` vào `[0, rs2]`, `rs2` là upper bound |
 | `p.lw` | load word tại địa chỉ `rs1`, sau đó `rs1 += sext(imm12)` |
 | `lp.setup` | thiết lập `LPSTART`, `LPEND`, `LPCOUNT`, dùng raw CORE-V immediate |
+
+Trạng thái báo cáo: Chương 3 đã dùng các semantics trên để viết phần đặc tả ở mức kiến trúc. Khi sang Chương 4, cần chuyển trọng tâm từ "lệnh có ý nghĩa gì" sang "gem5 hiện thực và kiểm chứng ý nghĩa đó như thế nào".
 
 ### 2.2 Hardware-loop state và ISA redirect
 
@@ -127,10 +129,10 @@ Các điểm kỹ thuật nên đưa vào Chương 5 nếu cần:
 
 | Operation trong báo cáo | gem5 | Board CV32E40P |
 |---|---|---|
-| `mac` | custom-0 `mac` trong decoder/`ai_ext` | `cv.mac` qua wrapper |
+| `mac` | custom-0 `mac` trong decoder/`ai_ext` | `cv.mac` qua hàm bao firmware |
 | `dot4_acc` | custom-0 `dot4_acc` | `cv.sdotsp.b` |
 | `relu` | custom-0 `relu` | `cv.max` hoặc logic tương đương tùy firmware |
-| `clamp` | custom-0 `clamp`, upper bound từ `rs2` | `cv.clipur`/wrapper ở benchmark; với TFLM signed INT8 có chỗ giữ scalar để đúng TFLite |
+| `clamp` | custom-0 `clamp`, upper bound từ `rs2` | `cv.clipur`/hàm bao ở benchmark; với TFLM signed INT8 có chỗ giữ scalar để đúng TFLite |
 | `p.lw` | `PostIncLoad`, load-before-update | `cv.lw` post-increment |
 | `lp.setup` | custom-0 `lp.setup`, raw CORE-V imm | `cv.setup` hardware loop |
 
