@@ -1,10 +1,10 @@
 # Bản đồ tài liệu phục vụ viết báo cáo đồ án
 
-Ngày cập nhật: 2026-06-17
+Ngày cập nhật: 2026-06-18
 
 Đồ án: Mở rộng tập lệnh RISC-V cho các phép toán AI lượng tử hóa, mô phỏng trên gem5 và triển khai thực nghiệm trên kit FPGA DE2i-150/CV32E40P.
 
-File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 3 đã bắt đầu được viết với tên chương, phần mở đầu chương, tổng quan giải pháp và sơ đồ luồng thực hiện. Các phần còn lại của Chương 3 và các chương từ Chương 4 đến Chương 6 vẫn còn nhiều nội dung mẫu và sẽ được viết tiếp theo mạch kỹ thuật đã chốt. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
+File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 3 đã có bản nội dung hoàn chỉnh ban đầu cho phần thiết kế và đặc tả nhóm lệnh mở rộng, gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh và ánh xạ sang hai môi trường triển khai. Các chương từ Chương 4 đến Chương 6 vẫn còn nhiều nội dung mẫu và sẽ được viết tiếp theo mạch kỹ thuật đã chốt. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
 
 ## 1. Bộ file hỗ trợ viết báo cáo
 
@@ -21,7 +21,8 @@ Khi bắt đầu viết một chương, đọc file này trước để xác đ�
 - Các phần đầu báo cáo đã có nội dung: `0_2_Loi_cam_on.tex`, `0_3_Tom_tat_noi_dung.tex` và `0_4_Tom_tat_noi_dung_eng.tex`.
 - Chương 1 đã được thay nội dung theo hướng hoàn chỉnh, gồm đặt vấn đề, các giải pháp hiện tại và hạn chế, mục tiêu và định hướng giải pháp, đóng góp của đồ án và bố cục báo cáo.
 - Chương 2 đã có bản hoàn chỉnh ban đầu cho các phần nền tảng: ngữ cảnh bài toán, nghiên cứu liên quan, suy luận AI lượng tử hóa, RISC-V và mở rộng tập lệnh, CV32E40P, gem5 và TensorFlow Lite Micro. Chương này hiện có hình tự vẽ về luồng INT8, bảng vùng opcode custom của RISC-V và hình sơ đồ khối CV32E40P trích từ tài liệu OpenHW.
-- Chương 3 đã được đổi tên theo hướng "Thiết kế và đặc tả nhóm lệnh mở rộng" và đã có phần mở đầu, tổng quan giải pháp cùng sơ đồ luồng gồm hai nhánh gem5 và triển khai thực tế. Các mục còn lại của Chương 3 và các chương từ Chương 4 đến Chương 6 vẫn còn nhiều nội dung mẫu; khi viết tiếp cần xóa hoặc thay toàn bộ đoạn hướng dẫn mẫu bằng nội dung đồ án.
+- Chương 3 đã có bản hoàn chỉnh ban đầu với tên "Thiết kế và đặc tả nhóm lệnh mở rộng". Chương này đã trình bày tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa cho `mac`, `dot4_acc`, `relu`, `clamp`, `p.lw`, `lp.setup`, bảng ánh xạ sang gem5 và DE2i-150/CV32E40P, cùng đoạn kết nối sang Chương 4. Chương 4 đến Chương 6 vẫn còn nhiều nội dung mẫu; khi viết tiếp cần xóa hoặc thay toàn bộ đoạn hướng dẫn mẫu bằng nội dung đồ án.
+- Các hình TikZ tự vẽ hiện đã được quản lý trong `Hinh_ve/` và được nạp bằng `\input{Hinh_ve/...}`. Các file đáng chú ý gồm `int8_inference_flow.tikz`, `solution_overview.tikz`, `fc_mac_model_layers.tikz`, `fc_mac_growth.tikz`, `ai_ext_loop_semantics.tikz` và `dot4_acc_semantics.tikz`.
 - `Danh_sach_tai_lieu_tham_khao.bib` đã có các nguồn nền tảng dùng trong Chương 1 và Chương 2, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, tài liệu LiteRT Microcontrollers, đặc tả lượng tử hóa LiteRT/INT8 và một số nghiên cứu liên quan về suy luận trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Khi viết Chương 3 trở đi vẫn cần bổ sung nguồn chính thức hoặc bài báo phù hợp với từng claim kỹ thuật mới.
 - `Tu_viet_tat.tex` đã được thay từ danh sách mẫu sang danh mục thuật ngữ của đồ án, chỉ giữ các mục cần hỗ trợ người đọc như MAC, SIMD, RVV, SoC, TFLM/LiteRT, MNIST, ReLU, TPU, TOPS. Các thuật ngữ quá phổ thông hoặc đã được giải thích ngay trong nội dung không nên đưa vào để tránh làm danh mục bị loãng.
 - `DoAn.tex` đang giữ `babel` tiếng Anh để danh mục tài liệu tham khảo hiển thị đúng chuẩn IEEE, đồng thời đã Việt hóa caption hình/bảng và header chương bằng cấu hình riêng. Khi sửa format, cần tránh đổi `babel` nếu chưa kiểm tra lại bibliography.
@@ -65,7 +66,7 @@ Lưu ý viết: Chương này nên viết thành văn xuôi mạch lạc, tránh
 
 ### Chương 2: Cơ sở lý thuyết
 
-Trạng thái hiện tại: đã có bản hoàn chỉnh ban đầu trong `Chuong/2_Co_so_ly_thuyet.tex`. Chương gồm phần dẫn nhập/ngữ cảnh, nghiên cứu liên quan, suy luận AI lượng tử hóa, RISC-V và mở rộng tập lệnh, CV32E40P, gem5 và TensorFlow Lite Micro. Phần nghiên cứu liên quan trình bày theo ba hướng chính: tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Phần suy luận INT8 có công thức lượng tử hóa, tích vô hướng INT8 và hình luồng tính toán tự vẽ. Phần RISC-V có bảng vùng opcode custom; phần CV32E40P dùng sơ đồ khối chính thức của OpenHW; phần gem5 và TFLM được viết cô đọng để giữ dung lượng chương.
+Trạng thái hiện tại: đã có bản hoàn chỉnh ban đầu trong `Chuong/2_Co_so_ly_thuyet.tex`. Chương gồm phần dẫn nhập/ngữ cảnh, nghiên cứu liên quan, suy luận AI lượng tử hóa, RISC-V và mở rộng tập lệnh, CV32E40P, gem5 và TensorFlow Lite Micro. Phần nghiên cứu liên quan trình bày theo ba hướng chính: tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Phần suy luận INT8 có công thức lượng tử hóa, tích vô hướng INT8 và hình luồng tính toán tự vẽ được tách ra `Hinh_ve/int8_inference_flow.tikz`. Phần RISC-V có bảng vùng opcode custom; phần CV32E40P dùng sơ đồ khối chính thức của OpenHW; phần gem5 và TFLM được viết cô đọng để giữ dung lượng chương.
 
 Mục tiêu: đặt nền cho người đọc hiểu vì sao cần các lệnh AI lượng tử hóa và vì sao chọn các nền tảng RISC-V/gem5/CV32E40P/TFLM.
 
@@ -88,9 +89,9 @@ Tài liệu ngoài đã dùng trong Chương 2 gồm đặc tả RISC-V, bài TF
 
 ### Chương 3: Thiết kế và đặc tả nhóm lệnh mở rộng
 
-Trạng thái hiện tại: đã có bản nháp ổn định cho phần mở đầu chương và mục tổng quan giải pháp trong `Chuong/3_De_xuat.tex`. Phần tổng quan đã liên kết với Chương 2, nêu lý do cần Chương 3, và giới thiệu luồng thực hiện gồm đặc tả nhóm thao tác, mô phỏng gem5, triển khai SoC/firmware trên DE2i-150/CV32E40P, sau đó đối chiếu kết quả. Sơ đồ tổng quan hiện chia rõ hai nhánh gem5 và triển khai thực tế; các mục đặc tả thao tác chi tiết phía sau vẫn cần viết tiếp.
+Trạng thái hiện tại: đã có bản hoàn chỉnh ban đầu trong `Chuong/3_De_xuat.tex`. Phần mở đầu liên kết với Chương 2 và nêu vai trò của chương. Mục tổng quan giải pháp có sơ đồ luồng thực hiện đã tách sang `Hinh_ve/solution_overview.tikz`. Mục cơ sở lựa chọn nhóm lệnh giải thích động lực từ số phép MAC trong các lớp fully connected và chi phí vòng lặp INT8. Mục đặc tả ngữ nghĩa đã trình bày sáu lệnh `mac`, `dot4_acc`, `relu`, `clamp`, `p.lw`, `lp.setup`; các hình minh họa đều nằm trong `Hinh_ve/` và được tham chiếu trong nội dung. Mục ánh xạ đã phân biệt rõ nhánh gem5 dùng mã hóa thử nghiệm `custom-0` và nhánh DE2i-150/CV32E40P dùng CORE-V/PULP thông qua lớp firmware. Cuối chương có đoạn kết ngắn nối sang Chương 4.
 
-Mục tiêu: trình bày giải pháp đề xuất và đặc tả semantics của các operation/lệnh.
+Mục tiêu: trình bày giải pháp mở rộng tập lệnh và đặc tả semantics của các operation/lệnh.
 
 Các nội dung chính:
 
@@ -98,8 +99,8 @@ Các nội dung chính:
 - Đặc tả các operation: `mac`, `dot4_acc`, `relu`, `clamp`, `p.lw`, `lp.setup`.
 - Làm rõ hai không gian triển khai:
   - gem5 dùng prototype custom-0 encoding để mô phỏng semantics;
-  - kit dùng các lệnh CORE-V/PULP có sẵn trên CV32E40P thông qua wrapper `.insn`.
-- Giải thích vì sao chọn mapping CORE-V/PULP thay vì tự viết toàn bộ custom RTL riêng ngay từ đầu.
+  - kit dùng các lệnh CORE-V/PULP có sẵn trên CV32E40P thông qua hàm bao `.insn`.
+- Giải thích vì sao nhánh phần cứng ánh xạ sang CORE-V/PULP thông qua firmware, đồng thời nhấn mạnh rằng phần này vẫn bao gồm cấu hình lõi, tích hợp SoC, xây dựng hàm bao, thống nhất quy ước dữ liệu và kiểm chứng trên mô hình suy luận INT8.
 
 Tài liệu nội bộ nên đọc:
 
