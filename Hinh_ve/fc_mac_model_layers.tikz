@@ -1,0 +1,32 @@
+\begin{tikzpicture}[
+    font=\scriptsize,
+    axis/.style={black!75, thick},
+    gridline/.style={black!15, thin},
+    label/.style={font=\scriptsize, align=center},
+    barlabel/.style={font=\scriptsize, align=center}
+]
+    \draw[axis] (0,0) -- (8.9,0);
+    \draw[axis] (0,0) -- (0,4.25);
+
+    \foreach \y/\lab in {0/{\(10^1\)},1/{\(10^2\)},2/{\(10^3\)},3/{\(10^4\)},4/{\(10^5\)}} {
+        \draw[gridline] (0,\y) -- (8.9,\y);
+        \draw[axis] (-0.06,\y) -- (0.06,\y);
+        \node[anchor=east] at (-0.12,\y) {\lab};
+    }
+    \node[rotate=90, anchor=south] at (-0.95,2.12) {Số MAC / mẫu (thang log)};
+
+    \fill[blue!55] (0.75,0) rectangle (1.35,2.01);
+    \fill[cyan!55!black] (2.65,0) rectangle (3.25,0.81);
+    \fill[orange!80!black] (4.65,0) rectangle (5.25,3.40);
+    \fill[red!70] (6.95,0) rectangle (7.55,1.51);
+
+    \node[barlabel, anchor=south] at (1.05,2.07) {1 024};
+    \node[barlabel, anchor=south] at (2.95,0.87) {64};
+    \node[barlabel, anchor=south] at (4.95,3.46) {25 088};
+    \node[barlabel, anchor=south] at (7.25,1.57) {320};
+
+    \node[label] at (1.05,-0.45) {Tiny FC1\\\(64\!\rightarrow\!16\)};
+    \node[label] at (2.95,-0.45) {Tiny FC2\\\(16\!\rightarrow\!4\)};
+    \node[label] at (4.95,-0.45) {MNIST FC1\\\(784\!\rightarrow\!32\)};
+    \node[label] at (7.25,-0.45) {MNIST FC2\\\(32\!\rightarrow\!10\)};
+\end{tikzpicture}

@@ -1,0 +1,37 @@
+\begin{tikzpicture}[
+    font=\scriptsize,
+    axis/.style={black!75, thick},
+    gridline/.style={black!15, thin},
+    pointlabel/.style={font=\scriptsize, align=center}
+]
+    \draw[axis] (0,0) -- (8.9,0);
+    \draw[axis] (0,0) -- (0,4.25);
+
+    \foreach \y/\lab in {0/{0},1/{25 000},2/{50 000},3/{75 000},4/{100 000}} {
+        \draw[gridline] (0,\y) -- (8.9,\y);
+        \draw[axis] (-0.06,\y) -- (0.06,\y);
+        \node[anchor=east] at (-0.12,\y) {\lab};
+    }
+    \foreach \x/\lab in {0.85/{8},2.25/{16},3.65/{32},5.05/{64},6.45/{128}} {
+        \draw[axis] (\x,-0.06) -- (\x,0.06);
+        \node[anchor=north] at (\x,-0.15) {\lab};
+    }
+    \node[anchor=north] at (3.65,-0.62) {Số nút đầu ra \(H\)};
+    \node[rotate=90, anchor=south] at (-1.15,2.12) {Số MAC / mẫu};
+
+    \fill[blue!10] (0.85,0) -- (0.85,0.25) -- (2.25,0.50) -- (3.65,1.00) --
+        (5.05,2.01) -- (6.45,4.01) -- (6.45,0) -- cycle;
+    \draw[blue!65!black, very thick]
+        (0.85,0.25) -- (2.25,0.50) -- (3.65,1.00) -- (5.05,2.01) -- (6.45,4.01);
+
+    \foreach \x/\y/\lab/\anchor/\dx/\dy in {
+        0.85/0.25/{6 272}/south/0/0.08,
+        2.25/0.50/{12 544}/south/0/0.08,
+        3.65/1.00/{25 088}/south/0/0.08,
+        5.05/2.01/{50 176}/south/0/0.08,
+        6.45/4.01/{100 352}/west/0.10/-0.02
+    } {
+        \fill[blue!65!black] (\x,\y) circle (1.8pt);
+        \node[pointlabel, anchor=\anchor] at (\x+\dx,\y+\dy) {\lab};
+    }
+\end{tikzpicture}

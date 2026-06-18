@@ -1,76 +1,240 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương~\ref{chap:co-so-ly-thuyet} đã đặt nền tảng để xem xét bài toán tối ưu suy luận INT8 dưới góc nhìn tập lệnh. Trên cơ sở đó, chương này cụ thể hóa định hướng của đồ án bằng cách xác định nhóm thao tác cần hỗ trợ và mô tả chúng với ngữ nghĩa rõ ràng. Nội dung chương bắt đầu với tổng quan luồng giải pháp, sau đó trình bày cơ sở lựa chọn nhóm thao tác, đặc tả từng thao tác và cách ánh xạ đặc tả này ở mức tổng quan sang hai môi trường được sử dụng trong đồ án là gem5 và DE2i-150/CV32E40P.
+Chương~\ref{chap:co-so-ly-thuyet} đã đặt nền tảng để xem xét bài toán tối ưu suy luận INT8 dưới góc nhìn tập lệnh. Trên cơ sở đó, chương này cụ thể hóa định hướng của đồ án bằng cách xác định các thao tác cần được đưa xuống mức lệnh và mô tả ngữ nghĩa của chúng một cách rõ ràng. Nội dung chương bắt đầu với tổng quan luồng giải pháp, sau đó trình bày cơ sở lựa chọn nhóm lệnh mở rộng, đặc tả ngữ nghĩa của từng thành phần trong nhóm lệnh và cách ánh xạ đặc tả này ở mức tổng quan sang hai môi trường được sử dụng trong đồ án là gem5 và DE2i-150/CV32E40P.
 
 \section{Tổng quan giải pháp}
 \label{sec:tong-quan-giai-phap}
 
-Giải pháp của đồ án được xây dựng như một luồng công việc từ nhận diện mẫu tính toán đến đánh giá trên hai môi trường bổ trợ cho nhau. Điểm xuất phát là các phép xử lý xuất hiện thường xuyên trong suy luận INT8, bao gồm nhân--cộng tích lũy, tích vô hướng trên dữ liệu 8 bit đóng gói, tải dữ liệu tuần tự, cập nhật con trỏ, điều khiển vòng lặp và giới hạn miền giá trị. Từ các mẫu này, đồ án đặc tả một nhóm thao tác ở mức tập lệnh, gồm \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw} và \texttt{lp.setup}. Đặc tả chung này là điểm nối giữa nhánh mô phỏng bằng gem5 và nhánh triển khai thực nghiệm trên kit FPGA.
+Giải pháp của đồ án được xây dựng như một luồng công việc từ nhận diện mẫu tính toán đến đánh giá trên hai môi trường bổ trợ cho nhau. Điểm xuất phát là các phép xử lý xuất hiện thường xuyên trong suy luận INT8, bao gồm nhân--cộng tích lũy, tích vô hướng trên dữ liệu 8 bit đóng gói, tải dữ liệu tuần tự, cập nhật con trỏ, điều khiển vòng lặp và giới hạn miền giá trị. Từ các mẫu này, đồ án xác định một nhóm lệnh mở rộng ở mức ngữ nghĩa, gồm \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw} và \texttt{lp.setup}. Việc tách ngữ nghĩa của nhóm lệnh khỏi mã hóa lệnh cụ thể cho phép sử dụng cùng một cơ sở đặc tả khi mô phỏng trong gem5 và khi ánh xạ sang các lệnh CORE-V/PULP trên phần cứng thật.
 
-Ở nhánh mô phỏng, đặc tả được hiện thực trong phần RISC-V của gem5 bằng mã hóa thử nghiệm trong vùng \texttt{custom-0}. Trên cơ sở mã hóa này, đồ án bổ sung đường giải mã, lớp lệnh và ngữ nghĩa thực thi cho các thao tác mở rộng. Với các thao tác không chỉ là tính toán ALU thông thường, cụ thể là \texttt{p.lw} và \texttt{lp.setup}, mô hình gem5 còn cần biểu diễn hành vi tải hậu tăng địa chỉ và trạng thái vòng lặp phần cứng. Sau khi kiểm thử chức năng, các benchmark mô phỏng được dùng để so sánh với đường vô hướng và phân tích xu hướng khi thay đổi cấu hình CPU/bộ nhớ. Kết quả của nhánh này được trình bày ở Chương~\ref{chap:phan-tich-ly-thuyet}.
+Ở nhánh mô phỏng, đặc tả được hiện thực trong phần RISC-V của gem5 bằng mã hóa thử nghiệm trong vùng \texttt{custom-0}. Trên cơ sở mã hóa này, đồ án bổ sung đường giải mã, lớp lệnh và ngữ nghĩa thực thi cho các lệnh thử nghiệm. Với các lệnh không chỉ là tính toán ALU thông thường, cụ thể là \texttt{p.lw} và \texttt{lp.setup}, mô hình gem5 còn cần biểu diễn hành vi tải hậu tăng địa chỉ và trạng thái vòng lặp phần cứng. Sau khi kiểm thử chức năng, các benchmark mô phỏng được dùng để so sánh với đường vô hướng và phân tích xu hướng khi thay đổi cấu hình CPU/bộ nhớ. Kết quả của nhánh này được trình bày ở Chương~\ref{chap:phan-tich-ly-thuyet}.
 
-Ở nhánh thực nghiệm, đồ án đưa lõi CV32E40P lên kit DE2i-150 và xây dựng một hệ thống SoC tối giản đủ để chạy chương trình bare-metal, giao tiếp UART và đo hiệu năng. Đây là một phần quan trọng của giải pháp vì CV32E40P không phải một hệ thống hoàn chỉnh có thể dùng trực tiếp trên kit, mà cần được tích hợp với bộ nhớ BRAM, ngoại vi UART, ràng buộc thời gian, firmware khởi động và các điều chỉnh phù hợp với FPGA. Trên nền tảng đó, nhóm thao tác của đồ án được ánh xạ sang các lệnh CORE-V/PULP tương ứng thông qua các hàm bao trong firmware. Việc đánh giá trên kit được tổ chức theo các mức tăng dần: trước hết là benchmark mức kernel, sau đó là mô hình fully connected nhỏ trên TensorFlow Lite Micro với kích thước \(64 \rightarrow 16 \rightarrow 4\), và cuối cùng là mô hình MNIST FC INT8 lớn hơn với kích thước \(784 \rightarrow 32 \rightarrow 10\). Cách tổ chức này giúp kiểm tra ý tưởng từ các vòng lặp tính toán riêng lẻ đến một luồng suy luận INT8 hoàn chỉnh hơn. Kết quả thực nghiệm được trình bày ở Chương~\ref{chap:thuc-nghiem}.
+Ở nhánh thực nghiệm, đồ án đưa lõi CV32E40P lên kit DE2i-150 và xây dựng một hệ thống SoC tối giản đủ để chạy chương trình bare-metal, giao tiếp UART và đo hiệu năng. Đây là một phần quan trọng của giải pháp vì CV32E40P không phải một hệ thống hoàn chỉnh có thể dùng trực tiếp trên kit, mà cần được tích hợp với bộ nhớ BRAM, ngoại vi UART, ràng buộc thời gian, firmware khởi động và các điều chỉnh phù hợp với FPGA. Trên nền tảng đó, các ngữ nghĩa đã đặc tả được ánh xạ sang các lệnh CORE-V/PULP tương ứng thông qua các hàm bao trong firmware. Việc đánh giá trên kit được tổ chức theo các mức tăng dần: trước hết là benchmark mức kernel, sau đó là mô hình fully connected nhỏ trên TensorFlow Lite Micro với kích thước \(64 \rightarrow 16 \rightarrow 4\), và cuối cùng là mô hình MNIST FC INT8 lớn hơn với kích thước \(784 \rightarrow 32 \rightarrow 10\). Cách tổ chức này giúp kiểm tra ý tưởng từ các vòng lặp tính toán riêng lẻ đến một luồng suy luận INT8 hoàn chỉnh hơn. Kết quả thực nghiệm được trình bày ở Chương~\ref{chap:thuc-nghiem}.
 
-Hình~\ref{fig:solution-overview} tóm tắt luồng thực hiện của đồ án. Các mốc trong hình được trình bày theo dạng công việc đã thực hiện: từ nhận diện mẫu tính toán, đặc tả thao tác, tách sang hai nhánh mô phỏng và thực nghiệm, rồi hội tụ ở phần đối chiếu kết quả. Hai nhánh này được đồng bộ theo ngữ nghĩa thao tác, nhưng không đồng nhất về opcode, mô hình thời gian hay loại số liệu thu được. Vì vậy, gem5 được dùng để kiểm chứng và phân tích xu hướng, còn DE2i-150/CV32E40P được dùng để đánh giá thực nghiệm trên một hệ thống nhúng cụ thể.
+Hình~\ref{fig:solution-overview} tóm tắt luồng thực hiện của đồ án. Các mốc trong hình được trình bày theo dạng công việc đã thực hiện: từ nhận diện mẫu tính toán, đặc tả ngữ nghĩa nhóm lệnh, tách sang hai nhánh mô phỏng và thực nghiệm, rồi hội tụ ở phần đối chiếu kết quả. Hai nhánh này được đồng bộ theo ngữ nghĩa của nhóm lệnh, nhưng không đồng nhất về opcode, mô hình thời gian hay loại số liệu thu được. Vì vậy, gem5 được dùng để kiểm chứng và phân tích xu hướng, còn DE2i-150/CV32E40P được dùng để đánh giá thực nghiệm trên một hệ thống nhúng cụ thể.
 
 \begin{figure}[H]
     \centering
-    \begin{tikzpicture}[
-        font=\scriptsize,
-        block/.style={draw, rounded corners=2pt, align=center, text width=3.7cm, minimum height=0.82cm, fill=gray!8},
-        root/.style={block, text width=5.9cm, fill=blue!7},
-        gem5/.style={block, fill=cyan!8},
-        board/.style={block, fill=green!8},
-        result/.style={block, text width=5.8cm, fill=yellow!12},
-        branch/.style={font=\bfseries\scriptsize, align=center},
-        arrow/.style={-{Latex[length=2mm]}, thick}
-    ]
-        \node[root] (patterns) at (0, 0) {Nhận diện mẫu tính toán INT8 cần hỗ trợ};
-        \node[root] (spec) at (0, -1.35) {Đặc tả nhóm thao tác: \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw}, \texttt{lp.setup}};
-
-        \node[gem5] (g1) at (-3.35, -4.05) {Mã hóa thử nghiệm trong vùng \texttt{custom-0}};
-        \node[gem5] (g2) at (-3.35, -5.50) {Bổ sung decoder, lớp lệnh và ngữ nghĩa thực thi};
-        \node[gem5] (g3) at (-3.35, -6.95) {Mô hình hóa tải hậu tăng và vòng lặp phần cứng};
-        \node[gem5] (g4) at (-3.35, -8.40) {Kiểm thử chức năng và đo benchmark mô phỏng};
-
-        \node[board] (b1) at (3.35, -3.10) {Tích hợp CV32E40P thành SoC trên DE2i-150};
-        \node[board] (b2) at (3.35, -4.45) {Tích hợp BRAM, UART và firmware bare-metal};
-        \node[board] (b3) at (3.35, -5.80) {Ánh xạ thao tác qua wrapper CORE-V/PULP};
-        \node[board] (b4) at (3.35, -7.15) {Đánh giá kernel bằng microbenchmark};
-        \node[board] (b5) at (3.35, -8.65) {Triển khai và đánh giá FC nhỏ trên TFLM\\\((64 \rightarrow 16 \rightarrow 4)\)};
-        \node[board] (b6) at (3.35, -10.35) {Triển khai và đánh giá MNIST FC INT8\\\((784 \rightarrow 32 \rightarrow 10)\)};
-
-        \node[result] (compare) at (0, -12.15) {Đối chiếu kết quả: kiểm chứng ngữ nghĩa, phân tích xu hướng và đánh giá thực nghiệm};
-
-        \draw[decorate, decoration={brace, amplitude=4pt, mirror}, thick, cyan!45!black]
-            (-5.75, -3.50) -- (-5.75, -8.95)
-            node[midway, left=0.18cm, branch] {Mô phỏng\\gem5};
-        \draw[decorate, decoration={brace, amplitude=4pt}, thick, green!35!black]
-            (5.75, -2.60) -- (5.75, -10.95)
-            node[midway, right=0.18cm, branch] {Triển khai\\thực tế};
-
-        \draw[arrow] (patterns) -- (spec);
-        \draw[arrow] (spec.south) -- ++(0, -0.35) -| (g1.north);
-        \draw[arrow] (spec.south) -- ++(0, -0.35) -| (b1.north);
-
-        \draw[arrow] (g1) -- (g2);
-        \draw[arrow] (g2) -- (g3);
-        \draw[arrow] (g3) -- (g4);
-
-        \draw[arrow] (b1) -- (b2);
-        \draw[arrow] (b2) -- (b3);
-        \draw[arrow] (b3) -- (b4);
-        \draw[arrow] (b4) -- (b5);
-        \draw[arrow] (b5) -- (b6);
-
-        \draw[arrow] (g4.south) |- (compare.west);
-        \draw[arrow] (b6.south) |- (compare.east);
-    \end{tikzpicture}
+    \input{Hinh_ve/solution_overview.tikz}
     \caption{Tổng quan luồng thực hiện giải pháp trong đồ án}
     \label{fig:solution-overview}
 \end{figure}
 
-Luồng trên cho thấy giải pháp không chỉ dừng ở việc thêm một vài lệnh trong môi trường mô phỏng hoặc gọi các lệnh có sẵn trên phần cứng. Trọng tâm của đồ án là xây dựng một chuỗi kiểm chứng tương đối đầy đủ cho nhóm thao tác được đề xuất: đặc tả ngữ nghĩa ở mức tập lệnh, mô hình hóa và phân tích trong gem5, sau đó đưa cùng nhóm thao tác vào một SoC chạy trên FPGA để đánh giá trên phần cứng thật. Ở nhánh thực nghiệm, việc đánh giá cũng không chỉ dừng ở các microbenchmark tự thiết kế, mà tiếp tục được mở rộng sang các mô hình suy luận INT8 cụ thể trên TensorFlow Lite Micro. Trên cơ sở tổng quan này, các mục tiếp theo sẽ trình bày cơ sở lựa chọn nhóm thao tác và đặc tả ngữ nghĩa của từng thao tác trước khi đi vào chi tiết mô phỏng và thực nghiệm ở các chương sau.
+Luồng trên cho thấy giải pháp không chỉ dừng ở việc thêm một vài lệnh trong môi trường mô phỏng hoặc gọi các lệnh có sẵn trên phần cứng. Trọng tâm của đồ án là xây dựng một chuỗi kiểm chứng tương đối đầy đủ cho nhóm lệnh mở rộng ở mức ngữ nghĩa: đặc tả ngữ nghĩa ở mức tập lệnh, mô hình hóa và phân tích trong gem5, sau đó đưa cùng ngữ nghĩa này vào một SoC chạy trên FPGA để đánh giá trên phần cứng thật. Ở nhánh thực nghiệm, việc đánh giá cũng không chỉ dừng ở các microbenchmark mức kernel, mà tiếp tục được mở rộng sang các mô hình suy luận INT8 cụ thể trên TensorFlow Lite Micro. Trên cơ sở tổng quan này, các mục tiếp theo sẽ trình bày cơ sở lựa chọn nhóm lệnh và đặc tả ngữ nghĩa của từng thành phần trước khi đi vào chi tiết mô phỏng và thực nghiệm ở các chương sau.
+
+\section{Cơ sở lựa chọn nhóm lệnh mở rộng}
+\label{sec:co-so-lua-chon-nhom-lenh-mo-rong}
+
+Việc lựa chọn nhóm lệnh mở rộng trong đồ án xuất phát từ đặc điểm lặp lại của suy luận INT8, chứ không bắt đầu từ mong muốn thêm một tập lệnh tùy ý. Như đã trình bày ở Chương~\ref{chap:co-so-ly-thuyet}, lõi tính toán của nhiều lớp kết nối đầy đủ và tích chập có thể quy về các phép tích vô hướng giữa kích hoạt và trọng số lượng tử hóa. Với một lớp fully connected có \(M\) phần tử đầu vào và \(K\) phần tử đầu ra, mỗi mẫu đầu vào cần xấp xỉ \(M \times K\) phép nhân--cộng tích lũy, chưa kể bias, lượng tử hóa lại, kích hoạt và giới hạn miền giá trị. Đối với lớp tích chập, cùng một dạng tích vô hướng còn được lặp trên nhiều vị trí không gian và nhiều kênh đầu ra. Vì vậy, khi kích thước lớp tăng, khối lượng tính toán không phụ thuộc vào số câu lệnh mô tả lớp ở mức mô hình, mà phụ thuộc trực tiếp vào số cặp kích hoạt--trọng số cần nhân và cộng dồn \cite{jacob2018integer,sze2017efficient}.
+
+Hình~\ref{fig:fc-mac-model-layers} minh họa nhận xét trên bằng hai mô hình được dùng trong phần thực nghiệm của đồ án. Ở mô hình TFLM nhỏ \(64 \rightarrow 16 \rightarrow 4\), lớp đầu tiên cần \(64 \times 16 = 1024\) phép MAC cho một mẫu, trong khi lớp thứ hai chỉ cần \(16 \times 4 = 64\) phép MAC. Khi chuyển sang mô hình MNIST FC INT8 \(784 \rightarrow 32 \rightarrow 10\), riêng lớp đầu tiên đã cần \(784 \times 32 = 25088\) phép MAC cho một mẫu, lớn hơn nhiều so với các phần còn lại của cùng mô hình. Cách minh họa này giúp nối trực tiếp công thức tổng quát với các bài đánh giá sẽ được dùng để kiểm chứng ở các chương sau.
+
+\begin{figure}[H]
+    \centering
+    \input{Hinh_ve/fc_mac_model_layers.tikz}
+    \caption{Số phép MAC trong các lớp fully connected của hai mô hình dùng trong đồ án}
+    \label{fig:fc-mac-model-layers}
+\end{figure}
+
+Cùng công thức \(M \times K\) cũng cho thấy chi phí của lớp fully connected tăng nhanh khi số phần tử đầu ra tăng. Hình~\ref{fig:fc-mac-hidden-growth} giữ số đầu vào bằng 784 như lớp đầu tiên của mô hình MNIST FC, rồi thay đổi số nút ẩn \(H\). Khi \(H\) tăng từ 8 lên 128, số phép MAC cho một mẫu tăng từ 6272 lên 100352. Do các phép MAC này thường được hiện thực bằng các vòng lặp tích vô hướng, mức tăng trên kéo theo số lần lặp và số lệnh động lớn hơn ở phần thân tính toán.
+
+\begin{figure}[H]
+    \centering
+    \input{Hinh_ve/fc_mac_growth.tikz}
+    \caption{Số phép MAC của lớp \(784 \rightarrow H\) khi tăng số nút ẩn \(H\)}
+    \label{fig:fc-mac-hidden-growth}
+\end{figure}
+
+Từ góc nhìn thực thi trên một lõi RISC-V vô hướng nhỏ, một phép MAC mức thuật toán thường kéo theo nhiều lệnh máy: tải kích hoạt, tải trọng số, mở rộng dấu nếu dữ liệu là INT8, nhân, cộng vào biến tích lũy, cập nhật con trỏ, cập nhật biến đếm và rẽ nhánh quay lại đầu vòng lặp. Với dữ liệu INT8, tình huống còn rõ hơn vì bốn phần tử 8 bit có thể được đóng gói trong một thanh ghi 32 bit, nhưng nếu chỉ dùng các lệnh vô hướng thông thường thì chương trình vẫn phải tách byte, mở rộng dấu từng lane và thực hiện nhiều phép nhân riêng rẽ. Do đó, giảm số lệnh động trong vòng lặp tích vô hướng là mục tiêu trực tiếp của nhóm lệnh mở rộng.
+
+Trên cơ sở đó, đồ án chọn hai lệnh tính toán chính là \texttt{mac} và \texttt{dot4\_acc}. Lệnh \texttt{mac} biểu diễn dạng nhân--cộng tích lũy cơ bản, phù hợp để mô tả trực tiếp quan hệ \(acc \leftarrow acc + a \times b\). Lệnh \texttt{dot4\_acc} đi xa hơn bằng cách xem một thanh ghi 32 bit như bốn lane INT8 có dấu, nhân từng cặp lane tương ứng và cộng tổng bốn tích vào thanh ghi tích lũy. Lệnh này bám sát dữ liệu lượng tử hóa 8 bit và giúp một lệnh thể hiện bốn phép nhân 8 bit cùng các phép cộng trung gian, nhờ đó phù hợp hơn với các nhân fully connected và convolution nhỏ so với chỉ có \texttt{mac} đơn lẻ.
+
+Tuy nhiên, chỉ tối ưu phép nhân--cộng là chưa đủ để làm ngắn thân vòng lặp. Các benchmark và firmware của đồ án đều xử lý dữ liệu theo luồng tuần tự trong bộ nhớ, nên sau mỗi lần tải, con trỏ kích hoạt và trọng số thường cần được tăng thêm một lượng cố định. Nếu dùng lệnh load thông thường, việc tăng con trỏ phải được biểu diễn bằng các lệnh cộng riêng, làm tăng số lệnh động và tạo thêm phụ thuộc trong vòng lặp. Vì vậy, nhóm lệnh bổ sung \texttt{p.lw} để biểu diễn thao tác tải word kèm hậu tăng địa chỉ. Theo ngữ nghĩa được dùng trong đồ án, lệnh này tải dữ liệu tại địa chỉ hiện tại trước, sau đó mới cập nhật thanh ghi con trỏ bằng hằng dịch có dấu. Đây là dạng truy cập phù hợp với các vòng lặp quét tuần tự qua mảng kích hoạt và trọng số.
+
+Một nguồn chi phí khác là điều khiển vòng lặp. Các tích vô hướng INT8 thường có thân vòng lặp ngắn nhưng số lần lặp lớn; trong mô hình MNIST FC của đồ án, lớp \(784 \rightarrow 32\) phải lặp qua 784 phần tử đầu vào cho mỗi nút ẩn. Nếu mỗi vòng lặp đều cần lệnh giảm biến đếm và lệnh nhánh, chi phí điều khiển có thể trở nên đáng kể so với phần tính toán đã được rút gọn bằng \texttt{dot4\_acc}. Lệnh \texttt{lp.setup} được đưa vào nhóm lệnh để mô tả việc thiết lập vòng lặp phần cứng, trong đó số lần lặp và phạm vi thân vòng lặp được xác định trước, còn việc quay lại đầu vòng lặp được xử lý ở mức kiến trúc hoặc vi kiến trúc thay vì bằng một nhánh phần mềm thông thường.
+
+Sau khi tích lũy, đường suy luận INT8 vẫn cần đưa kết quả về miền hợp lệ của kích hoạt hoặc đầu ra. Vì vậy, nhóm lệnh còn có \texttt{relu} và \texttt{clamp}. Lệnh \texttt{relu} biểu diễn phép chặn dưới tại 0, là dạng kích hoạt đơn giản và phổ biến. Lệnh \texttt{clamp} biểu diễn thao tác giới hạn kết quả vào một khoảng cho trước, trong đồ án được đặc tả theo dạng chặn giá trị có dấu của \texttt{rs1} vào miền \([0, rs2]\). Hai lệnh này không thay thế toàn bộ bước lượng tử hóa lại của TensorFlow Lite Micro, nhưng chúng phản ánh phần xử lý biên giá trị xuất hiện sau tích lũy và giúp microbenchmark tách riêng tác động của các thao tác giới hạn miền.
+
+Như vậy, nhóm lệnh được lựa chọn theo nguyên tắc hỗ trợ một đường tính toán INT8 tối thiểu nhưng đủ đại diện: \texttt{mac} và \texttt{dot4\_acc} xử lý phần số học tích lũy, \texttt{p.lw} xử lý truy cập dữ liệu tuần tự, \texttt{lp.setup} giảm chi phí điều khiển vòng lặp, còn \texttt{relu} và \texttt{clamp} xử lý bước kích hoạt/giới hạn miền giá trị. Phạm vi này hẹp hơn nhiều so với một bộ tăng tốc neural network chuyên dụng, nhưng vẫn bám sát các điểm nóng của suy luận lượng tử hóa. Đây là lý do đồ án chọn hướng mở rộng tập lệnh: tận dụng bộ xử lý lập trình được, giảm chi phí của các vòng lặp INT8 thường gặp, đồng thời tránh phải thiết kế một khối tăng tốc riêng với giao tiếp bộ nhớ và phần mềm điều phối phức tạp.
+
+\section{Đặc tả ngữ nghĩa nhóm lệnh mở rộng}
+\label{sec:dac-ta-ngu-nghia-nhom-lenh-mo-rong}
+
+Trước khi mô tả cách hiện thực trên gem5 và CV32E40P, mục này xác định ngữ nghĩa kiến trúc của sáu lệnh mở rộng được sử dụng trong đồ án. Với mỗi lệnh, đặc tả tập trung vào toán hạng đọc/ghi, cách diễn giải dữ liệu, phép biến đổi trạng thái và các điều kiện biên cần kiểm soát. Việc tách riêng mức ngữ nghĩa giúp hai nhánh triển khai có cùng cơ sở so sánh, mặc dù nhánh mô phỏng dùng mã hóa thử nghiệm trong vùng \texttt{custom-0} của gem5 còn nhánh thực nghiệm ánh xạ sang các lệnh CORE-V/PULP trên CV32E40P. Chi tiết ánh xạ được trình bày ở Mục~\ref{sec:anh-xa-dac-ta-sang-hai-moi-truong}.
+
+Trong các công thức dưới đây, \texttt{rs1}, \texttt{rs2} và \texttt{rd} chỉ các thanh ghi nguyên của RISC-V; \(\texttt{rd}_{old}\) là giá trị của \texttt{rd} trước khi lệnh thực thi. Trong phạm vi RV32 của đồ án, kết quả số học được giữ theo biểu diễn số bù hai 32 bit và không tạo cờ trạng thái riêng. Quy ước thanh ghi \texttt{x0} của RISC-V vẫn được giữ: đọc \texttt{x0} cho giá trị 0, còn ghi vào \texttt{x0} không làm thay đổi trạng thái kiến trúc \cite{riscv_unpriv_2026}.
+
+Hình~\ref{fig:ai-ext-loop-semantics} đặt nhóm lệnh vào một vòng lặp tích vô hướng INT8 điển hình. Vòng lặp được khởi tạo bằng \texttt{lp.setup}; trong thân vòng lặp, \texttt{p.lw} tải dữ liệu tuần tự, \texttt{mac} hoặc \texttt{dot4\_acc} thực hiện cộng dồn, còn \texttt{relu} và \texttt{clamp} xử lý miền giá trị sau tích lũy. Từ luồng tổng quát này, các tiểu mục tiếp theo lần lượt làm rõ ngữ nghĩa của từng lệnh.
+
+\begin{figure}[H]
+    \centering
+    \input{Hinh_ve/ai_ext_loop_semantics.tikz}
+    \caption{Vai trò của các lệnh mở rộng trong một vòng lặp tích vô hướng INT8}
+    \label{fig:ai-ext-loop-semantics}
+\end{figure}
+
+\subsection{Lệnh nhân--cộng tích lũy \texttt{mac}}
+\label{subsec:dac-ta-mac}
+
+Lệnh \texttt{mac} biểu diễn thao tác nhân--cộng tích lũy cơ bản trong nhóm lệnh mở rộng. Dạng lệnh được mô tả là \(\texttt{mac rd, rs1, rs2}\), trong đó \texttt{rs1} và \texttt{rs2} là hai toán hạng nhân, còn \texttt{rd} vừa là thanh ghi tích lũy đầu vào vừa là thanh ghi kết quả. Ngữ nghĩa của lệnh là:
+
+\begin{equation}
+    \texttt{rd} \leftarrow \operatorname{wrap}_{32}
+    \left(\texttt{rd}_{old} + \operatorname{sext}_{32}(\texttt{rs1}) \times \operatorname{sext}_{32}(\texttt{rs2})\right),
+    \label{eq:mac-semantics}
+\end{equation}
+
+trong đó \(\operatorname{wrap}_{32}\) biểu thị việc giữ kết quả trong miền 32 bit theo biểu diễn số bù hai. Lệnh không thực hiện bão hòa và không tự giới hạn kết quả về miền INT8; việc giới hạn được tách sang \texttt{relu} hoặc \texttt{clamp}. Cách tách này giữ \texttt{mac} gần với bước cộng dồn trong các lớp fully connected và convolution: tích lũy có thể diễn ra trong nhiều vòng lặp ở miền INT32, sau đó mới xử lý kích hoạt hoặc chặn miền giá trị.
+
+Về phụ thuộc dữ liệu, \texttt{mac} đọc giá trị cũ của \texttt{rd}. Do đó, các lần cộng dồn liên tiếp trên cùng một biến tích lũy tạo thành một chuỗi phụ thuộc đúng với bản chất của tích vô hướng: mỗi phần tử đầu vào đóng góp thêm một tích vào cùng một tổng. Trong các bài đo mức kernel của đồ án, \texttt{mac} được dùng để đánh giá lợi ích của việc gộp phép nhân và phép cộng vào một lệnh trước khi xét biến thể đóng gói bốn phần tử \texttt{dot4\_acc}.
+
+\subsection{Lệnh tích vô hướng bốn phần tử \texttt{dot4\_acc}}
+\label{subsec:dac-ta-dot4-acc}
+
+Lệnh \texttt{dot4\_acc} được thiết kế cho trường hợp dữ liệu lượng tử hóa 8 bit được đóng gói trong thanh ghi 32 bit. Lệnh có dạng \(\texttt{dot4\_acc rd, rs1, rs2}\). Bốn byte thấp của \texttt{rs1} được xem là bốn phần tử \(a_0,a_1,a_2,a_3\), bốn byte thấp của \texttt{rs2} được xem là bốn phần tử \(b_0,b_1,b_2,b_3\). Mỗi byte được diễn giải như một số nguyên có dấu 8 bit, sau đó mở rộng dấu lên 32 bit để thực hiện phép nhân và cộng dồn. Vì vậy, lệnh không nhân theo kiểu giữ kết quả trong miền 8 bit. Theo quy ước đóng gói của đồ án, \(a_0\) và \(b_0\) nằm ở byte thấp nhất, sau đó lần lượt đến các byte cao hơn. Hình~\ref{fig:dot4-acc-semantics} minh họa cách các byte trong hai thanh ghi nguồn được ghép cặp để tạo bốn tích trước khi cộng dồn vào thanh ghi đích.
+
+\begin{figure}[H]
+    \centering
+    \input{Hinh_ve/dot4_acc_semantics.tikz}
+    \caption{Ngữ nghĩa dữ liệu đóng gói của lệnh \texttt{dot4\_acc}}
+    \label{fig:dot4-acc-semantics}
+\end{figure}
+
+Ngữ nghĩa toán học của lệnh được biểu diễn như sau:
+
+\begin{equation}
+    \texttt{rd} \leftarrow \operatorname{wrap}_{32}
+    \left(\texttt{rd}_{old} + \sum_{i=0}^{3}
+    \operatorname{sext}_{8\rightarrow 32}(a_i) \times
+    \operatorname{sext}_{8\rightarrow 32}(b_i)\right).
+    \label{eq:dot4-acc-semantics}
+\end{equation}
+
+So với việc xử lý từng byte bằng các lệnh vô hướng thông thường, \texttt{dot4\_acc} gộp bốn phép nhân 8 bit, các phép mở rộng dấu theo lane và phép cộng trung gian vào một thao tác kiến trúc. Lệnh này đặc biệt phù hợp với các kernel tích vô hướng của INT8, nơi dữ liệu kích hoạt và trọng số có thể được đọc theo từng word 32 bit. Nếu số phần tử của một tích vô hướng không chia hết cho bốn, phần dư không thuộc ngữ nghĩa của lệnh và cần được xử lý bằng phần mềm, bằng padding hoặc bằng một đoạn vòng lặp phụ tùy cách tổ chức kernel.
+
+\subsection{Lệnh kích hoạt \texttt{relu}}
+\label{subsec:dac-ta-relu}
+
+Lệnh \texttt{relu} biểu diễn phép chặn dưới tại 0. Lệnh nhận một toán hạng nguồn \texttt{rs1}, ghi kết quả vào \texttt{rd} và diễn giải \texttt{rs1} như số nguyên có dấu. Ngữ nghĩa của lệnh là:
+
+\begin{equation}
+    \texttt{rd} \leftarrow
+    \begin{cases}
+        0, & \operatorname{sext}_{32}(\texttt{rs1}) < 0, \\
+        \texttt{rs1}, & \operatorname{sext}_{32}(\texttt{rs1}) \ge 0.
+    \end{cases}
+    \label{eq:relu-semantics}
+\end{equation}
+
+Trong luồng suy luận, ReLU thường xuất hiện sau bước tích lũy hoặc sau khi kết quả đã được đưa về miền số nguyên phù hợp. Vì vậy, \texttt{relu} không bao gồm các thao tác lượng tử hóa lại như nhân với hệ số tỉ lệ, làm tròn hoặc cộng zero-point. Lệnh chỉ đặc tả phần so sánh và chọn giá trị không âm. Phạm vi này giúp các bài đo mức kernel tách riêng chi phí của thao tác kích hoạt, đồng thời tránh đồng nhất \texttt{relu} với toàn bộ tầng hậu xử lý của TensorFlow Lite Micro.
+
+\subsection{Lệnh giới hạn miền giá trị \texttt{clamp}}
+\label{subsec:dac-ta-clamp}
+
+Lệnh \texttt{clamp} mở rộng thao tác chặn giá trị bằng cách xét cả chặn dưới và chặn trên. Dạng lệnh được mô tả là \(\texttt{clamp rd, rs1, rs2}\). Trong đặc tả của đồ án, \texttt{rs1} là giá trị cần chặn theo diễn giải có dấu, còn \texttt{rs2} là chặn trên không âm được truyền qua thanh ghi. Ngữ nghĩa được dùng là:
+
+\begin{equation}
+    \texttt{rd} \leftarrow
+    \begin{cases}
+        0, & \operatorname{sext}_{32}(\texttt{rs1}) < 0, \\
+        \texttt{rs2}, & \operatorname{sext}_{32}(\texttt{rs1}) > \texttt{rs2}, \\
+        \texttt{rs1}, & 0 \le \operatorname{sext}_{32}(\texttt{rs1}) \le \texttt{rs2}.
+    \end{cases}
+    \label{eq:clamp-semantics}
+\end{equation}
+
+Lệnh này không thay thế toàn bộ phép lượng tử hóa lại. Trong một mô hình INT8 đầy đủ, kết quả sau tích lũy có thể còn phải nhân với hệ số tỉ lệ, dịch bit, làm tròn và cộng điểm không trước khi giới hạn về miền biểu diễn của đầu ra \cite{google_litert_quant_spec}. \texttt{clamp} chỉ đặc tả bước giới hạn miền sau khi giá trị đã nằm trong cùng hệ quy chiếu số nguyên với chặn trên. Theo ngữ nghĩa này, các giá trị âm được đưa về 0, các giá trị lớn hơn chặn trên được đưa về \texttt{rs2}, còn các giá trị nằm trong khoảng \([0, \texttt{rs2}]\) được giữ nguyên.
+
+\subsection{Lệnh tải hậu tăng \texttt{p.lw}}
+\label{subsec:dac-ta-p-lw}
+
+Lệnh \texttt{p.lw} phục vụ mẫu truy cập bộ nhớ tuần tự. Dạng lệnh được mô tả là \(\texttt{p.lw rd, imm(rs1)}\), nhưng khác với \texttt{lw} thông thường, giá trị hằng không được dùng để cộng vào địa chỉ tải trước khi truy cập bộ nhớ. Thay vào đó, địa chỉ hiệu dụng là giá trị hiện tại của \texttt{rs1}; sau khi tải xong, \texttt{rs1} mới được cập nhật bằng hằng dịch có dấu:
+
+\begin{equation}
+    \begin{aligned}
+        \mathrm{EA} &\leftarrow \texttt{rs1}_{old}, \\
+        \texttt{rd} &\leftarrow \operatorname{Mem32}(\mathrm{EA}), \\
+        \texttt{rs1} &\leftarrow \texttt{rs1}_{old} + \operatorname{sext}_{12}(\texttt{imm}).
+    \end{aligned}
+    \label{eq:plw-semantics}
+\end{equation}
+
+Trong đó, \(\mathrm{EA}\) là địa chỉ hiệu dụng, tức địa chỉ được dùng cho lần truy cập bộ nhớ.
+
+Thứ tự ``tải trước, cập nhật sau'' là phần cốt lõi của ngữ nghĩa lệnh. Với các mảng kích hoạt hoặc trọng số được quét tuần tự, mỗi lần lặp thường cần tải word hiện tại rồi tăng con trỏ thêm 4 byte để trỏ sang word kế tiếp. \texttt{p.lw} gộp hai thao tác này vào một lệnh, giảm một lệnh cộng địa chỉ trong thân vòng lặp. Hằng dịch có dấu cũng cho phép biểu diễn các mẫu quét lùi hoặc các bước nhảy khác 4 byte khi cần.
+
+Do lệnh vừa ghi \texttt{rd} bằng dữ liệu tải được, vừa ghi lại \texttt{rs1} bằng con trỏ mới, tổ hợp \(\texttt{rd}=\texttt{rs1}\) được xem là không hợp lệ trong đặc tả của đồ án để tránh nhập nhằng giữa kết quả tải và con trỏ sau cập nhật. Nếu \texttt{rd} là \texttt{x0}, dữ liệu tải bị bỏ qua theo quy ước thanh ghi 0, nhưng cập nhật con trỏ vẫn được giữ vì \texttt{rs1} là trạng thái độc lập cần ghi lại. Quy ước này tách rõ dữ liệu tải khỏi trạng thái con trỏ và giữ ngữ nghĩa tải hậu tăng nhất quán ở mức chương trình.
+
+\subsection{Lệnh thiết lập vòng lặp phần cứng \texttt{lp.setup}}
+\label{subsec:dac-ta-lp-setup}
+
+Lệnh \texttt{lp.setup} mô tả bước thiết lập vòng lặp phần cứng. Dạng lệnh được mô tả là \(\texttt{lp.setup rs1, imm}\), trong đó \texttt{rs1} chứa số lần lặp và trường hằng trong lệnh mô tả độ dài thân vòng lặp. Lệnh không ghi một thanh ghi nguyên thông thường, mà cập nhật các trạng thái điều khiển vòng lặp:
+
+\begin{equation}
+    \begin{aligned}
+        \texttt{LPCOUNT} &\leftarrow \texttt{rs1}, \\
+        \texttt{LPSTART} &\leftarrow PC + 4, \\
+        \texttt{LPEND} &\leftarrow PC + (\texttt{imm} \ll 2) - 4, \\
+        \texttt{LPACTIVE} &\leftarrow (\texttt{rs1} \ne 0).
+    \end{aligned}
+    \label{eq:lpsetup-semantics}
+\end{equation}
+
+Theo quy ước này, \texttt{LPSTART} là địa chỉ lệnh đầu tiên ngay sau \texttt{lp.setup}, còn \texttt{LPEND} là địa chỉ lệnh cuối của thân vòng lặp. Trường hằng được hiểu theo đơn vị word lệnh 32 bit và phải đủ lớn để tạo ra một thân vòng lặp hợp lệ; trong mô hình của đồ án, giá trị nhỏ hơn 2 bị xem là không hợp lệ. Khi chương trình thực thi đến \texttt{LPEND}, nếu vòng lặp còn hoạt động và số lần lặp còn lại lớn hơn một, PC kế tiếp được đưa về \texttt{LPSTART}; sau mỗi lần đi qua \texttt{LPEND}, bộ đếm \texttt{LPCOUNT} giảm đi một. Khi bộ đếm về 0, vòng lặp không còn hoạt động và chương trình rơi xuống lệnh tiếp theo sau thân vòng lặp.
+
+Về mặt ngữ nghĩa, \texttt{lp.setup} thay thế phần cập nhật biến đếm và nhánh quay lại đầu vòng lặp bằng trạng thái điều khiển kiến trúc. Điều này phù hợp với các thân vòng lặp ngắn như tải hai word bằng \texttt{p.lw} rồi cộng dồn bằng \texttt{dot4\_acc}: chương trình chỉ cần thiết lập số lần lặp và phạm vi thân vòng lặp một lần, còn việc quay lại đầu vòng lặp được biểu diễn như một phần của trạng thái điều khiển thay vì một lệnh nhánh trong thân vòng lặp.
+
+\section{Ánh xạ đặc tả ngữ nghĩa sang hai môi trường triển khai}
+\label{sec:anh-xa-dac-ta-sang-hai-moi-truong}
+
+Các đặc tả ở Mục~\ref{sec:dac-ta-ngu-nghia-nhom-lenh-mo-rong} đóng vai trò lớp quy chiếu chung cho hai nhánh triển khai của đồ án. Hai nhánh này cùng hướng tới một nhóm ngữ nghĩa, nhưng khác nhau về mã hóa lệnh, mức trừu tượng và mục tiêu đánh giá. Trong gem5, nhóm lệnh được hiện thực bằng mã hóa thử nghiệm trong vùng \texttt{custom-0} của RISC-V để phục vụ mô phỏng, kiểm tra hồi quy và phân tích xu hướng. Trên DE2i-150/CV32E40P, các ngữ nghĩa tương ứng được triển khai ở mức firmware thông qua nhóm lệnh CORE-V/PULP của lõi CV32E40P. Riêng với nhánh phần cứng, việc khai thác các lệnh sẵn có của lõi vẫn đòi hỏi một quy trình triển khai nhiều lớp, bao gồm cấu hình lõi, tích hợp SoC, xây dựng hàm bao assembly, thống nhất quy ước dữ liệu và kiểm chứng bằng cả benchmark mức kernel lẫn mô hình suy luận INT8 hoàn chỉnh.
+
+Bảng~\ref{tab:semantics-deployment-mapping} hệ thống hóa quan hệ giữa nhóm lệnh ở mức đặc tả và cách hiện thực trong từng môi trường. Qua đó, phần này phân định ranh giới giữa ngữ nghĩa chung và cơ chế triển khai riêng; các chi tiết về cấu hình, kiểm thử, benchmark và kết quả đo được trình bày ở Chương~\ref{chap:phan-tich-ly-thuyet} và Chương~\ref{chap:thuc-nghiem}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.18}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{2.55cm}|>{\raggedright\arraybackslash}p{5.05cm}|>{\raggedright\arraybackslash}p{5.05cm}|}
+        \hline
+        \textbf{Lệnh trong đặc tả} & \textbf{Mô phỏng gem5} & \textbf{DE2i-150/CV32E40P} \\
+        \hline
+        \texttt{mac} & Lệnh thử nghiệm trong \texttt{custom-0}; lớp lệnh thực hiện nhân có dấu và cộng vào giá trị cũ của \texttt{rd}. & Hàm bao trong firmware được hiện thực bằng lệnh \texttt{cv.mac} của CORE-V/PULP. \\
+        \hline
+        \texttt{dot4\_acc} & Lệnh thử nghiệm trong \texttt{custom-0}; bốn byte thấp của hai thanh ghi được diễn giải như bốn lane INT8 có dấu và cộng dồn vào \texttt{rd}. & Hàm bao trong firmware được hiện thực bằng lệnh tích vô hướng đóng gói \texttt{cv.sdotsp.b}. \\
+        \hline
+        \texttt{relu} & Lệnh thử nghiệm thực hiện so sánh có dấu với 0 và ghi giá trị không âm vào \texttt{rd}. & Hàm bao trong firmware được hiện thực bằng \texttt{cv.max} với toán hạng 0. \\
+        \hline
+        \texttt{clamp} & Lệnh thử nghiệm chặn giá trị có dấu của \texttt{rs1} vào miền \([0,\texttt{rs2}]\), trong đó chặn trên lấy từ thanh ghi. & Kernel mức phép toán sử dụng \texttt{cv.clipur}; nhánh TFLM dùng biến thể phù hợp với ngữ nghĩa lượng tử hóa của mô hình. \\
+        \hline
+        \texttt{p.lw} & Định dạng tải hậu tăng trong gem5: tải word tại địa chỉ \texttt{rs1}, sau đó ghi lại \texttt{rs1} bằng \(\texttt{rs1}+\operatorname{sext}_{12}(\texttt{imm})\). & Hàm bao trong firmware được hiện thực bằng lệnh \texttt{cv.lw} hậu tăng địa chỉ. \\
+        \hline
+        \texttt{lp.setup} & Lệnh thử nghiệm thiết lập \texttt{LPSTART}, \texttt{LPEND}, \texttt{LPCOUNT} và \texttt{LPACTIVE}; đường cập nhật PC dùng các trạng thái này để mô phỏng vòng lặp phần cứng. & Hàm bao trong firmware được hiện thực bằng lệnh \texttt{cv.setup} để thiết lập vòng lặp phần cứng của CV32E40P. \\
+        \hline
+    \end{tabular}
+    \caption{Ánh xạ nhóm lệnh mở rộng sang hai môi trường triển khai}
+    \label{tab:semantics-deployment-mapping}
+\end{table}
+
+\subsection{Ánh xạ trong mô phỏng gem5}
+\label{subsec:anh-xa-gem5}
+
+Trong nhánh gem5, mục tiêu là tạo một môi trường mô phỏng có thể kiểm soát để xác nhận ngữ nghĩa của nhóm lệnh và phân tích xu hướng hiệu năng. RISC-V dành một số vùng opcode cho mở rộng không chuẩn, trong đó có vùng \texttt{custom-0}; đồ án sử dụng vùng này để mã hóa thử nghiệm các lệnh AI mà không làm thay đổi các lệnh chuẩn của ISA \cite{riscv_unpriv_2026}. Trên cơ sở đó, đường giải mã RISC-V của gem5 được bổ sung các nhánh nhận diện \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw} và \texttt{lp.setup}.
+
+Sau bước giải mã, mỗi lệnh được gắn với một lớp thực thi tương ứng trong mô hình RISC-V của gem5. Các lệnh số học đọc thanh ghi nguồn, tính kết quả theo đặc tả và ghi về thanh ghi đích. Riêng \texttt{p.lw} sử dụng định dạng tải hậu tăng để đồng thời trả dữ liệu tải vào \texttt{rd} và cập nhật lại con trỏ \texttt{rs1}. Với \texttt{lp.setup}, mô hình bổ sung các trạng thái vòng lặp \texttt{LPSTART}, \texttt{LPEND}, \texttt{LPCOUNT} và \texttt{LPACTIVE} để biểu diễn việc quay lại đầu vòng lặp mà không cần một lệnh nhánh phần mềm trong thân vòng lặp.
+
+Nhánh gem5 đảm nhiệm hai vai trò chính: kiểm tra quan hệ giữa đặc tả lệnh và hành vi thực thi, sau đó cung cấp số liệu mô phỏng để phân tích xu hướng \cite{binkert2011gem5,gem5_docs_2026}. Các smoke test được tách theo nhóm để xác nhận ngữ nghĩa cơ bản của phép số học, tải hậu tăng và vòng lặp phần cứng; các benchmark mô phỏng tiếp tục so sánh đường vô hướng với đường dùng lệnh mở rộng. Chi tiết về cấu hình gem5, bộ kiểm thử và kết quả mô phỏng được trình bày ở Chương~\ref{chap:phan-tich-ly-thuyet}.
+
+\subsection{Ánh xạ trên DE2i-150/CV32E40P}
+\label{subsec:anh-xa-de2i150-cv32e40p}
+
+Nhánh DE2i-150/CV32E40P có vai trò kiểm chứng thực nghiệm trên một hệ thống nhúng cụ thể. Khác với gem5, nhánh này không dùng mã hóa \texttt{custom-0} của mô hình thử nghiệm, mà khai thác nhóm lệnh CORE-V/PULP của CV32E40P khi cấu hình tương ứng được bật \cite{openhw_cv32e40p_um_2024}. Các lệnh này cung cấp nền tảng phần cứng cho những thao tác đã đặc tả, nhưng để sử dụng được trong đồ án vẫn cần một lớp tích hợp đầy đủ từ RTL hệ thống đến firmware và benchmark.
+
+Ở mức hệ thống, lõi CV32E40P được tích hợp thành một SoC tối giản trên kit DE2i-150, bao gồm bộ nhớ BRAM, giao tiếp UART, firmware bare-metal và cơ chế đọc bộ đếm chu kỳ/lệnh. Ở mức phần mềm, đồ án xây dựng các hàm bao C/assembly dùng chỉ thị \texttt{.insn} để phát sinh mã máy CORE-V/PULP, đồng thời thống nhất quy ước đóng gói dữ liệu, hậu tăng con trỏ và thiết lập vòng lặp phần cứng trong các kernel. Nhờ lớp này, firmware có thể gọi các thao tác như \texttt{ai\_mac}, \texttt{ai\_dot4\_acc}, \texttt{ai\_relu}, \texttt{ai\_clamp}, tải hậu tăng và thiết lập vòng lặp bằng một giao diện gần với đặc tả.
+
+Trên nền tảng đó, nhánh thực nghiệm không dừng ở các microbenchmark mức kernel, mà tiếp tục kiểm chứng trên các luồng suy luận INT8 cụ thể: mô hình fully connected nhỏ trên TensorFlow Lite Micro và mô hình MNIST FC INT8 \(784 \rightarrow 32 \rightarrow 10\). Cách tổ chức này cho phép đánh giá tác động của nhóm lệnh trong bối cảnh gần với ứng dụng suy luận thực tế hơn, nơi kernel tối ưu phải đồng thời giữ đúng quy ước lượng tử hóa, dữ liệu đầu vào/đầu ra và kết quả dự đoán của mô hình. Chi tiết về SoC, firmware, quy trình đo và kết quả thực nghiệm được trình bày ở Chương~\ref{chap:thuc-nghiem}.
+
+Kết lại, Chương 3 đã cụ thể hóa hướng mở rộng tập lệnh cho suy luận INT8 bằng cách xác định các điểm nóng tính toán, lựa chọn sáu thao tác đại diện và đặc tả ngữ nghĩa kiến trúc của từng lệnh. Các đặc tả này được đặt vào hai nhánh triển khai cụ thể: mã hóa thử nghiệm trong vùng \texttt{custom-0} của gem5 để kiểm tra ngữ nghĩa và phân tích xu hướng, đồng thời ánh xạ sang các lệnh CORE-V/PULP trên DE2i-150/CV32E40P thông qua lớp firmware để phục vụ đánh giá thực nghiệm. Như vậy, chương này hoàn thành vai trò thiết kế và tạo cơ sở cho Chương~\ref{chap:phan-tich-ly-thuyet}, nơi nhánh gem5 sẽ được trình bày chi tiết nhằm kiểm tra tính đúng đắn và phân tích xu hướng hiệu năng trong môi trường mô phỏng.
 
 \end{document}

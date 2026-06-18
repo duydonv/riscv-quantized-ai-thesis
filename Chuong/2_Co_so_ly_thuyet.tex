@@ -51,27 +51,7 @@ Hình~\ref{fig:int8-inference-flow} tóm tắt luồng tính toán điển hình
 
 \begin{figure}[H]
     \centering
-    \begin{tikzpicture}[
-        font=\scriptsize,
-        block/.style={draw, rounded corners=2pt, align=center, minimum height=0.85cm, text width=2.1cm, fill=gray!10},
-        compute/.style={block, fill=blue!8},
-        arrow/.style={-{Latex[length=2mm]}, thick}
-    ]
-        \node[block] (input) at (0, 0) {Dữ liệu vào\\INT8};
-        \node[block] (weight) at (0, -1.25) {Trọng số\\INT8};
-        \node[compute] (mac) at (3.0, -0.625) {MAC / tích\\vô hướng};
-        \node[compute] (acc) at (5.8, -0.625) {Tích lũy\\INT32};
-        \node[compute] (requant) at (8.6, -0.625) {Lượng tử\\hóa lại};
-        \node[compute] (clamp) at (11.4, -0.625) {Kích hoạt\\và clamp};
-        \node[block] (output) at (11.4, -2.05) {Đầu ra\\INT8};
-
-        \draw[arrow] (input.east) -- (mac.west);
-        \draw[arrow] (weight.east) -- (mac.west);
-        \draw[arrow] (mac.east) -- (acc.west);
-        \draw[arrow] (acc.east) -- (requant.west);
-        \draw[arrow] (requant.east) -- (clamp.west);
-        \draw[arrow] (clamp.south) -- (output.north);
-    \end{tikzpicture}
+    \input{Hinh_ve/int8_inference_flow.tikz}
     \caption{Luồng tính toán điển hình trong một nhân suy luận INT8}
     \label{fig:int8-inference-flow}
 \end{figure}

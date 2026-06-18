@@ -1,0 +1,38 @@
+\begin{tikzpicture}[
+    font=\small,
+    lane/.style={draw, minimum width=1.06cm, minimum height=0.56cm, inner sep=0pt, text height=1.6ex, text depth=0.35ex, align=center, fill=cyan!8, outer sep=0pt},
+    lane2/.style={draw, minimum width=1.06cm, minimum height=0.56cm, inner sep=0pt, text height=1.6ex, text depth=0.35ex, align=center, fill=green!9, outer sep=0pt},
+    prod/.style={draw, circle, minimum size=0.56cm, inner sep=0pt, fill=gray!10},
+    part/.style={draw, rounded corners=1pt, minimum width=0.90cm, minimum height=0.48cm, align=center, fill=gray!8},
+    arrow/.style={-{Latex[length=2.0mm]}, thick}
+]
+    \node[align=center] at (1.05, 2.08) {byte thấp \(\rightarrow\) byte cao};
+    \node[anchor=east] at (-3.85, 1.25) {\texttt{rs1}};
+    \node[anchor=west] at (6.08, 1.25) {\texttt{rs2}};
+
+    \foreach \x/\i in {-3.20/0,-2.14/1,-1.08/2,-0.02/3} {
+        \node[lane] (a\i) at (\x, 1.25) {\(a_\i\)};
+    }
+    \foreach \x/\i in {2.20/0,3.26/1,4.32/2,5.38/3} {
+        \node[lane2] (b\i) at (\x, 1.25) {\(b_\i\)};
+    }
+    \foreach \x/\i in {-0.53/0,0.52/1,1.58/2,2.63/3} {
+        \node[prod] (m\i) at (\x, -0.70) {\(\times\)};
+        \node[part] (p\i) at (\x, -1.60) {\(p_\i\)};
+        \draw[arrow] (a\i.south) to[out=-90,in=135] (m\i.north west);
+        \draw[arrow] (b\i.south) to[out=-90,in=45] (m\i.north east);
+        \draw[arrow] (m\i.south) -- (p\i.north);
+    }
+
+    \node[draw, rounded corners=2pt, align=center, fill=blue!7, minimum width=7.6cm, minimum height=1.05cm] (sum) at (1.05, -3.05)
+        {\(p_i=\mathrm{sext}_{8\to32}(a_i)\times\mathrm{sext}_{8\to32}(b_i)\)\\[3pt]
+         \(d=\sum_{i=0}^{3}p_i\)};
+    \node[draw, rounded corners=2pt, align=center, fill=yellow!15, minimum width=7.6cm, minimum height=0.78cm] (acc) at (1.05, -4.45)
+        {\(\texttt{rd} \leftarrow \texttt{rd}_{old} + d\)};
+
+    \draw[arrow] (p0.south) -- (sum.135);
+    \draw[arrow] (p1.south) -- (sum.105);
+    \draw[arrow] (p2.south) -- (sum.75);
+    \draw[arrow] (p3.south) -- (sum.45);
+    \draw[arrow] (sum) -- (acc);
+\end{tikzpicture}
