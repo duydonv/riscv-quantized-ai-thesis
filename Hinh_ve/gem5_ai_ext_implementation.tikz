@@ -1,0 +1,31 @@
+\begin{tikzpicture}[
+    font=\scriptsize,
+    block/.style={draw, rounded corners=2pt, align=center, minimum height=0.82cm, fill=gray!8},
+    file/.style={block, text width=3.85cm, fill=cyan!8},
+    proc/.style={block, text width=3.85cm, fill=yellow!15},
+    cpp/.style={block, text width=3.85cm, fill=blue!8},
+    outbox/.style={block, text width=3.85cm, fill=green!9},
+    resultbox/.style={block, text width=3.85cm, fill=orange!12},
+    side/.style={block, text width=3.05cm, fill=orange!12},
+    note/.style={align=center, font=\scriptsize},
+    arrow/.style={-{Latex[length=2mm]}, thick}
+]
+    \node[file] (dsl) at (0, 0) {Mô tả ISA\\\texttt{decoder.isa}\\\texttt{formats/*.isa}\\\texttt{operands.isa}};
+    \node[proc] (parser) at (0, -1.85) {ISA parser\\sinh decoder\\và mã C++};
+    \node[cpp] (cpp) at (0, -3.70) {C++ sinh ra\\và C++ bổ sung\\\texttt{ai\_ext.*}, \texttt{mem.*}};
+    \node[proc] (compiler) at (0, -5.35) {Biên dịch gem5};
+    \node[outbox] (bin) at (0, -6.95) {Tệp thực thi gem5\\chạy smoke test\\và benchmark};
+    \node[resultbox] (stats) at (0, -8.55) {Kết quả mô phỏng\\và kiểm thử};
+
+    \node[side] (decode) at (4.25, 0) {Phần đồ án bổ sung\\ánh xạ \texttt{custom-0}\\theo \texttt{funct3/funct7}};
+    \node[side] (model) at (4.25, -3.70) {Mô hình hành vi\\lệnh số học,\\\texttt{PostIncLoad}\\và hardware loop};
+
+    \draw[arrow] (dsl) -- (parser);
+    \draw[arrow] (parser) -- (cpp);
+    \draw[arrow] (cpp) -- (compiler);
+    \draw[arrow] (compiler) -- (bin);
+    \draw[arrow] (bin) -- (stats);
+
+    \draw[arrow] (decode) -- (dsl);
+    \draw[arrow] (model) -- (cpp);
+\end{tikzpicture}
