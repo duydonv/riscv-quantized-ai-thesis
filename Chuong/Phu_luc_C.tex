@@ -1,0 +1,199 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\raggedbottom
+\lstdefinestyle{phulucgem5}{
+    basicstyle=\ttfamily\scriptsize,
+    columns=fullflexible,
+    keepspaces=true,
+    frame=single,
+    breaklines=true,
+    aboveskip=6pt,
+    belowskip=6pt,
+    abovecaptionskip=6pt,
+    belowcaptionskip=0pt
+}
+
+Phụ lục này trình bày phần thông tin thực hành đi kèm Chương~\ref{chap:phan-tich-ly-thuyet}, nhằm giúp người đọc theo dõi và khi cần có thể chạy lại các mô phỏng gem5 của đồ án. Trong chương chính, nội dung đã tập trung vào quá trình hiện thực, kiểm thử và phân tích kết quả. Vì vậy, các chi tiết vận hành như kho mã nguồn sử dụng, nhóm tệp liên quan, lệnh biên dịch/chạy, cách khoanh vùng đo và cách đọc tệp kết quả được tách sang phụ lục để mạch trình bày không bị ngắt. Các mục dưới đây được sắp xếp theo trình tự thực hiện: xác định môi trường gem5, nhận diện các thành phần phục vụ tái mô phỏng, chạy lại các kiểm thử và bài đo hiệu năng, đọc kết quả đầu ra, sau đó xem hai đoạn mã tiêu biểu cho cách đo hiệu năng và cách gọi các lệnh phức hợp trong nhân tính toán.
+
+\section{Phiên bản và môi trường gem5 sử dụng}
+\label{sec:phuluc-gem5-phien-ban}
+
+Môi trường mô phỏng của đồ án sử dụng một bản gem5 đã được chỉnh sửa để bổ sung nhóm lệnh thử nghiệm, bộ kiểm thử chức năng và các bài đo hiệu năng phục vụ Chương~\ref{chap:phan-tich-ly-thuyet}. Kho mã nguồn gem5 đã chỉnh sửa của đồ án được lưu tại địa chỉ \url{https://github.com/duydonv/gem5.git}. Kho mã nguồn gem5 chính gốc tại \url{https://github.com/gem5/gem5.git} đóng vai trò nền tảng tham chiếu; bản chính gốc không chứa các lệnh thử nghiệm, kiểm thử nhanh và bài đo hiệu năng riêng của đồ án.
+
+Các lệnh trong phụ lục giả định được thực hiện trên môi trường Linux, tại thư mục gốc của cây mã nguồn gem5 đã được sao chép về máy. Đường dẫn cục bộ đến kho mã nguồn có thể khác nhau giữa các máy; vì vậy, trong các đoạn lệnh bên dưới, ký hiệu \path|/path/to/gem5| được dùng để chỉ thư mục chứa bản gem5 đã chỉnh sửa. Khi chạy so sánh hiệu năng, chương trình điều khiển bài đo cũng có thể nhận thêm đường dẫn tới một cây mã nguồn gem5 nền để tạo ca đối chứng vô hướng trên bản chưa mở rộng.
+
+\section{Bản đồ thành phần phục vụ tái mô phỏng}
+\label{sec:phuluc-gem5-ban-do-thanh-phan}
+
+Bảng~\ref{tab:phuluc-gem5-file-map} tóm tắt các nhóm thành phần cần biết khi tái mô phỏng. Bảng này chỉ đóng vai trò bản đồ tra cứu nhanh; chi tiết về cách các lệnh được tích hợp vào đường giải mã và mô hình thực thi đã được trình bày trong Chương~\ref{chap:phan-tich-ly-thuyet}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.16}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{3.65cm}|>{\raggedright\arraybackslash}p{9.25cm}|}
+        \hline
+        \textbf{Nhóm thành phần} & \textbf{Vai trò trong tái mô phỏng} \\
+        \hline
+        Mô tả ISA và bộ giải mã & Các tệp trong \texttt{src/arch/riscv/isa/} định nghĩa mẫu mã hóa thử nghiệm, định dạng lệnh và toán hạng bổ sung cho nhóm lệnh mở rộng. \\
+        \hline
+        Lớp lệnh và ngữ nghĩa thực thi & \texttt{src/arch/riscv/insts/ai\_ext.hh} và \texttt{src/arch/riscv/insts/ai\_ext.cc} chứa lớp lệnh, dạng hiển thị lệnh và ngữ nghĩa thực thi của các thao tác AI. \\
+        \hline
+        Tải hậu tăng và vòng lặp phần cứng & Các mở rộng trong \texttt{mem.*}, \texttt{operands.isa}, \texttt{regs/misc.hh} và \texttt{isa.cc} phục vụ \texttt{p.lw}, trạng thái \texttt{LPSTART}/\texttt{LPEND}/\texttt{LPCOUNT} và cập nhật PC khi chạy \texttt{lp.setup}. \\
+        \hline
+        Hỗ trợ O3 và khối lấy lệnh & Một số tệp trong \texttt{src/cpu/o3/} được chỉnh để mô hình O3 xử lý trạng thái vòng lặp phần cứng và giảm chi phí đổi hướng muộn ở phần sau của đường ống xử lý. \\
+        \hline
+        Kiểm thử nhanh & Thư mục \texttt{tests/gem5/riscv\_ai\_ext/src/} chứa các chương trình kiểm thử chức năng nhỏ cho nhóm lệnh số học, tải hậu tăng và vòng lặp phần cứng. \\
+        \hline
+        Bài đo hiệu năng & Thư mục \texttt{tests/gem5/riscv\_ai\_ext/perf\_src/} chứa các nhân tính toán vô hướng và nhân dùng lệnh mở rộng; các chương trình \texttt{build\_perf\_binaries.py}, \texttt{run\_perf\_compare.py} và \texttt{configs/perf\_binary\_run.py} điều khiển quá trình biên dịch, chạy và trích xuất thống kê. \\
+        \hline
+    \end{tabular}
+    \caption{Các nhóm thành phần gem5 liên quan đến tái mô phỏng}
+    \label{tab:phuluc-gem5-file-map}
+\end{table}
+
+\section{Thiết lập biên dịch và chạy lại}
+\label{sec:phuluc-gem5-thiet-lap-chay}
+
+Sau khi xác định đúng kho mã nguồn và các nhóm tệp liên quan, bước tiếp theo là biên dịch bản gem5 đã chỉnh sửa rồi chạy các chương trình kiểm thử. Các lệnh trong Đoạn mã~\ref{lst:phuluc-gem5-run-commands} tóm tắt quy trình chính để tạo tệp thực thi kiểm thử, chạy kiểm thử nhanh và chạy lại các bài đo hiệu năng trong mô phỏng. Các lệnh này được trình bày như thông tin tái lập quy trình thực nghiệm, không nhằm thay thế tài liệu cài đặt đầy đủ của gem5.
+
+\begin{lstlisting}[
+    style=phulucgem5,
+    caption={Các lệnh chính để tái mô phỏng trong gem5},
+    captionpos=b,
+    label={lst:phuluc-gem5-run-commands}
+]
+cd /path/to/gem5
+
+# Bien dich gem5 da chinh sua
+scons build/RISCV/gem5.opt -j$(nproc)
+
+# Bien dich va chay kiem thu nhanh
+python3 tests/gem5/riscv_ai_ext/build_binaries.py
+cd tests
+./main.py run gem5/riscv_ai_ext --length=quick --skip-build
+cd ..
+
+# Bien dich va chay bai do hieu nang
+python3 tests/gem5/riscv_ai_ext/build_perf_binaries.py
+python3 tests/gem5/riscv_ai_ext/run_perf_compare.py --skip-build
+python3 tests/gem5/riscv_ai_ext/run_perf_compare.py --skip-build --no-cache
+python3 tests/gem5/riscv_ai_ext/run_perf_compare.py --skip-build --no-cache --memory fast-ram
+\end{lstlisting}
+
+Trong quy trình trên, kiểm thử nhanh được dùng để xác nhận ngữ nghĩa cơ bản trước khi chạy bài đo hiệu năng. Các bài đo hiệu năng được chạy trên ba cấu hình chính: O3 có bộ nhớ đệm, NoCache với DDR3 và NoCache với fast-ram. Ba cấu hình này tương ứng với các điểm phân tích đã sử dụng trong Chương~\ref{chap:phan-tich-ly-thuyet}: cấu hình có bộ nhớ đệm dùng để quan sát hành vi đường ống xử lý/O3, còn hai cấu hình NoCache dùng như các điểm nhạy cảm đối với chi phí lấy lệnh và truy cập bộ nhớ.
+
+\section{Quy ước ca chạy và cách đọc số liệu}
+\label{sec:phuluc-gem5-doc-so-lieu}
+
+Sau khi chạy bài đo hiệu năng, người đọc không cần đọc trực tiếp toàn bộ \path|stats.txt| của từng mô phỏng. Chương trình \path|run_perf_compare.py| gom các chỉ số cần thiết vào \path|summary.csv| và \path|summary.json|, đồng thời giữ quy ước tên ca chạy đã dùng trong Chương~\ref{chap:phan-tich-ly-thuyet}. Trong đó, \texttt{baseline\_scalar} là mốc vô hướng trên bản gem5 nền, \texttt{update\_scalar} là ca vô hướng dùng để kiểm soát bản gem5 đã chỉnh sửa, còn \texttt{update\_custom} là ca dùng lệnh mở rộng. Khi kiểm tra lại một lần chạy, bước đầu tiên là đối chiếu \texttt{checksum}; sau đó mới đọc các trường chu kỳ, số lệnh động và các chỉ số đường ống xử lý tương ứng.
+
+Bảng~\ref{tab:phuluc-gem5-stat-fields} giải thích các trường thường được dùng khi đối chiếu kết quả. Trong Chương~\ref{chap:phan-tich-ly-thuyet}, thước đo chính là \texttt{numCycles}; mức tăng tốc được tính bằng tỉ số giữa số chu kỳ của ca vô hướng và số chu kỳ của ca dùng lệnh mở rộng. Các trường còn lại giúp kiểm tra vì sao một biến thể giảm số lệnh động nhưng không nhất thiết giảm số chu kỳ theo cùng tỷ lệ.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.16}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{3.15cm}|>{\raggedright\arraybackslash}p{9.75cm}|}
+        \hline
+        \textbf{Trường số liệu} & \textbf{Ý nghĩa khi đọc kết quả} \\
+        \hline
+        \texttt{numCycles} & Số chu kỳ mô phỏng trong vùng đo của nhân tính toán; đây là trường chính để tính mức tăng tốc trong Chương~\ref{chap:phan-tich-ly-thuyet}. \\
+        \hline
+        \texttt{simInsts} & Số lệnh động được thực thi trong vùng đo, dùng để quan sát mức giảm số lệnh của bản dùng lệnh mở rộng so với bản vô hướng. \\
+        \hline
+        \texttt{ipc}, \texttt{cpi} & Chỉ số thực thi của CPU mô phỏng trong vùng đo; các chỉ số này giúp giải thích vì sao giảm số lệnh không luôn tương ứng tuyến tính với giảm số chu kỳ. \\
+        \hline
+        \texttt{nonControl}\newline\texttt{Redirects} & Số lần sửa PC không phải nhánh điều khiển thông thường, đặc biệt hữu ích khi phân tích vòng lặp phần cứng trong mô hình O3. \\
+        \hline
+        \texttt{checksum} & Giá trị kiểm tra đầu ra của bài đo; các ca vô hướng và ca dùng lệnh mở rộng phải khớp checksum trước khi so sánh hiệu năng. \\
+        \hline
+    \end{tabular}
+    \caption{Các trường số liệu chính trong kết quả bài đo gem5}
+    \label{tab:phuluc-gem5-stat-fields}
+\end{table}
+
+\section{Khoanh vùng đo hiệu năng trong bài đo}
+\label{sec:phuluc-gem5-khoanh-vung-do}
+
+Các trường số liệu ở mục trên chỉ có ý nghĩa khi vùng đo được xác định nhất quán giữa các biến thể vô hướng và biến thể dùng lệnh mở rộng. Vì vậy, bài đo không ghi nhận toàn bộ thời gian chạy của tiến trình. Dữ liệu đầu vào được khởi tạo trước vùng đo; sau đó chương trình gọi hai m5ops \path|m5_reset_stats| ngay trước nhân tính toán và \path|m5_dump_reset_stats| ngay sau nhân tính toán. Chương trình tổng hợp kết quả đọc phần thống kê đầu tiên trong \path|stats.txt|, vì vậy các chỉ số được báo cáo chủ yếu phản ánh vùng nhân tính toán thay vì bao gồm khởi động chương trình, sinh dữ liệu, in kết quả hoặc thoát tiến trình.
+
+Đoạn mã~\ref{lst:phuluc-gem5-roi} minh họa cách một bài đo được tổ chức. Hàm \path|fillDot4Inputs| chuẩn bị dữ liệu ngoài vùng đo; \path|beginKernelStats| và \path|endKernelStats| lần lượt đánh dấu đầu và cuối vùng nhân tính toán; dòng in \path|BENCH_RESULT| chỉ được thực hiện sau khi thống kê vùng đo đã được ghi ra.
+
+\begin{lstlisting}[
+    style=phulucgem5,
+    caption={Khoanh vùng đo hiệu năng trong bài đo},
+    captionpos=b,
+    label={lst:phuluc-gem5-roi}
+]
+extern "C" [[noreturn]] void
+_start()
+{
+    perf::fillDot4Inputs(gActivations, gWeights);
+    perf::beginKernelStats();
+    const std::uint32_t checksum = runBenchmark();
+    perf::endKernelStats();
+    perf::printBenchmarkResult("dot4_plw_lp_clamp_custom", checksum);
+    perf::syscallExit(0);
+}
+\end{lstlisting}
+
+\section{Đoạn mã tiêu biểu cho \texttt{lp.setup}, \texttt{p.lw} và \texttt{dot4\_acc}}
+\label{sec:phuluc-gem5-ma-tieu-bieu}
+
+Đoạn mã~\ref{lst:phuluc-gem5-dot4-plw-lp} trích phần nhân dùng lệnh mở rộng trong bài đo \path|dot4_plw_lp_clamp|. Đoạn mã này được chọn vì nó minh họa đồng thời ba thao tác quan trọng trong vòng lặp tích vô hướng: thiết lập vòng lặp phần cứng bằng \texttt{lp.setup}, tải hai từ dữ liệu 32 bit bằng \texttt{p.lw} hậu tăng địa chỉ, rồi cộng dồn bằng \texttt{dot4\_acc}. Phần clamp được gọi sau vòng lặp để giữ đoạn mã tập trung vào phần thân tính toán.
+
+\begin{lstlisting}[
+    style=phulucgem5,
+    caption={Nhân dùng lệnh mở rộng với \texttt{lp.setup}, \texttt{p.lw} và \texttt{dot4\_acc}},
+    captionpos=b,
+    label={lst:phuluc-gem5-dot4-plw-lp}
+]
+asm volatile(
+    ".option push\n"
+    ".option norvc\n"
+    ".balign 4\n"
+    "mv t0, %[loop_count]\n"
+    ".insn i 0x0b, 0x2, x0, t0, 4\n"
+    ".insn i 0x0b, 0x3, %[act_word], %[act_ptr], 4\n"
+    ".insn i 0x0b, 0x3, %[weight_word], %[weight_ptr], 4\n"
+    ".insn r 0x0b, 0x0, 0x1, %[acc], %[act_word], %[weight_word]\n"
+    ".option pop\n"
+    : [acc] "+&r"(accumulator),
+      [act_ptr] "+r"(activation_ptr),
+      [weight_ptr] "+r"(weight_ptr),
+      [act_word] "=&r"(activation_word),
+      [weight_word] "=&r"(weight_word)
+    : [loop_count] "r"(loop_count)
+    : "memory", "t0");
+\end{lstlisting}
+
+Trong đoạn mã trên, mã thao tác \texttt{0x0b} là vùng \texttt{custom-0} được dùng cho mô phỏng gem5. Bảng~\ref{tab:phuluc-gem5-asm-map} đối chiếu từng dòng hợp ngữ với thao tác tương ứng để làm rõ vai trò của mỗi lệnh trong thân vòng lặp.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.16}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{4.45cm}|>{\raggedright\arraybackslash}p{8.45cm}|}
+        \hline
+        \textbf{Dòng mã} & \textbf{Ý nghĩa trong nhân tính toán} \\
+        \hline
+        \texttt{mv t0, loop\_count} & Chuyển số vòng lặp cần thực hiện sang thanh ghi \texttt{t0}. Thanh ghi này là toán hạng nguồn cho lệnh thiết lập vòng lặp phần cứng ở dòng kế tiếp. \\
+        \hline
+        \texttt{.insn i ..., 0x2, x0, t0, 4} & Mã hóa lệnh \texttt{lp.setup}. Lệnh này lấy số vòng lặp từ \texttt{t0}; hằng tức thời \texttt{4} biểu diễn độ dài thân vòng lặp theo quy ước mã hóa đang được mô phỏng. \\
+        \hline
+        \texttt{.insn i ..., 0x3, act\_word, act\_ptr, 4} & Mã hóa lệnh \texttt{p.lw} thứ nhất. Lệnh đọc một từ dữ liệu 32 bit của kích hoạt từ địa chỉ \texttt{act\_ptr} vào \texttt{act\_word}, sau đó tăng \texttt{act\_ptr} thêm 4 byte. \\
+        \hline
+        \texttt{.insn i ..., 0x3, weight\_word, weight\_ptr, 4} & Mã hóa lệnh \texttt{p.lw} thứ hai. Lệnh đọc một từ dữ liệu 32 bit của trọng số từ địa chỉ \texttt{weight\_ptr} vào \texttt{weight\_word}, sau đó tăng \texttt{weight\_ptr} thêm 4 byte. \\
+        \hline
+        \texttt{.insn r ..., 0x0, 0x1, acc, act\_word, weight\_word} & Mã hóa lệnh \texttt{dot4\_acc}. Lệnh xem hai từ dữ liệu 32 bit vừa tải như bốn phần tử INT8 có dấu, nhân từng cặp phần tử tương ứng và cộng tổng bốn tích vào biến tích lũy \texttt{acc}. \\
+        \hline
+    \end{tabular}
+    \caption{Đối chiếu các dòng hợp ngữ với thao tác trong nhân tính toán}
+    \label{tab:phuluc-gem5-asm-map}
+\end{table}
+
+Như vậy, phụ lục đã gom các thông tin cần thiết để người đọc có thể theo dõi và chạy lại phần mô phỏng gem5 của đồ án, từ kho mã nguồn, quy trình biên dịch/chạy, cách đọc số liệu đến các đoạn mã then chốt. Khi đối chiếu với nhánh triển khai phần cứng, điểm cần tập trung là ngữ nghĩa thao tác của nhóm lệnh thay vì giá trị mã thao tác cụ thể trong đoạn hợp ngữ phục vụ gem5.
+
+\end{document}
