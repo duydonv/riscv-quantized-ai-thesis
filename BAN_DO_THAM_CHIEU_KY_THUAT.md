@@ -2,7 +2,7 @@
 
 Ngày cập nhật: 2026-06-20
 
-File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; Chương 3 đã có bản hoàn chỉnh ban đầu cho phần thiết kế, đặc tả ngữ nghĩa và ánh xạ nhóm lệnh mở rộng sang gem5 và DE2i-150/CV32E40P; Chương 4 đã có bản hoàn chỉnh ban đầu cho phần đánh giá qua mô phỏng gem5. File này tiếp tục đóng vai trò bản đồ đối chiếu khi viết Chương 5 về thực nghiệm trên kit và khi rà soát các số liệu kỹ thuật.
+File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; Chương 3 đã có bản hoàn chỉnh ban đầu cho phần thiết kế, đặc tả ngữ nghĩa và ánh xạ nhóm lệnh mở rộng sang gem5 và DE2i-150/CV32E40P; Chương 4 đã có bản hoàn chỉnh ban đầu cho phần đánh giá qua mô phỏng gem5. Báo cáo cũng đã có phụ lục gem5 bổ sung quy trình thiết lập và tái mô phỏng để người đọc đối chiếu lệnh chạy, tệp liên quan và đoạn mã tiêu biểu mà không làm loãng nội dung Chương 4. File này tiếp tục đóng vai trò bản đồ đối chiếu khi viết Chương 5 về thực nghiệm trên kit và khi rà soát các số liệu kỹ thuật.
 
 ## 1. Nguyên tắc diễn đạt kỹ thuật
 
@@ -11,6 +11,7 @@ File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. 
 - Không viết rằng gem5 là mô hình khớp từng chu kỳ của kit. gem5 dùng để kiểm tra ngữ nghĩa, kiểm tra hồi quy và phân tích xu hướng.
 - Khi nói "mở rộng tập lệnh", cần làm rõ phạm vi: đồ án đặc tả/đồng bộ ngữ nghĩa các thao tác AI và triển khai qua hai môi trường, trong đó phần cứng thực tế tận dụng các lệnh CORE-V/PULP có sẵn của CV32E40P.
 - Chương 2 chỉ trình bày nền tảng ở mức tổng quan; Chương 3 đã chốt mức đặc tả và ánh xạ tổng quan. Chương 4 đã trình bày các chi tiết gem5, smoke test, benchmark và số liệu mô phỏng; số liệu thực nghiệm trên kit cần để sang Chương 5.
+- Phụ lục gem5 chỉ nên đóng vai trò thông tin bổ sung để tái mô phỏng: kho mã nguồn, bản đồ tệp, lệnh chạy, cách đọc đầu ra và đoạn mã tiêu biểu. Không đưa thêm phân tích kết quả mới vào phụ lục nếu nội dung đó thuộc Chương 4 hoặc Chương 5.
 
 ## 2. Bản đồ gem5
 
@@ -89,6 +90,22 @@ Smoke coverage cần nêu:
 - `ai_ops_smoke`: `mac`, `dot4_acc`, `relu`, `clamp`, hành vi với `x0`.
 - `p_lw_smoke`: tải trước khi cập nhật hậu tăng, bỏ ghi khi `rd=x0`.
 - `hwloop_smoke`: hành vi đổi hướng, trường hợp bộ đếm bằng 0, immediate thô, chạy trên `atomic`, `minor`, `o3`.
+
+### 2.5 Phụ lục gem5 trong quyển báo cáo
+
+| File | Vai trò |
+|---|---|
+| `/home/duydonv/Downloads/20225608_PhamDuyDong_20252/Chuong/Phu_luc_C.tex` | Phụ lục thiết lập và tái mô phỏng nhóm lệnh mở rộng trong gem5 |
+| `/home/duydonv/Downloads/20225608_PhamDuyDong_20252/DoAn.tex` | Nạp phụ lục sau trang "PHỤ LỤC"; do hai phụ lục mẫu A/B đang comment nên phụ lục gem5 hiển thị là Phụ lục A |
+
+Nội dung phụ lục đã chốt:
+
+- Dùng kho mã nguồn gem5 đã chỉnh sửa tại `https://github.com/duydonv/gem5.git` và kho gem5 chính gốc tại `https://github.com/gem5/gem5.git` làm mốc tham chiếu.
+- Tóm tắt nhóm tệp gem5 theo vai trò: ISA/bộ giải mã, lớp lệnh, tải hậu tăng, vòng lặp phần cứng, O3, kiểm thử nhanh và bài đo hiệu năng.
+- Ghi các lệnh chính để biên dịch gem5, chạy kiểm thử nhanh và chạy lại ba cấu hình bài đo hiệu năng.
+- Giải thích cách đọc các trường số liệu chính trong kết quả mô phỏng, nhưng không phân tích lại bảng kết quả của Chương 4.
+- Minh họa cách khoanh vùng đo bằng `m5_reset_stats`/`m5_dump_reset_stats`.
+- Đối chiếu từng dòng hợp ngữ trong nhân dùng `lp.setup`, `p.lw`, `dot4_acc` để người đọc hiểu rõ đoạn mã Assembly.
 
 ## 3. Bản đồ SoC/FPGA
 

@@ -4,7 +4,7 @@ Ngày cập nhật: 2026-06-20
 
 Đồ án: Mở rộng tập lệnh RISC-V cho các phép toán AI lượng tử hóa, mô phỏng trên gem5 và triển khai thực nghiệm trên kit FPGA DE2i-150/CV32E40P.
 
-File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 3 đã có bản nội dung hoàn chỉnh ban đầu cho phần thiết kế và đặc tả nhóm lệnh mở rộng, gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh và ánh xạ sang hai môi trường triển khai. Chương 4 đã được thay từ nội dung mẫu sang chương "Đánh giá qua mô phỏng gem5", gồm hiện thực gem5, kiểm thử chức năng, thiết lập benchmark, kết quả mô phỏng và phân tích riêng cho vòng lặp phần cứng trong O3. Các chương từ Chương 5 đến Chương 6 vẫn cần được viết tiếp theo mạch kỹ thuật đã chốt. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
+File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 3 đã có bản nội dung hoàn chỉnh ban đầu cho phần thiết kế và đặc tả nhóm lệnh mở rộng, gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh và ánh xạ sang hai môi trường triển khai. Chương 4 đã được thay từ nội dung mẫu sang chương "Đánh giá qua mô phỏng gem5", gồm hiện thực gem5, kiểm thử chức năng, thiết lập benchmark, kết quả mô phỏng và phân tích riêng cho vòng lặp phần cứng trong O3. Báo cáo cũng đã bổ sung phụ lục gem5 để ghi lại quy trình thiết lập và tái mô phỏng, giúp người đọc có thể đối chiếu các lệnh chạy, tệp liên quan và đoạn mã tiêu biểu mà không làm loãng Chương 4. Các chương từ Chương 5 đến Chương 6 vẫn cần được viết tiếp theo mạch kỹ thuật đã chốt. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
 
 ## 1. Bộ file hỗ trợ viết báo cáo
 
@@ -22,7 +22,9 @@ Khi bắt đầu viết một chương, đọc file này trước để xác đ�
 - Chương 1 đã được thay nội dung theo hướng hoàn chỉnh, gồm đặt vấn đề, các giải pháp hiện tại và hạn chế, mục tiêu và định hướng giải pháp, đóng góp của đồ án và bố cục báo cáo.
 - Chương 2 đã có bản hoàn chỉnh ban đầu cho các phần nền tảng: ngữ cảnh bài toán, nghiên cứu liên quan, suy luận AI lượng tử hóa, RISC-V và mở rộng tập lệnh, CV32E40P, gem5 và TensorFlow Lite Micro. Chương này hiện có hình tự vẽ về luồng INT8, bảng vùng opcode custom của RISC-V và hình sơ đồ khối CV32E40P trích từ tài liệu OpenHW.
 - Chương 3 đã có bản hoàn chỉnh ban đầu với tên "Thiết kế và đặc tả nhóm lệnh mở rộng". Chương này đã trình bày tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa cho `mac`, `dot4_acc`, `relu`, `clamp`, `p.lw`, `lp.setup`, bảng ánh xạ sang gem5 và DE2i-150/CV32E40P, cùng đoạn kết nối sang Chương 4.
-- Chương 4 đã có bản hoàn chỉnh ban đầu với tên "Đánh giá qua mô phỏng gem5". Chương này đã trình bày luồng hiện thực nhóm lệnh trong gem5, phạm vi smoke test, thiết lập benchmark mô phỏng, bảng số liệu chu kỳ/lệnh động, biểu đồ tăng tốc và phân tích riêng cho mô hình vòng lặp phần cứng trong O3. Chương 5 và Chương 6 vẫn còn nội dung cần viết tiếp.
+- Chương 4 đã có bản hoàn chỉnh ban đầu với tên "Đánh giá qua mô phỏng gem5". Chương này đã trình bày luồng hiện thực nhóm lệnh trong gem5, phạm vi smoke test, thiết lập benchmark mô phỏng, bảng số liệu chu kỳ/lệnh động, biểu đồ tăng tốc và phân tích riêng cho mô hình vòng lặp phần cứng trong O3.
+- Báo cáo đã có thêm phụ lục về thiết lập và tái mô phỏng nhóm lệnh mở rộng trong gem5. Phụ lục được nạp từ `Chuong/Phu_luc_C.tex` và hiện hiển thị là Phụ lục A do các phụ lục mẫu A/B đang được comment trong `DoAn.tex`. Nội dung phụ lục gồm kho mã nguồn tham chiếu, bản đồ thành phần gem5, lệnh biên dịch/chạy, cách đọc số liệu, khoanh vùng đo bằng m5ops và bảng đối chiếu từng dòng hợp ngữ trong nhân dùng `lp.setup`, `p.lw`, `dot4_acc`.
+- Chương 5 và Chương 6 vẫn còn nội dung cần viết tiếp.
 - Các hình TikZ tự vẽ hiện đã được quản lý trong `Hinh_ve/` và được nạp bằng `\input{Hinh_ve/...}`. Các file đáng chú ý gồm `int8_inference_flow.tikz`, `solution_overview.tikz`, `fc_mac_model_layers.tikz`, `fc_mac_growth.tikz`, `ai_ext_loop_semantics.tikz`, `dot4_acc_semantics.tikz`, `gem5_ai_ext_implementation.tikz`, `gem5_perf_speedup.tikz` và `hwloop_o3_frontend.tikz`.
 - `Danh_sach_tai_lieu_tham_khao.bib` đã có các nguồn nền tảng dùng trong Chương 1 và Chương 2, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, tài liệu LiteRT Microcontrollers, đặc tả lượng tử hóa LiteRT/INT8 và một số nghiên cứu liên quan về suy luận trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Khi viết Chương 3 trở đi vẫn cần bổ sung nguồn chính thức hoặc bài báo phù hợp với từng claim kỹ thuật mới.
 - `Tu_viet_tat.tex` đã được thay từ danh sách mẫu sang danh mục thuật ngữ của đồ án, chỉ giữ các mục cần hỗ trợ người đọc như MAC, SIMD, RVV, SoC, TFLM/LiteRT, MNIST, ReLU, TPU, TOPS. Các thuật ngữ quá phổ thông hoặc đã được giải thích ngay trong nội dung không nên đưa vào để tránh làm danh mục bị loãng.
@@ -133,6 +135,18 @@ Tài liệu nội bộ nên đọc:
 - `/home/duydonv/gem5/src/cpu/o3/HWLOOP_FE_NOTES.txt`
 - `BAN_DO_THAM_CHIEU_KY_THUAT.md`, phần gem5.
 
+### Phụ lục A: Thiết lập và tái mô phỏng nhóm lệnh mở rộng trong gem5
+
+Trạng thái hiện tại: đã có nội dung trong `Chuong/Phu_luc_C.tex` và đã được nạp vào cuối `DoAn.tex` sau trang phụ lục. Phụ lục này không lặp lại đặc tả Chương 3 hoặc phân tích kết quả Chương 4, mà đóng vai trò tài liệu bổ sung để người đọc lần theo quy trình tái mô phỏng gem5.
+
+Nội dung chính:
+
+- Hai kho mã nguồn tham chiếu: bản gem5 đã chỉnh sửa của đồ án và gem5 chính gốc.
+- Bản đồ các nhóm tệp liên quan đến ISA, bộ giải mã, ngữ nghĩa lệnh, tải hậu tăng, vòng lặp phần cứng, O3, kiểm thử nhanh và bài đo hiệu năng.
+- Các lệnh chính để biên dịch gem5, chạy kiểm thử nhanh và chạy lại bài đo hiệu năng.
+- Quy ước đọc `summary.csv`, `summary.json`, `stats.txt`, `checksum`, `numCycles`, `simInsts`, `ipc/cpi` và chỉ số đổi hướng.
+- Hai đoạn mã tiêu biểu: khoanh vùng đo bằng `m5_reset_stats`/`m5_dump_reset_stats` và nhân dùng `lp.setup`, `p.lw`, `dot4_acc`.
+
 ### Chương 5: Đánh giá thực nghiệm, triển khai thực tế trên kit
 
 Mục tiêu: trình bày phần thực nghiệm trên phần cứng thật, gồm SoC, firmware, benchmark UART, TFLM và MNIST runtime input.
@@ -171,6 +185,7 @@ Các ý cần có:
 
 - Chương 3 đặc tả operation/lệnh và mapping giữa mô phỏng với phần cứng.
 - Chương 4 nói về gem5: cách cấu hình, mô hình hóa, smoke test, benchmark mô phỏng, phân tích xu hướng.
+- Phụ lục A bổ sung quy trình tái mô phỏng gem5: lệnh chạy, cách đọc đầu ra và đoạn mã tiêu biểu. Phụ lục không thay thế Chương 4 và không phân tích lại bảng kết quả.
 - Chương 5 nói về kit: SoC, firmware, UART benchmark, TFLM, MNIST, số liệu thực nghiệm.
 - Không trộn số liệu gem5 và board như thể cùng một loại đo. Nếu so sánh, phải nói rõ khác mục tiêu và khác mô hình.
 
