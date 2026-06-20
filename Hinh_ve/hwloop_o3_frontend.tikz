@@ -1,0 +1,65 @@
+\begin{tikzpicture}[
+    font=\small,
+    node distance=0.58cm and 0.92cm,
+    terminator/.style={
+        draw,
+        rounded corners=9pt,
+        align=center,
+        minimum height=0.78cm,
+        text width=2.95cm,
+        fill=blue!6
+    },
+    process/.style={
+        draw,
+        rectangle,
+        align=center,
+        minimum height=0.78cm,
+        text width=3.05cm,
+        fill=green!7
+    },
+    warn/.style={
+        draw,
+        rectangle,
+        align=center,
+        minimum height=0.78cm,
+        text width=3.05cm,
+        fill=orange!10
+    },
+    decision/.style={
+        draw,
+        diamond,
+        aspect=2.15,
+        align=center,
+        inner xsep=1pt,
+        inner ysep=1pt,
+        text width=2.35cm,
+        fill=yellow!12
+    },
+    arrow/.style={-{Latex[length=2mm]}, thick}
+]
+    \node[terminator] (setup) {Bắt đầu\\\texttt{lp.setup}};
+    \node[process, below=of setup] (regs) {Cập nhật\\\texttt{LPSTART}, \texttt{LPEND}\\\texttt{LPCOUNT}, \texttt{LPACTIVE}};
+    \node[process, below=of regs] (body) {Thân vòng\\\texttt{LPSTART} \(\ldots\) \texttt{LPEND}};
+    \node[decision, below=of body] (tail) {Chạm\\\texttt{LPEND}?};
+    \node[decision, below=of tail] (predict) {Front-end\\dự đoán kịp?};
+    \node[process, right=of predict] (frontend) {BAC/FTQ\\đưa fetch về\\\texttt{LPSTART}};
+    \node[warn, below=of predict] (backend) {IEW sửa PC\\\texttt{nonControl}\\\texttt{Redirects}};
+    \node[process, below=of backend] (commit) {Commit lệnh cuối\\giảm \texttt{LPCOUNT}\\và cập nhật BTB};
+    \node[decision, below=of commit] (check) {Sau commit\\\texttt{LPCOUNT}\\còn?};
+    \node[process, below left=0.70cm and 0.70cm of check] (again) {Giữ mục tiêu\\\texttt{LPSTART}};
+    \node[terminator, below right=0.70cm and 0.70cm of check] (done) {Kết thúc vòng\\xóa mục tiêu\\tắt \texttt{LPACTIVE}};
+
+    \draw[arrow] (setup) -- (regs);
+    \draw[arrow] (regs) -- (body);
+    \draw[arrow] (body) -- (tail);
+    \draw[arrow] (tail) -- node[right] {có} (predict);
+    \draw[arrow] (tail.west) -- ++(-0.80,0) node[pos=0.15, above] {chưa} |- (body.west);
+    \draw[arrow] (predict) -- node[above] {có} (frontend);
+    \draw[arrow] (frontend) |- (commit.east);
+    \draw[arrow] (predict) -- node[right] {không} (backend);
+    \draw[arrow] (backend) -- (commit);
+    \draw[arrow] (commit) -- (check);
+    \draw[arrow] (check) -| node[pos=0.28, above] {có} (again.north);
+    \draw[arrow] (check) -| node[pos=0.28, above] {không} (done.north);
+    \draw[arrow] (again.west) -- ++(-0.75,0) |- (body.west);
+\end{tikzpicture}

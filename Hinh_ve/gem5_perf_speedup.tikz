@@ -1,0 +1,56 @@
+\begin{tikzpicture}[
+    x=1cm,
+    y=0.39cm,
+    font=\scriptsize,
+    axis/.style={black!75, thick},
+    gridline/.style={black!15, thin},
+    cached/.style={fill=blue!55!black},
+    ddr/.style={fill=green!50!black},
+    fast/.style={fill=orange!80!black},
+    legend/.style={anchor=west, align=left},
+    value/.style={font=\tiny, anchor=south}
+]
+    \draw[axis] (0,0) -- (10.2,0);
+    \draw[axis] (0,0) -- (0,10.55);
+
+    \foreach \y/\lab in {0/{0},2/{2},4/{4},6/{6},8/{8},10/{10}} {
+        \draw[gridline] (0,\y) -- (10.0,\y);
+        \draw[axis] (-0.06,\y) -- (0.06,\y);
+        \node[anchor=east] at (-0.14,\y) {\lab};
+    }
+
+    \node[rotate=90, anchor=south] at (-0.9,5.25) {Tăng tốc so với scalar};
+
+    \draw[cached] (0.70,0) rectangle (1.12,0.99);
+    \draw[ddr]    (1.20,0) rectangle (1.62,1.00);
+    \draw[fast]   (1.70,0) rectangle (2.12,1.00);
+
+    \draw[cached] (3.80,0) rectangle (4.22,2.93);
+    \draw[ddr]    (4.30,0) rectangle (4.72,3.26);
+    \draw[fast]   (4.80,0) rectangle (5.22,3.25);
+
+    \draw[cached] (6.90,0) rectangle (7.32,2.85);
+    \draw[ddr]    (7.40,0) rectangle (7.82,9.63);
+    \draw[fast]   (7.90,0) rectangle (8.32,8.66);
+
+    \node[value] at (0.91,1.13) {0.99};
+    \node[value] at (1.41,1.14) {1.00};
+    \node[value] at (1.91,1.14) {1.00};
+    \node[value] at (4.01,3.07) {2.93};
+    \node[value] at (4.51,3.40) {3.26};
+    \node[value] at (5.01,3.39) {3.25};
+    \node[value] at (7.11,2.99) {2.85};
+    \node[value] at (7.61,9.77) {9.63};
+    \node[value] at (8.11,8.80) {8.66};
+
+    \node[align=center, anchor=north] at (1.41,-0.35) {\texttt{mac}\\\texttt{clamp}};
+    \node[align=center, anchor=north] at (4.51,-0.35) {\texttt{dot4\_acc}\\\texttt{clamp}};
+    \node[align=center, anchor=north] at (7.61,-0.35) {\texttt{dot4\_plw}\\\texttt{lp\_clamp}};
+
+    \draw[cached] (8.75,6.85) rectangle (9.00,7.20);
+    \node[legend] at (9.10,7.03) {O3 có cache};
+    \draw[ddr] (8.75,6.10) rectangle (9.00,6.45);
+    \node[legend] at (9.10,6.28) {NoCache DDR3};
+    \draw[fast] (8.75,5.35) rectangle (9.00,5.70);
+    \node[legend] at (9.10,5.53) {NoCache fast-ram};
+\end{tikzpicture}

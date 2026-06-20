@@ -1,12 +1,12 @@
 # Hướng dẫn viết và trích dẫn cho báo cáo
 
-Ngày cập nhật: 2026-06-18
+Ngày cập nhật: 2026-06-20
 
 File này tóm tắt các lưu ý quan trọng từ `Chuong/1_Gioi_thieu.tex` và `Chuong/Phu_luc_A.tex`, đồng thời chuyển chúng thành checklist thực hành cho đồ án này.
 
 ## 1. Trạng thái template
 
-Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1, Chương 2 và Chương 3 ở mức nội dung hoàn chỉnh ban đầu. Chương 2 đã hoàn thiện phần nền tảng về ngữ cảnh bài toán, nghiên cứu liên quan, suy luận INT8, RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro. Chương 3 đã hoàn thiện phần thiết kế và đặc tả nhóm lệnh mở rộng, bao gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh, ánh xạ sang gem5/DE2i-150-CV32E40P và đoạn kết nối sang Chương 4. Các chương từ Chương 4 đến Chương 6 vẫn còn nhiều nội dung mẫu và cần được thay bằng nội dung đồ án khi viết tiếp. Khi viết từng chương:
+Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1, Chương 2, Chương 3 và Chương 4 ở mức nội dung hoàn chỉnh ban đầu. Chương 2 đã hoàn thiện phần nền tảng về ngữ cảnh bài toán, nghiên cứu liên quan, suy luận INT8, RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro. Chương 3 đã hoàn thiện phần thiết kế và đặc tả nhóm lệnh mở rộng, bao gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh, ánh xạ sang gem5/DE2i-150-CV32E40P và đoạn kết nối sang Chương 4. Chương 4 đã hoàn thiện phần đánh giá qua mô phỏng gem5, gồm hiện thực, smoke test, benchmark mô phỏng, phân tích kết quả và mô hình vòng lặp phần cứng trong O3. Các chương từ Chương 5 đến Chương 6 vẫn cần được thay bằng nội dung đồ án khi viết tiếp. Khi viết từng chương:
 
 - Không giữ nguyên các đoạn "Sinh viên cần..." trong bản thảo cuối.
 - Không để các dòng `\textcolor{red}{Chú ý...}` của template trong bản nộp.
@@ -59,6 +59,7 @@ Ví dụ áp dụng cho đồ án:
 - Kết Chương 3 nên dẫn sang Chương 4 bằng ý: sau khi đặc tả các operation và mapping, cần kiểm tra semantics và phân tích hiệu năng bằng mô phỏng gem5.
 - Kết Chương 4 nên dẫn sang Chương 5 bằng ý: mô phỏng cho thấy xu hướng và kiểm tra logic, còn hiệu quả thực tế cần đánh giá trên kit DE2i-150/CV32E40P.
 - Với Chương 3, bản hiện tại đã chốt mạch từ cơ sở lựa chọn nhóm lệnh đến đặc tả thao tác và ánh xạ sang gem5/CV32E40P. Khi rà soát lại, cần giữ cách diễn đạt hiện có: nhánh gem5 là mô hình thử nghiệm dùng `custom-0`, còn nhánh phần cứng ánh xạ cùng ngữ nghĩa sang CORE-V/PULP thông qua lớp firmware và vẫn bao gồm nhiều công việc tích hợp/kiểm chứng.
+- Với Chương 4, bản hiện tại đã chốt mạch từ hiện thực gem5, kiểm thử chức năng, thiết lập benchmark, phân tích số liệu mô phỏng đến giới hạn của mô hình O3. Khi viết Chương 5, cần giữ cách phân vai này: gem5 dùng để kiểm chứng và phân tích xu hướng, còn kit DE2i-150/CV32E40P dùng để đánh giá hiệu quả thực nghiệm.
 
 ## 5. Hình, bảng, công thức
 
@@ -92,7 +93,7 @@ Các nguyên tắc từ phụ lục:
 
 ## 7. Trạng thái `.bib` hiện tại
 
-`.bib` hiện đã có các nguồn nền tảng dùng cho Chương 1 và Chương 2, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, tài liệu LiteRT Microcontrollers, đặc tả lượng tử hóa LiteRT/INT8 và các nghiên cứu liên quan về suy luận học sâu trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Các mục template không dùng đã được comment lại để tránh xuất hiện trong tài liệu tham khảo. Tuy nhiên, chưa nên giả định `.bib` đã đủ nguồn cho toàn bộ báo cáo. Khi viết Chương 3 trở đi, cần tiếp tục tạo dần danh sách citation cho các claim kỹ thuật mới.
+`.bib` hiện đã có các nguồn nền tảng dùng cho Chương 1, Chương 2 và các phần mô tả gem5 trong Chương 4, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, tài liệu LiteRT Microcontrollers, đặc tả lượng tử hóa LiteRT/INT8 và các nghiên cứu liên quan về suy luận học sâu trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Các mục template không dùng đã được comment lại để tránh xuất hiện trong tài liệu tham khảo. Tuy nhiên, chưa nên giả định `.bib` đã đủ nguồn cho toàn bộ báo cáo. Khi viết Chương 5 trở đi, cần tiếp tục tạo dần danh sách citation cho các claim kỹ thuật mới.
 
 Nhóm tài liệu cần bổ sung:
 
