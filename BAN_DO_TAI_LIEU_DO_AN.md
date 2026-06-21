@@ -4,7 +4,7 @@ Ngày cập nhật: 2026-06-21
 
 Đồ án: Mở rộng tập lệnh RISC-V cho các phép toán AI lượng tử hóa, mô phỏng trên gem5 và triển khai thực nghiệm trên kit FPGA DE2i-150/CV32E40P.
 
-File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 3 đã có bản nội dung hoàn chỉnh ban đầu cho phần thiết kế và đặc tả nhóm lệnh mở rộng, gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh và ánh xạ sang hai môi trường triển khai. Chương 4 đã được thay từ nội dung mẫu sang chương "Đánh giá qua mô phỏng gem5", gồm hiện thực gem5, kiểm thử chức năng, thiết lập benchmark, kết quả mô phỏng và phân tích riêng cho vòng lặp phần cứng trong O3. Báo cáo cũng đã bổ sung phụ lục gem5 để ghi lại quy trình thiết lập và tái mô phỏng, giúp người đọc có thể đối chiếu các lệnh chạy, tệp liên quan và đoạn mã tiêu biểu mà không làm loãng Chương 4. Chương 5 đã bắt đầu được thay bằng nội dung thật với tên "Triển khai và đánh giá trên kit DE2i-150/CV32E40P"; hiện đã có bản nháp hoàn chỉnh cho phần mở chương và các mục 5.1--5.4, còn các mục kết quả từ 5.5 trở đi vẫn đang để TODO để viết tiếp. Vì vậy nội dung dưới đây không phải bản thảo cuối, mà là bản đồ để khi viết từng chương có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
+File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 3 đã có bản nội dung hoàn chỉnh ban đầu cho phần thiết kế và đặc tả nhóm lệnh mở rộng, gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh và ánh xạ sang hai môi trường triển khai. Chương 4 đã được thay từ nội dung mẫu sang chương "Đánh giá qua mô phỏng gem5", gồm hiện thực gem5, kiểm thử chức năng, thiết lập benchmark, kết quả mô phỏng và phân tích riêng cho vòng lặp phần cứng trong O3. Chương 5 đã có bản nội dung hoàn chỉnh ban đầu với tên "Triển khai và đánh giá trên kit DE2i-150/CV32E40P", bao gồm luồng SoC/firmware, kiểm thử nhóm lệnh, benchmark INT8, ước lượng năng lượng, MNIST FC INT8 với TensorFlow Lite Micro, kết quả UART trên kit, tài nguyên/timing và kết chương. Báo cáo cũng đã bổ sung phụ lục gem5 và phụ lục tái lập triển khai SoC để ghi lại các lệnh chạy, tệp liên quan, đoạn mã tiêu biểu và luồng tạo project Quartus mà không làm loãng các chương chính. Vì vậy nội dung dưới đây là bản đồ để khi rà soát và viết tiếp có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
 
 ## 1. Bộ file hỗ trợ viết báo cáo
 
@@ -24,9 +24,10 @@ Khi bắt đầu viết một chương, đọc file này trước để xác đ�
 - Chương 3 đã có bản hoàn chỉnh ban đầu với tên "Thiết kế và đặc tả nhóm lệnh mở rộng". Chương này đã trình bày tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa cho `mac`, `dot4_acc`, `relu`, `clamp`, `p.lw`, `lp.setup`, bảng ánh xạ sang gem5 và DE2i-150/CV32E40P, cùng đoạn kết nối sang Chương 4.
 - Chương 4 đã có bản hoàn chỉnh ban đầu với tên "Đánh giá qua mô phỏng gem5". Chương này đã trình bày luồng hiện thực nhóm lệnh trong gem5, phạm vi smoke test, thiết lập benchmark mô phỏng, bảng số liệu chu kỳ/lệnh động, biểu đồ tăng tốc và phân tích riêng cho mô hình vòng lặp phần cứng trong O3.
 - Báo cáo đã có thêm phụ lục về thiết lập và tái mô phỏng nhóm lệnh mở rộng trong gem5. Phụ lục được nạp từ `Chuong/Phu_luc_C.tex` và hiện hiển thị là Phụ lục A do các phụ lục mẫu A/B đang được comment trong `DoAn.tex`. Nội dung phụ lục gồm kho mã nguồn tham chiếu, bản đồ thành phần gem5, lệnh biên dịch/chạy, cách đọc số liệu, khoanh vùng đo bằng m5ops và bảng đối chiếu từng dòng hợp ngữ trong nhân dùng `lp.setup`, `p.lw`, `dot4_acc`.
-- Chương 5 đã đổi tên thành "Triển khai và đánh giá trên kit DE2i-150/CV32E40P" trong `DoAn.tex`. Phần mở chương và các mục 5.1--5.4 đã có bản nháp nội dung: nền tảng phần cứng/luồng triển khai, hiện thực CV32E40P/PULP và xử lý timing, ánh xạ/kiểm thử smoke nhóm lệnh mở rộng, phương pháp đo và kiểm chứng kết quả. Các mục từ 5.5 đến cuối chương vẫn còn TODO để viết phần kết quả benchmark INT8, MNIST FC, UART, tài nguyên/timing và kết chương.
+- Chương 5 đã có bản nội dung hoàn chỉnh ban đầu trong `Chuong/5_Thuc_nghiem.tex`. Chương này trình bày từ nền tảng DE2i-150/CV32E40P, luồng SoC/firmware, xử lý timing khi bật PULP, ánh xạ/kiểm thử smoke, phương pháp đo, benchmark INT8 và năng lượng ước lượng, đến triển khai MNIST FC INT8 với TensorFlow Lite Micro, kiểm thử UART/GUI trên kit, tài nguyên/timing của cấu hình cuối và kết chương.
+- Báo cáo đã có thêm phụ lục tái lập triển khai SoC CV32E40P trên kit DE2i-150. Phụ lục được nạp từ `Chuong/Phu_luc_D.tex` và hiện hiển thị là Phụ lục B. Nội dung phụ lục gồm kho mã nguồn SoC public, môi trường cần có, cấu trúc thư mục, clock gate FPGA-safe, các bản vá SystemVerilog cho Quartus, cách tạo project Quartus, biên dịch firmware, kiểm tra LED smoke, chạy UART/MNIST và tạo VCD cho Power Analyzer.
 - Chương 6 vẫn còn nội dung cần viết tiếp.
-- Các hình TikZ tự vẽ hiện đã được quản lý trong `Hinh_ve/` và được nạp bằng `\input{Hinh_ve/...}`. Các file đáng chú ý gồm `int8_inference_flow.tikz`, `solution_overview.tikz`, `fc_mac_model_layers.tikz`, `fc_mac_growth.tikz`, `ai_ext_loop_semantics.tikz`, `dot4_acc_semantics.tikz`, `gem5_ai_ext_implementation.tikz`, `gem5_perf_speedup.tikz`, `hwloop_o3_frontend.tikz`, `de2i150_soc_experiment_flow.tikz` và `fpga_timing_bubble.tikz`. Chương 5 còn dùng ảnh RTL view của lõi CV32E40P từ Quartus tại `Hinh_ve/quartus_cv32e40p_core_rtl_view.png`.
+- Các hình TikZ tự vẽ hiện đã được quản lý trong `Hinh_ve/` và được nạp bằng `\input{Hinh_ve/...}`. Các file đáng chú ý gồm `int8_inference_flow.tikz`, `solution_overview.tikz`, `fc_mac_model_layers.tikz`, `fc_mac_growth.tikz`, `ai_ext_loop_semantics.tikz`, `dot4_acc_semantics.tikz`, `gem5_ai_ext_implementation.tikz`, `gem5_perf_speedup.tikz`, `hwloop_o3_frontend.tikz`, `de2i150_soc_experiment_flow.tikz`, `fpga_timing_bubble.tikz` và `mnist_fc_tflm_flow.tikz`. Chương 5 còn dùng các ảnh thực nghiệm trong `Hinh_ve/` như RTL view của lõi CV32E40P, waveform Questa cho `dot4_plw_lp_clamp_custom` và giao diện MNIST UART GUI.
 - `Danh_sach_tai_lieu_tham_khao.bib` đã có các nguồn nền tảng dùng trong Chương 1 và Chương 2, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, tài liệu LiteRT Microcontrollers, đặc tả lượng tử hóa LiteRT/INT8 và một số nghiên cứu liên quan về suy luận trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Khi viết Chương 3 trở đi vẫn cần bổ sung nguồn chính thức hoặc bài báo phù hợp với từng claim kỹ thuật mới.
 - `Tu_viet_tat.tex` đã được thay từ danh sách mẫu sang danh mục thuật ngữ của đồ án, chỉ giữ các mục cần hỗ trợ người đọc như MAC, SIMD, RVV, SoC, TFLM/LiteRT, MNIST, ReLU, TPU, TOPS. Các thuật ngữ quá phổ thông hoặc đã được giải thích ngay trong nội dung không nên đưa vào để tránh làm danh mục bị loãng.
 - `DoAn.tex` đang giữ `babel` tiếng Anh để danh mục tài liệu tham khảo hiển thị đúng chuẩn IEEE, đồng thời đã Việt hóa caption hình/bảng và header chương bằng cấu hình riêng. Khi sửa format, cần tránh đổi `babel` nếu chưa kiểm tra lại bibliography.
@@ -150,25 +151,18 @@ Nội dung chính:
 
 ### Chương 5: Triển khai và đánh giá trên kit DE2i-150/CV32E40P
 
-Trạng thái hiện tại: đã có phần mở chương và bản nháp nội dung cho các mục 5.1--5.4 trong `Chuong/5_Thuc_nghiem.tex`. Các mục này đã trình bày nền tảng DE2i-150/CV32E40P, cấu hình SoC/firmware, ảnh RTL view của lõi trong Quartus, luồng build/nạp/chạy benchmark, việc bật CV32E40P/PULP và chèn chu kỳ rỗng để xử lý đường timing dài, bảng ánh xạ hàm bao firmware sang lệnh CORE-V/PULP, kiểm thử smoke bằng LED và phương pháp đo bằng `mcycle`/`minstret`. Bảng 5.4 đã tách rõ mốc so sánh và biến thể tối ưu cho ba nhóm đo: nhân INT8, MNIST FC cố định và MNIST qua UART. Các công thức trong mục phương pháp đo đang để dạng hiển thị không đánh số vì chỉ là quy ước đo và không được tham chiếu như công thức lý thuyết.
+Trạng thái hiện tại: đã có bản nội dung hoàn chỉnh ban đầu trong `Chuong/5_Thuc_nghiem.tex`. Chương này trình bày phần thực nghiệm trên phần cứng thật, gồm SoC, firmware, benchmark UART, TensorFlow Lite Micro và MNIST runtime input.
 
-Mục tiêu: trình bày phần thực nghiệm trên phần cứng thật, gồm SoC, firmware, benchmark UART, TFLM và MNIST runtime input.
-
-Các nội dung đã có trong bản nháp:
+Các nội dung đã chốt:
 
 - Môi trường: DE2i-150, CV32E40P, `COREV_PULP=1`, 50 MHz, BRAM 128 KB, UART 115200 8N1.
 - Luồng triển khai: build firmware, sinh ảnh BRAM byte-lane hex, tổng hợp/nạp bitstream bằng Quartus và thu kết quả qua UART.
-- Hiện thực CV32E40P/PULP trên FPGA, gồm các điều chỉnh tương thích Quartus từ giai đoạn tích hợp ban đầu và xử lý timing khi bật PULP/nhóm lệnh mở rộng.
+- Hiện thực CV32E40P/PULP trên FPGA, gồm clock gate FPGA-safe, các điều chỉnh tương thích Quartus, ảnh RTL view, xử lý timing khi bật PULP và chèn chu kỳ rỗng ở đường phụ thuộc dài.
 - Kiểm thử smoke các hàm bao `ai_mac`, `ai_dot4_acc`, `ai_relu`, `ai_clamp`, `AI_PLW_U32`, `AI_LP_SETUP_L0` trước khi dùng cho benchmark.
-- Phương pháp đo: đọc `mcycle`/`minstret`, tính speedup, quy ước baseline/optimized, điều kiện kiểm chứng đúng/sai và cách quy đổi năng lượng tương đối.
-
-Các nội dung còn cần viết tiếp:
-
-- Firmware benchmark 3 nhóm: `mac_clamp`, `dot4_acc_clamp`, `dot4_plw_lp_clamp`.
-- Tiny AI và TFLM bring-up, trình bày ngắn để thể hiện quá trình đưa mô hình AI lên kit.
-- MNIST FC INT8 `784 -> 32 -> 10`, TFLM reference và `pulp_opt`.
-- UART runtime input, image-mode và GUI nếu cần đưa vào báo cáo.
-- Tài nguyên/timing của image cuối và năng lượng ước lượng từ Quartus Power Analyzer nếu dùng trong mạch phân tích.
+- Phương pháp đo bằng `mcycle`/`minstret`, quy ước baseline/optimized, điều kiện kiểm chứng đúng/sai, phân biệt validate run và inference-only, cùng cách quy đổi năng lượng tương đối.
+- Kết quả benchmark INT8 cho ba nhóm `mac_clamp`, `dot4_acc_clamp`, `dot4_plw_lp_clamp`, có ảnh waveform Questa và bảng năng lượng ước lượng từ VCD/Power Analyzer.
+- Luồng tạo mô hình MNIST FC INT8 `784 -> 32 -> 10`, TensorFlow Lite Micro reference, đường tối ưu `pulp_opt`, kết quả fixed-vector, UART runtime input, GUI và thử nghiệm 200 ảnh PGM.
+- Tài nguyên/timing của cấu hình MNIST FC cuối chương, dùng như xác nhận rằng cấu hình đầy đủ nhất của đồ án vẫn fit và được nạp/chạy trên kit.
 
 Tài liệu nội bộ nên đọc:
 
@@ -178,6 +172,18 @@ Tài liệu nội bộ nên đọc:
 - `/home/duydonv/de2i150_cv32e40p_soc/firmware/TFLM.md`
 - `/home/duydonv/de2i150_cv32e40p_soc/firmware/UART_RX.md`
 - `/home/duydonv/de2i150_cv32e40p_soc/firmware/mnist_fc/README.md`
+
+### Phụ lục B: Hướng dẫn tái lập triển khai SoC CV32E40P trên kit DE2i-150
+
+Trạng thái hiện tại: đã có nội dung trong `Chuong/Phu_luc_D.tex` và đã được nạp vào cuối `DoAn.tex` sau Phụ lục A. Phụ lục này đóng vai trò hướng dẫn tham khảo để người đọc có thể tái lập luồng triển khai thực tế mà Chương 5 đã dùng, nhưng không phân tích lại số liệu hiệu năng.
+
+Nội dung chính:
+
+- Kho mã nguồn SoC public `https://github.com/duydonv/DE2i150_CV32E40P_SoC.git` và lưu ý rằng project Quartus `.qpf`/`.qsf` được tạo cục bộ, không có sẵn trong repo.
+- Môi trường và các thư mục quan trọng: `rtl/`, `firmware/`, `sim/`, `fpga_patches/`, `PIN_ASSIGNMENTS.md`, `de2i150_cv32e40p_top.sdc`.
+- Hai nhóm điều chỉnh cần biết khi tái lập: clock gate thay thế cho FPGA và các bản vá SystemVerilog-2012/2017 sang mức Quartus Lite/Standard chấp nhận.
+- Cách tạo project Quartus, chọn thiết bị `EP4CGX150DF31C7`, thêm RTL/ràng buộc, bật SystemVerilog-2005, tạo firmware `smoke`, compile và kiểm tra LED trên kit.
+- Cách biên dịch firmware C/TFLM, chạy script UART/GUI, tạo ảnh PGM và tạo VCD cho Quartus Power Analyzer.
 
 ### Chương 6: Kết luận
 
@@ -197,6 +203,7 @@ Các ý cần có:
 - Chương 4 nói về gem5: cách cấu hình, mô hình hóa, smoke test, benchmark mô phỏng, phân tích xu hướng.
 - Phụ lục A bổ sung quy trình tái mô phỏng gem5: lệnh chạy, cách đọc đầu ra và đoạn mã tiêu biểu. Phụ lục không thay thế Chương 4 và không phân tích lại bảng kết quả.
 - Chương 5 nói về kit: SoC, firmware, UART benchmark, TFLM, MNIST, số liệu thực nghiệm.
+- Phụ lục B bổ sung quy trình tái lập triển khai SoC trên kit: lấy repo SoC, tạo project Quartus, biên dịch firmware, nạp thiết kế, chạy UART/MNIST và tạo VCD. Phụ lục không thay thế Chương 5 và không phân tích lại kết quả hiệu năng.
 - Không trộn số liệu gem5 và board như thể cùng một loại đo. Nếu so sánh, phải nói rõ khác mục tiêu và khác mô hình.
 
 ## 5. Checklist trước khi viết từng chương
