@@ -1,0 +1,290 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+\raggedbottom
+\lstdefinestyle{phulucsoc}{
+    basicstyle=\ttfamily\scriptsize,
+    columns=fullflexible,
+    keepspaces=true,
+    frame=single,
+    breaklines=true,
+    aboveskip=6pt,
+    belowskip=6pt,
+    abovecaptionskip=6pt,
+    belowcaptionskip=0pt
+}
+
+Phụ lục này trình bày luồng tái lập cấu hình SoC CV32E40P đã được sử dụng trong Chương~\ref{chap:thuc-nghiem}. Trong chương chính, nội dung tập trung vào phương pháp đo, kết quả thực nghiệm và phân tích hiệu năng. Vì vậy, các chi tiết vận hành như lấy mã nguồn, tạo project Quartus, biên dịch firmware, nạp thiết kế, chạy kiểm thử trên kit và tạo dữ liệu hoạt động cho phân tích năng lượng được tách sang phụ lục. Mục tiêu của phụ lục không phải là hướng dẫn phát triển lại toàn bộ lõi CV32E40P từ đầu, mà là cung cấp một luồng tham khảo để người đọc có thể tái lập cấu hình phần cứng/phần mềm đã dùng trong đồ án.
+
+\section{Mã nguồn, môi trường và cấu trúc thư mục}
+\label{sec:phuluc-soc-ma-nguon-moi-truong}
+
+Điểm xuất phát khuyến nghị là kho mã nguồn SoC đã được chuẩn bị cho đồ án tại \url{https://github.com/duydonv/DE2i150_CV32E40P_SoC.git}. Kho này chứa phần RTL đã tích hợp cho kit, firmware kiểm thử, các tệp tích hợp TensorFlow Lite Micro ở phía firmware, script host phục vụ UART, ràng buộc thời gian và tài liệu gán chân. Các tệp project Quartus sinh tự động như \path|.qpf| và \path|.qsf| không được đưa lên kho public; project cần được tạo cục bộ theo Mục~\ref{sec:phuluc-soc-quartus}. Nếu bắt đầu trực tiếp từ kho CV32E40P gốc, người thực hiện phải tự ghép lại bus, BRAM, UART, ràng buộc chân, firmware và các bản vá tương thích Quartus; do đó luồng đó phù hợp cho phát triển sâu hơn là tái lập kết quả của đồ án.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Lấy mã nguồn SoC dùng cho triển khai trên kit},
+    captionpos=b,
+    label={lst:phuluc-soc-clone}
+]
+git clone https://github.com/duydonv/DE2i150_CV32E40P_SoC.git de2i150_cv32e40p_soc
+cd de2i150_cv32e40p_soc
+\end{lstlisting}
+
+Các lệnh trong phụ lục giả định được chạy trên Linux tại thư mục gốc của kho SoC. Nếu đặt kho mã nguồn ở vị trí khác, chỉ cần thay đường dẫn tương ứng. Các công cụ chính cần có gồm Quartus Prime Lite/Standard cho Cyclone IV GX, Questa/ModelSim khi cần mô phỏng RTL và tạo VCD, RISC-V GCC cho firmware C, xPack GNU RISC-V Embedded GCC hoặc một toolchain tương đương có hỗ trợ C++/newlib/libstdc++ cho firmware TensorFlow Lite Micro, cùng Python cho các script host.
+
+Bảng~\ref{tab:phuluc-soc-file-map} tóm tắt các nhóm thư mục quan trọng trong kho SoC. Bảng này chỉ đóng vai trò bản đồ tra cứu nhanh; chi tiết triển khai và kết quả đo đã được trình bày trong Chương~\ref{chap:thuc-nghiem}.
+
+\begin{table}[H]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.16}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{3.80cm}|>{\raggedright\arraybackslash}p{9.10cm}|}
+        \hline
+        \textbf{Thư mục/tệp} & \textbf{Vai trò trong luồng tái lập} \\
+        \hline
+        \path|rtl/core/| & Bản copy lõi CV32E40P đã được chỉnh để Quartus Lite/Standard có thể biên dịch ở chế độ SystemVerilog-2005. \\
+        \hline
+        \path|rtl/fpga/| & Chứa thay thế clock gate phù hợp FPGA, tránh mô hình clock gate kiểu mô phỏng/ASIC của upstream. \\
+        \hline
+        \path|rtl/soc/de2i150_cv32e40p_top.v| & Wrapper mức SoC: nối CV32E40P với BRAM, UART, LED và tín hiệu clock/reset của kit. \\
+        \hline
+        \path|firmware/| & Chứa startup, linker script, wrapper lệnh CORE-V/PULP, chương trình smoke/benchmark, các tệp tích hợp TensorFlow Lite Micro phía firmware và các script UART host. \\
+        \hline
+        \path|firmware/mnist_fc/| & Chứa mô hình MNIST FC INT8, dữ liệu kiểm chứng, script huấn luyện/lượng tử hóa và script xuất ảnh PGM. \\
+        \hline
+        \path|sim/| & Chứa testbench Questa và script tạo VCD cho Quartus Power Analyzer. \\
+        \hline
+        \path|fpga_patches/README.md| & Ghi lại các bản vá SystemVerilog cần thiết khi cập nhật lại bản copy CV32E40P từ upstream. \\
+        \hline
+        \path|de2i150_cv32e40p_top.sdc|, \path|PIN_ASSIGNMENTS.md| & Ràng buộc thời gian cho clock 50 MHz và bản đồ gán chân của kit; các tệp project Quartus \path|.qpf|/\path|.qsf| được tạo cục bộ khi lập project. \\
+        \hline
+    \end{tabular}
+    \caption{Các thành phần chính của kho SoC phục vụ tái lập triển khai}
+    \label{tab:phuluc-soc-file-map}
+\end{table}
+
+Trên một bản sao mới của kho mã nguồn, cây TensorFlow Lite Micro sinh ra trong \path|third_party/tflm_tree/| không có sẵn vì đây là phụ thuộc tạo lại được và đã được loại khỏi kho bằng \path|.gitignore|. Khi cần biên dịch các firmware TFLM, cây này được tạo lại từ bản upstream TensorFlow Lite Micro theo script trong kho. Trước khi chạy script, cần có một bản clone TensorFlow Lite Micro đã checkout về commit \texttt{ac1fae36}; nếu clone này được đặt ở vị trí khác, truyền đường dẫn bằng biến \texttt{TFLM\_SRC}.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Tạo lại cây TensorFlow Lite Micro tối thiểu khi cần},
+    captionpos=b,
+    label={lst:phuluc-soc-generate-tflm-tree}
+]
+git clone https://github.com/tensorflow/tflite-micro.git /path/to/tflite-micro
+git -C /path/to/tflite-micro checkout ac1fae3
+
+cd de2i150_cv32e40p_soc/firmware
+TFLM_SRC=/path/to/tflite-micro ./generate_tflm_tree.sh
+\end{lstlisting}
+
+\section{Các điều chỉnh chính phục vụ triển khai trên Quartus và kit}
+\label{sec:phuluc-soc-dieu-chinh-chinh}
+
+Phần lớn cấu trúc SoC, bản đồ bộ nhớ, UART, BRAM và cách ánh xạ thao tác AI sang CORE-V/PULP đã được trình bày trong Chương~\ref{chap:thuc-nghiem}. Vì vậy, mục này chỉ ghi lại hai nhóm điều chỉnh mang tính ``bring-up'' cần biết khi tái lập từ mã nguồn public: thay thế clock gate cho FPGA và các bản vá SystemVerilog để Quartus Lite/Standard biên dịch được bản copy CV32E40P trong \path|rtl/core/|.
+
+Thứ nhất, CV32E40P upstream sử dụng một mô hình clock gate phục vụ mô phỏng/ASIC. Nếu đưa trực tiếp mô hình latch-based clock gate này vào Cyclone IV, Quartus có thể suy luận latch trong clock network, gây khó định thời và không phù hợp với phong cách thiết kế FPGA. Vì vậy, kho SoC dùng tệp \path|rtl/fpga/cv32e40p_clock_gate.sv| làm bản thay thế cho FPGA. Bản này giữ clock chạy tự do và bỏ qua tín hiệu enable ở mức cổng clock; phần tối ưu WFI/sleep không còn tác dụng tiết kiệm clock, nhưng thiết kế vẫn đúng chức năng và dễ đóng timing hơn trên kit.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Clock gate thay thế dùng cho FPGA},
+    captionpos=b,
+    label={lst:phuluc-soc-clock-gate}
+]
+module cv32e40p_clock_gate (
+    input  logic clk_i,
+    input  logic en_i,
+    input  logic scan_cg_en_i,
+    output logic clk_o
+);
+    (* keep = 1 *) wire unused_ok = en_i | scan_cg_en_i;
+    assign clk_o = clk_i;
+endmodule
+\end{lstlisting}
+
+Thứ hai, bản CV32E40P gốc dùng một số cấu trúc SystemVerilog mới hơn mức mà Quartus Prime Lite/Standard chấp nhận. Tài liệu \path|fpga_patches/README.md| trong repo ghi rõ bối cảnh: CV32E40P được viết ở mức SystemVerilog-2012/2017, còn Quartus Prime Lite/Standard Edition chỉ parse tới SystemVerilog-2005; nếu add file gốc thẳng vào Quartus sẽ phát sinh lỗi Verilog-HDL như \texttt{import} trong module header, \texttt{for (genvar i ...)}, \texttt{case ... inside}, \texttt{x inside \{ranges\}}, v.v. Các bản vá được áp dụng trực tiếp trên bản copy trong \path|rtl/core/|; upstream CV32E40P không bị sửa.
+
+Đoạn mã~\ref{lst:phuluc-soc-sv-patch-import} và Đoạn mã~\ref{lst:phuluc-soc-sv-patch-generate} minh họa hai dạng chỉnh sửa thường gặp. Đây là các thay đổi cơ học để công cụ đọc được RTL, không làm thay đổi ý nghĩa thiết kế ở mức kiến trúc.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Ví dụ chuyển module-header import về dạng Quartus chấp nhận},
+    captionpos=b,
+    label={lst:phuluc-soc-sv-patch-import}
+]
+// Truoc: nhieu import trong module header
+module cv32e40p_id_stage
+  import cv32e40p_pkg::*;
+  import cv32e40p_apu_core_pkg::*;
+#(
+  ...
+
+// Sau: giu import chinh trong header, import goi con lai trong body
+module cv32e40p_id_stage
+  import cv32e40p_pkg::*;
+#(
+  ...
+)(
+  ...
+);
+  import cv32e40p_apu_core_pkg::*;
+\end{lstlisting}
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Ví dụ bọc for-generate bằng generate/endgenerate và đặt tên block},
+    captionpos=b,
+    label={lst:phuluc-soc-sv-patch-generate}
+]
+// Truoc
+genvar k;
+for (k = 0; k < N_REGS; k++) begin
+  assign hwlp_counter_n[k] = hwlp_counter_q[k] - 1;
+end
+
+// Sau
+genvar k;
+generate
+  for (k = 0; k < N_REGS; k = k + 1) begin : gen_hwlp_counter_dec
+    assign hwlp_counter_n[k] = hwlp_counter_q[k] - 1;
+  end
+endgenerate
+\end{lstlisting}
+
+Khi tái lập, không nên chép đè trực tiếp \path|rtl/core/| bằng mã nguồn upstream rồi biên dịch ngay. Nếu cần cập nhật lõi CV32E40P, nên đọc \path|fpga_patches/README.md| và áp lại các nhóm patch tương ứng trước khi tạo lại project Quartus.
+
+\section{Tạo và cấu hình project Quartus}
+\label{sec:phuluc-soc-quartus}
+
+Kho public không chứa sẵn \path|de2i150_cv32e40p_top.qpf| và \path|de2i150_cv32e40p_top.qsf| vì đây là các tệp project do Quartus sinh ra tại môi trường cục bộ. Do đó, sau khi sao chép kho SoC, cần tạo project mới trong Quartus rồi thêm các tệp RTL/ràng buộc đã có trong repo. Các bước chính như sau:
+
+\begin{enumerate}
+    \item Tạo project mới tại thư mục gốc của kho SoC, đặt tên project và top-level entity là \path|de2i150_cv32e40p_top|.
+    \item Chọn family \textit{Cyclone IV GX} và thiết bị \texttt{EP4CGX150DF31C7}, tương ứng FPGA trên kit DE2i-150.
+    \item Thêm các gói trong \path|rtl/core/include/| trước, sau đó thêm các tệp \path|rtl/core/*.sv|, \path|rtl/fpga/cv32e40p_clock_gate.sv|, \path|rtl/soc/de2i150_cv32e40p_top.v| và \path|de2i150_cv32e40p_top.sdc|.
+    \item Bật chế độ SystemVerilog-2005 cho Verilog/SystemVerilog input và thêm \path|rtl/core/include| vào search path.
+    \item Nhập các gán chân theo \path|PIN_ASSIGNMENTS.md|, chú ý chuẩn điện áp của clock, UART và LED.
+    \item Trước lần biên dịch Quartus đầu tiên, tạo firmware mặc định bằng lệnh \texttt{make -C firmware smoke} từ thư mục gốc của kho SoC. Lệnh này sinh các tệp \path|firmware/firmware_byte*.hex| để BRAM đọc bằng \texttt{\$readmemh}.
+    \item Chạy \textit{Processing > Start Compilation}; sau khi biên dịch thành công, nạp \path|output_files/de2i150_cv32e40p_top.sof| xuống kit bằng \textit{Tools > Programmer}.
+\end{enumerate}
+
+Sau khi project được tạo, Quartus sẽ sinh các tệp \path|.qpf| và \path|.qsf| tương ứng trong thư mục làm việc. Nếu có lỗi ở bước Analysis \& Synthesis, các nguyên nhân thường gặp là thêm thiếu package trong \path|rtl/core/include|, chưa bật SystemVerilog-2005, thiếu search path \path|rtl/core/include|, hoặc chưa tạo các tệp \path|firmware_byte*.hex| trước khi biên dịch.
+
+Nếu làm theo luồng trên, firmware được nạp vào BRAM trong lần compile đầu tiên là \texttt{smoke}. Firmware này kiểm tra nhanh các lệnh \texttt{cv.mac}, \texttt{cv.sdotsp.b}, \texttt{cv.max}, \texttt{cv.clipur}, \texttt{cv.lw} hậu tăng và \texttt{cv.setup}. Sau khi nạp \path|.sof| xuống kit và nhả KEY0, có thể kiểm tra trực tiếp trên kit: LEDG0 nhấp nháy như heartbeat phần cứng, LEDG1 tắt nếu lõi không ở trạng thái sleep, LEDR[7:0] nhấp nháy giữa \texttt{0xA5} và \texttt{0x00} nếu toàn bộ smoke test pass. Nếu LEDR[7:0] nhấp nháy một mã trong khoảng \texttt{0xE1} đến \texttt{0xE6}, firmware đang báo lỗi ở một nhóm lệnh tương ứng.
+
+Nếu dùng dòng lệnh thay cho GUI, có thể chạy biên dịch từ thư mục gốc của kho SoC như Đoạn mã~\ref{lst:phuluc-soc-quartus-compile}. Cách này đặc biệt hữu ích sau mỗi lần đổi firmware, vì các tệp \path|firmware_byte*.hex| chỉ được Quartus đọc lại trong quá trình tổng hợp/fit thiết kế.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Biên dịch project Quartus bằng dòng lệnh},
+    captionpos=b,
+    label={lst:phuluc-soc-quartus-compile}
+]
+cd de2i150_cv32e40p_soc
+make -C firmware smoke
+/path/to/quartus/bin/quartus_sh --flow compile de2i150_cv32e40p_top
+\end{lstlisting}
+
+\section{Biên dịch firmware, mô phỏng và chạy kiểm thử}
+\label{sec:phuluc-soc-firmware-test}
+
+Firmware trong kho SoC được biên dịch thành \path|firmware.elf|, \path|firmware.bin|, \path|firmware.hex| và bốn tệp làn byte \path|firmware_byte*.hex|. Các tệp làn byte này được BRAM trong \path|de2i150_cv32e40p_top.v| đọc bằng \texttt{\$readmemh}. Vì vậy, mỗi lần thay đổi firmware cần thực hiện đủ hai bước: biên dịch lại firmware, sau đó biên dịch lại project Quartus và nạp lại \path|.sof|. Nếu chỉ chạy lại \texttt{make} nhưng không biên dịch lại Quartus, nội dung BRAM trong thiết kế nạp lên FPGA vẫn là phiên bản cũ.
+
+Đoạn mã~\ref{lst:phuluc-soc-firmware-basic} tóm tắt một số mục tiêu firmware C dùng cho kiểm tra bring-up và đo nhân INT8. Các firmware này dùng toolchain C RISC-V với tiền tố mặc định \path|riscv64-unknown-elf-|.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Biên dịch các firmware C cơ bản},
+    captionpos=b,
+    label={lst:phuluc-soc-firmware-basic}
+]
+cd de2i150_cv32e40p_soc/firmware
+
+make smoke       # kiem tra nhanh cac lenh va LED pass/fail
+make benchmark   # do cac nhan INT8 va in bang ket qua qua UART
+make tiny_ai     # mo hinh INT8 nho truoc khi dua TFLM vao firmware
+make rx_smoke    # kiem tra duong UART RX bang frame co checksum
+\end{lstlisting}
+
+Với các firmware TensorFlow Lite Micro, cần dùng toolchain RISC-V có hỗ trợ C++ tiêu chuẩn. Trong đồ án, đường dẫn cụ thể của toolchain được truyền bằng biến \texttt{CROSS}; trên máy khác, chỉ cần thay tiền tố này theo vị trí cài đặt tương ứng. Đoạn mã~\ref{lst:phuluc-soc-firmware-tflm} minh họa các mục tiêu quan trọng nhất.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Biên dịch firmware TensorFlow Lite Micro},
+    captionpos=b,
+    label={lst:phuluc-soc-firmware-tflm}
+]
+cd de2i150_cv32e40p_soc/firmware
+
+make tflm_tiny_ai CROSS=/path/to/riscv-none-elf-
+make tflm_tiny_uart CROSS=/path/to/riscv-none-elf-
+make tflm_mnist_fc CROSS=/path/to/riscv-none-elf-
+make tflm_mnist_uart CROSS=/path/to/riscv-none-elf-
+\end{lstlisting}
+
+Hai firmware MNIST có vai trò khác nhau. \path|tflm_mnist_fc| chạy tập vector cố định đã nhúng trong firmware và phù hợp để kiểm tra bit-exact giữa \texttt{tflm\_ref} và \texttt{pulp\_opt}. \path|tflm_mnist_uart| nhận một tensor đầu vào 784 byte qua UART, phù hợp cho thử nghiệm với dữ liệu gửi từ máy tính và cho giao diện đồ họa đã minh họa ở Chương~\ref{chap:thuc-nghiem}.
+
+Sau khi nạp \path|.sof| tương ứng, có thể chạy các script host qua cổng UART 115200 8N1. Đoạn mã~\ref{lst:phuluc-soc-uart-run} đưa ra các lệnh thường dùng nhất cho đường UART. Tên cổng \path|/dev/ttyUSB0| cần được thay theo thiết bị thực tế trên máy.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Chạy kiểm thử UART từ máy tính host},
+    captionpos=b,
+    label={lst:phuluc-soc-uart-run}
+]
+cd de2i150_cv32e40p_soc/firmware
+
+# Kiem tra UART RX rieng
+python3 rx_smoke_runner.py /dev/ttyUSB0
+
+# Chay MNIST FC voi 32 vector co dinh
+python3 tflm_mnist_uart_runner.py /dev/ttyUSB0
+
+# Tao lai anh PGM tu tap test MNIST va chay che do anh
+python3 mnist_fc/export_test_images_pgm.py
+python3 tflm_mnist_uart_runner.py /dev/ttyUSB0 --images-dir --limit 10
+\end{lstlisting}
+
+Giao diện đồ họa dùng chung lớp giao thức UART với script dòng lệnh. Đoạn mã~\ref{lst:phuluc-soc-gui} minh họa trọn vẹn luồng chuẩn bị môi trường Python cục bộ và khởi chạy GUI MNIST UART từ thư mục gốc của kho SoC.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Khởi chạy giao diện MNIST UART},
+    captionpos=b,
+    label={lst:phuluc-soc-gui}
+]
+cd de2i150_cv32e40p_soc
+
+python3 -m venv .venv_gui
+.venv_gui/bin/python -m pip install -r firmware/gui_requirements.txt
+.venv_gui/bin/python firmware/tflm_mnist_uart_gui.py
+\end{lstlisting}
+
+Trong một lần chạy hợp lệ, các dòng phản hồi UART cần cho thấy trạng thái \texttt{pass=yes}, lớp dự đoán của \texttt{tflm\_ref} và \texttt{pulp\_opt} khớp nhau, số phần tử điểm số sai khác bằng 0 và checksum khớp. Với cấu hình MNIST FC trong Chương~\ref{chap:thuc-nghiem}, mức tăng tốc tổng hợp của đường tối ưu trên kit nằm trong khoảng 12--13 lần so với đường TFLM tham chiếu.
+
+Khi cần tạo VCD để ước lượng năng lượng bằng Quartus Power Analyzer, dùng testbench trong \path|sim/|. Script \path|run_power_vcd.sh| sẽ biên dịch firmware ở chế độ \texttt{POWER\_SIM}, chạy từng kịch bản nhân và ghi VCD vào \path|sim/vcd/|. Đoạn mã~\ref{lst:phuluc-soc-vcd} tóm tắt luồng chính.
+
+\begin{lstlisting}[
+    style=phulucsoc,
+    caption={Tạo VCD cho Quartus Power Analyzer},
+    captionpos=b,
+    label={lst:phuluc-soc-vcd}
+]
+cd de2i150_cv32e40p_soc
+
+./sim/run_power_vcd.sh --list
+./sim/run_power_vcd.sh dot4_plw_lp_clamp_custom
+./sim/run_power_vcd.sh
+\end{lstlisting}
+
+Các VCD được sinh ra từ testbench, không phải từ project Quartus đã fit. Khi nhập VCD vào Power Analyzer, entity của Power Input File cần đặt là \path|de2i150_cv32e40p_top|, không phải \path|tb_power|. Sau khi mô phỏng ở chế độ \texttt{POWER\_SIM}, script mặc định khôi phục firmware benchmark thông thường; nếu đã tự biên dịch thủ công một firmware \texttt{POWER\_SIM}, cần chạy lại firmware mong muốn trước khi tổng hợp để nạp lên kit.
+
+\section{Khả năng mở rộng luồng triển khai}
+\label{sec:phuluc-soc-mo-rong}
+
+Luồng triển khai trong phụ lục có thể được dùng lại cho các thử nghiệm tiếp theo theo ba hướng chính. Thứ nhất, có thể thay firmware trong \path|firmware/| để kiểm thử thêm các nhân INT8 mới, miễn là sau đó tạo lại \path|firmware_byte*.hex| và biên dịch lại Quartus. Thứ hai, có thể thay mô hình TFLite trong \path|firmware/mnist_fc/| bằng một mô hình nhỏ khác, nhưng cần bảo đảm tập toán tử vẫn nằm trong phần TensorFlow Lite Micro đã được sinh vào \path|third_party/tflm_tree/| hoặc cập nhật lại cây TFLM khi cần thêm toán tử. Thứ ba, có thể mở rộng wrapper SoC để thêm ngoại vi hoặc bộ nhớ lớn hơn; khi làm như vậy cần kiểm tra lại bản đồ địa chỉ, linker script, ràng buộc chân, tài nguyên FPGA và ràng buộc thời gian.
+
+Như vậy, phụ lục đã gom các bước thực hành cần thiết để tái lập cấu hình triển khai phần cứng/phần mềm dùng trong Chương~\ref{chap:thuc-nghiem}: lấy đúng kho SoC, nhận diện các điều chỉnh so với CV32E40P upstream, tạo project Quartus, biên dịch firmware, nạp thiết kế, chạy kiểm thử UART/MNIST và tạo VCD phục vụ ước lượng năng lượng. Nhờ đó, các kết quả thực nghiệm trong báo cáo có thể được đối chiếu với một luồng triển khai cụ thể thay vì chỉ dừng ở mô tả số liệu.
+
+\end{document}

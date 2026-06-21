@@ -1,0 +1,46 @@
+\begin{tikzpicture}[
+    font=\scriptsize,
+    stage/.style={draw, align=center, minimum width=1.05cm, minimum height=0.58cm, fill=gray!10},
+    exstage/.style={stage, fill=blue!10},
+    idstall/.style={stage, dashed, fill=cyan!12},
+    inst/.style={anchor=east, font=\ttfamily\scriptsize},
+    note/.style={align=center, font=\scriptsize},
+    dep/.style={-{Latex[length=2mm]}, very thick, red!75},
+    okpath/.style={-{Latex[length=2mm]}, thick, blue!75},
+    flow/.style={-{Latex[length=1.8mm]}, thick, gray!70},
+    stallarrow/.style={-{Latex[length=1.8mm]}, thick, orange!85!black}
+]
+    \foreach \x/\c in {0/C1,1.70/C2,3.40/C3,5.10/C4,6.80/C5,8.50/C6} {
+        \node[note, text width=1.0cm] at (\x, 1.88) {\c};
+        \draw[gray!35] (\x, 1.58) -- (\x, -1.92);
+    }
+
+    \node[inst] at (-0.40, 0.98)
+        {cv.mac x10,x11,x12};
+    \node[stage] (mac_if) at (0, 0.98) {IF};
+    \node[stage] (mac_id) at (1.70, 0.98) {ID};
+    \node[exstage] (mac_ex) at (3.40, 0.98) {EX\\sinh x10};
+    \node[stage] (mac_wb) at (5.10, 0.98) {WB\\ghi x10};
+
+    \node[inst] at (-0.40, -1.02)
+        {add x13,x10,x14};
+    \node[stage] (add_if) at (1.70, -1.02) {IF};
+    \node[idstall] (add_id0) at (3.40, -1.02) {ID\\đọc x10};
+    \node[idstall, fill=orange!12] (add_id1) at (5.10, -1.02) {ID giữ\\EX rỗng};
+    \node[exstage] (add_ex) at (6.80, -1.02) {EX};
+    \node[stage] (add_wb) at (8.50, -1.02) {WB};
+
+    \draw[flow] (mac_if) -- (mac_id);
+    \draw[flow] (mac_id) -- (mac_ex);
+    \draw[flow] (mac_ex) -- (mac_wb);
+
+    \draw[flow] (add_if) -- (add_id0);
+    \draw[stallarrow] (add_id0.east) -- (add_id1.west);
+    \draw[flow] (add_id1) -- (add_ex);
+    \draw[flow] (add_ex) -- (add_wb);
+
+    \draw[dep] (mac_ex.south) -- node[left, align=right, text=red!75!black]
+        {đường dài\\EX-to-ID} (add_id0.north);
+    \draw[okpath] (mac_wb.south) -- node[right, align=left, text=blue!75!black]
+        {đọc từ\\WB/RF} (add_id1.north);
+\end{tikzpicture}
