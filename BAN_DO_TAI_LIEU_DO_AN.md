@@ -4,7 +4,7 @@ Ngày cập nhật: 2026-06-21
 
 Đồ án: Mở rộng tập lệnh RISC-V cho các phép toán AI lượng tử hóa, mô phỏng trên gem5 và triển khai thực nghiệm trên kit FPGA DE2i-150/CV32E40P.
 
-File này là điểm vào của bộ tài liệu làm việc khi viết báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1 và Chương 2 ở mức nội dung hoàn chỉnh ban đầu. Chương 3 đã có bản nội dung hoàn chỉnh ban đầu cho phần thiết kế và đặc tả nhóm lệnh mở rộng, gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh và ánh xạ sang hai môi trường triển khai. Chương 4 đã được thay từ nội dung mẫu sang chương "Đánh giá qua mô phỏng gem5", gồm hiện thực gem5, kiểm thử chức năng, thiết lập benchmark, kết quả mô phỏng và phân tích riêng cho vòng lặp phần cứng trong O3. Chương 5 đã có bản nội dung hoàn chỉnh ban đầu với tên "Triển khai và đánh giá trên kit DE2i-150/CV32E40P", bao gồm luồng SoC/firmware, kiểm thử nhóm lệnh, benchmark INT8, ước lượng năng lượng, MNIST FC INT8 với TensorFlow Lite Micro, kết quả UART trên kit, tài nguyên/timing và kết chương. Báo cáo cũng đã bổ sung phụ lục gem5 và phụ lục tái lập triển khai SoC để ghi lại các lệnh chạy, tệp liên quan, đoạn mã tiêu biểu và luồng tạo project Quartus mà không làm loãng các chương chính. Vì vậy nội dung dưới đây là bản đồ để khi rà soát và viết tiếp có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
+File này là điểm vào của bộ tài liệu làm việc khi viết và rà soát báo cáo. Repo báo cáo đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và toàn bộ Chương 1 đến Chương 6 ở mức hoàn chỉnh cuối. Chương 3 đã hoàn thiện phần thiết kế và đặc tả nhóm lệnh mở rộng, gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh và ánh xạ sang hai môi trường triển khai. Chương 4 đã được thay từ nội dung mẫu sang chương "Đánh giá qua mô phỏng gem5", gồm hiện thực gem5, kiểm thử chức năng, thiết lập benchmark, kết quả mô phỏng và phân tích riêng cho vòng lặp phần cứng trong O3. Chương 5 đã hoàn thiện với tên "Triển khai và đánh giá trên kit DE2i-150/CV32E40P", bao gồm luồng SoC/firmware, kiểm thử nhóm lệnh, benchmark INT8, ước lượng năng lượng, MNIST FC INT8 với TensorFlow Lite Micro, kết quả UART trên kit, tài nguyên/timing và kết chương. Chương 6 đã hoàn thiện phần kết luận và hướng phát triển trong tương lai. Báo cáo cũng đã bổ sung phụ lục gem5 và phụ lục tái lập triển khai SoC để ghi lại các lệnh chạy, tệp liên quan, đoạn mã tiêu biểu và luồng tạo project Quartus mà không làm loãng các chương chính. Vì vậy nội dung dưới đây là bản đồ để khi rà soát cuối có thể biết cần đọc gì, lấy số liệu ở đâu và cần giữ chuẩn trình bày nào.
 
 ## 1. Bộ file hỗ trợ viết báo cáo
 
@@ -26,11 +26,11 @@ Khi bắt đầu viết một chương, đọc file này trước để xác đ�
 - Báo cáo đã có thêm phụ lục về thiết lập và tái mô phỏng nhóm lệnh mở rộng trong gem5. Phụ lục được nạp từ `Chuong/Phu_luc_C.tex` và hiện hiển thị là Phụ lục A do các phụ lục mẫu A/B đang được comment trong `DoAn.tex`. Nội dung phụ lục gồm kho mã nguồn tham chiếu, bản đồ thành phần gem5, lệnh biên dịch/chạy, cách đọc số liệu, khoanh vùng đo bằng m5ops và bảng đối chiếu từng dòng hợp ngữ trong nhân dùng `lp.setup`, `p.lw`, `dot4_acc`.
 - Chương 5 đã có bản nội dung hoàn chỉnh ban đầu trong `Chuong/5_Thuc_nghiem.tex`. Chương này trình bày từ nền tảng DE2i-150/CV32E40P, luồng SoC/firmware, xử lý timing khi bật PULP, ánh xạ/kiểm thử smoke, phương pháp đo, benchmark INT8 và năng lượng ước lượng, đến triển khai MNIST FC INT8 với TensorFlow Lite Micro, kiểm thử UART/GUI trên kit, tài nguyên/timing của cấu hình cuối và kết chương.
 - Báo cáo đã có thêm phụ lục tái lập triển khai SoC CV32E40P trên kit DE2i-150. Phụ lục được nạp từ `Chuong/Phu_luc_D.tex` và hiện hiển thị là Phụ lục B. Nội dung phụ lục gồm kho mã nguồn SoC public, môi trường cần có, cấu trúc thư mục, clock gate FPGA-safe, các bản vá SystemVerilog cho Quartus, cách tạo project Quartus, biên dịch firmware, kiểm tra LED smoke, chạy UART/MNIST và tạo VCD cho Power Analyzer.
-- Chương 6 vẫn còn nội dung cần viết tiếp.
+- Chương 6 đã hoàn thiện trong `Chuong/6_Ket_luan.tex`, gồm phần tổng quan chương, kết luận và hướng phát triển trong tương lai. Nội dung kết luận nhắc lại bài toán, hướng tiếp cận ở mức tập lệnh, luồng đánh giá gem5/DE2i-150-CV32E40P, kết quả tiêu biểu và một số hạn chế phù hợp. Phần hướng phát triển tập trung vào ba nhánh: hoàn thiện mô hình gem5, cải thiện toolchain/lớp phần mềm và mở rộng sang mô hình/toán tử thực tế hơn.
 - Các hình TikZ tự vẽ hiện đã được quản lý trong `Hinh_ve/` và được nạp bằng `\input{Hinh_ve/...}`. Các file đáng chú ý gồm `int8_inference_flow.tikz`, `solution_overview.tikz`, `fc_mac_model_layers.tikz`, `fc_mac_growth.tikz`, `ai_ext_loop_semantics.tikz`, `dot4_acc_semantics.tikz`, `gem5_ai_ext_implementation.tikz`, `gem5_perf_speedup.tikz`, `hwloop_o3_frontend.tikz`, `de2i150_soc_experiment_flow.tikz`, `fpga_timing_bubble.tikz` và `mnist_fc_tflm_flow.tikz`. Chương 5 còn dùng các ảnh thực nghiệm trong `Hinh_ve/` như RTL view của lõi CV32E40P, waveform Questa cho `dot4_plw_lp_clamp_custom` và giao diện MNIST UART GUI.
-- `Danh_sach_tai_lieu_tham_khao.bib` đã có các nguồn nền tảng dùng trong Chương 1 và Chương 2, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, tài liệu LiteRT Microcontrollers, đặc tả lượng tử hóa LiteRT/INT8 và một số nghiên cứu liên quan về suy luận trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Khi viết Chương 3 trở đi vẫn cần bổ sung nguồn chính thức hoặc bài báo phù hợp với từng claim kỹ thuật mới.
+- `Danh_sach_tai_lieu_tham_khao.bib` đã có các nguồn nền tảng dùng trong toàn bộ báo cáo, gồm RISC-V ISA, CV32E40P, gem5, TensorFlow Lite Micro, tài liệu LiteRT Microcontrollers, đặc tả lượng tử hóa LiteRT/INT8 và một số nghiên cứu liên quan về suy luận trên hệ nhúng, tối ưu phần mềm, SIMD/RVV và bộ tăng tốc chuyên dụng. Các mục template không dùng được giữ lại bằng comment `%` để bảo toàn mẫu định dạng nhưng không để biber xử lý.
 - `Tu_viet_tat.tex` đã được thay từ danh sách mẫu sang danh mục thuật ngữ của đồ án, chỉ giữ các mục cần hỗ trợ người đọc như MAC, SIMD, RVV, SoC, TFLM/LiteRT, MNIST, ReLU, TPU, TOPS. Các thuật ngữ quá phổ thông hoặc đã được giải thích ngay trong nội dung không nên đưa vào để tránh làm danh mục bị loãng.
-- `DoAn.tex` đang giữ `babel` tiếng Anh để danh mục tài liệu tham khảo hiển thị đúng chuẩn IEEE, đồng thời đã Việt hóa caption hình/bảng và header chương bằng cấu hình riêng. Khi sửa format, cần tránh đổi `babel` nếu chưa kiểm tra lại bibliography.
+- `DoAn.tex` đang giữ `babel` tiếng Anh để danh mục tài liệu tham khảo hiển thị đúng chuẩn IEEE, đồng thời đã Việt hóa caption hình/bảng và header chương bằng cấu hình riêng. Bản cuối dùng biber cho `biblatex`, giữ `\changefontsizes{13pt}` cho cỡ chữ chính, thêm `fix-cm`, tăng `headheight`, cấu hình `pageanchor` cho phần đầu báo cáo và chỉ in glossary dạng acronym để giảm cảnh báo không ảnh hưởng nội dung. Khi sửa format, cần tránh đổi `babel` hoặc thêm `csquotes` nếu chưa kiểm tra lại bibliography.
 - Các file README/HANDOFF trong repo gem5 và SoC là nguồn nội bộ để hiểu đồ án và lấy số liệu/log. Chúng không thay thế tài liệu tham khảo học thuật hoặc tài liệu chính thức trong `.bib`.
 - Phần gem5 không chỉ nằm trong `tests/gem5/riscv_ai_ext`. Đồ án đã chỉnh cả phần ISA, bộ giải mã, ngữ nghĩa lệnh, định dạng truy cập bộ nhớ, thanh ghi trạng thái phụ, cơ chế đổi hướng của vòng lặp phần cứng và một số đường xử lý trong O3/khối lấy lệnh. Chương 4 hiện đã làm rõ điểm này ở mức báo cáo, không đi sâu quá mức vào từng dòng code.
 - Phần thực nghiệm trên kit là nguồn kết quả chính. gem5 dùng để phân tích, mô phỏng, đánh giá độ nhạy và hỗ trợ câu chuyện kỹ thuật, không khẳng định là mô hình khớp từng chu kỳ của CV32E40P.
@@ -187,15 +187,15 @@ Nội dung chính:
 
 ### Chương 6: Kết luận
 
-Mục tiêu: kết luận theo chuẩn đồ án nghiên cứu: nhắc lại vấn đề, tóm tắt giải pháp, đóng góp, kết quả chính, hạn chế và hướng phát triển.
+Trạng thái hiện tại: đã có bản hoàn chỉnh trong `Chuong/6_Ket_luan.tex`. Chương gồm đoạn tổng quan nối từ Chương 5, mục kết luận và mục hướng phát triển trong tương lai.
 
-Các ý cần có:
+Nội dung đã chốt:
 
-- Đã đặc tả và mô phỏng các operation phục vụ AI lượng tử hóa.
-- Đã triển khai và đánh giá trên kit DE2i-150/CV32E40P.
-- Kết quả thực nghiệm cho thấy lợi ích rõ nhất ở phép tích vô hướng đóng gói kết hợp tải hậu tăng và vòng lặp phần cứng.
-- Đã chứng minh khả năng chạy TFLM/MNIST INT8 trên SoC và tối ưu bằng CORE-V/PULP.
-- Hạn chế: gem5 không khớp từng chu kỳ với board; board dùng ánh xạ CORE-V/PULP; một số tối ưu cho kernel, requantization và công suất còn có thể phát triển.
+- Phần kết luận nhắc lại bài toán tối ưu suy luận AI lượng tử hóa trên RISC-V nhúng và lý do chọn hướng tiếp cận ở mức tập lệnh.
+- Đồ án tổng kết nhóm thao tác `mac`, `dot4_acc`, `relu`, `clamp`, `p.lw`, `lp.setup` và luồng đánh giá hai nhánh: gem5 dùng mã hóa thử nghiệm `custom-0`, kit dùng ánh xạ CORE-V/PULP trên CV32E40P thông qua firmware.
+- Kết quả tiêu biểu được nêu ở mức vừa đủ: `dot4_acc` đạt 6,33 lần, tổ hợp `dot4_acc`/tải hậu tăng/vòng lặp phần cứng đạt 13,10 lần, MNIST FC INT8 đạt 12,39 lần ở khoảng đo có kiểm chứng và xấp xỉ 12,52 lần trong chế độ nhận ảnh qua UART.
+- Hạn chế được trình bày chọn lọc: gem5 chưa khớp từng chu kỳ với kit, đánh giá năng lượng mới ở mức tương đối từ VCD/Power Analyzer, phạm vi mô hình thực nghiệm hiện tập trung vào nhân INT8 và MNIST FC.
+- Hướng phát triển được giữ trong ba nhánh trọng tâm: hoàn thiện gem5, cải thiện toolchain/lớp phần mềm thay cho việc dùng trực tiếp `.insn`, và mở rộng sang CNN/convolution/depthwise convolution hoặc các mô hình TinyML thực tế hơn.
 
 ## 4. Nguyên tắc phân vai gem5 và kit trong báo cáo
 
@@ -209,7 +209,7 @@ Các ý cần có:
 ## 5. Checklist trước khi viết từng chương
 
 - Đọc `HUONG_DAN_VIET_VA_TRICH_DAN.md` để tránh lối viết gạch đầu dòng/template.
-- Với các chương còn template, xóa nội dung mẫu trong file `.tex` trước khi viết thật.
+- Khi phát hiện đoạn template còn sót, xóa nội dung mẫu trong file `.tex` trước khi coi bản thảo là cuối.
 - Ghi lại nguồn nội bộ đã dùng trong quá trình viết để sau này dễ đối chiếu.
 - Với kiến thức nền hoặc claim không phải do mình triển khai/đo, thêm TODO citation và cập nhật `.bib` sau.
 - Với số liệu, luôn ghi nguồn log/file và ngày chạy nếu có.

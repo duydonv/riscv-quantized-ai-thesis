@@ -2,7 +2,7 @@
 
 Ngày cập nhật: 2026-06-21
 
-File này giúp tra cứu nhanh khi viết và rà soát phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; Chương 3 đã có bản hoàn chỉnh ban đầu cho phần thiết kế, đặc tả ngữ nghĩa và ánh xạ nhóm lệnh mở rộng sang gem5 và DE2i-150/CV32E40P; Chương 4 đã có bản hoàn chỉnh ban đầu cho phần đánh giá qua mô phỏng gem5. Chương 5 cũng đã có bản hoàn chỉnh ban đầu cho phần triển khai và đánh giá trên kit, gồm SoC/firmware, benchmark INT8, ước lượng năng lượng, TensorFlow Lite Micro, MNIST FC, UART/GUI, tài nguyên và timing. Báo cáo hiện có hai phụ lục kỹ thuật: phụ lục gem5 để tái mô phỏng và phụ lục SoC để tái lập triển khai Quartus/DE2i-150. File này tiếp tục đóng vai trò bản đồ đối chiếu khi rà soát số liệu, câu chữ kỹ thuật và các lệnh tái lập.
+File này giúp tra cứu nhanh khi viết và rà soát phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã hoàn thiện phần nền tảng lý thuyết; Chương 3 đã hoàn thiện phần thiết kế, đặc tả ngữ nghĩa và ánh xạ nhóm lệnh mở rộng sang gem5 và DE2i-150/CV32E40P; Chương 4 đã hoàn thiện phần đánh giá qua mô phỏng gem5; Chương 5 đã hoàn thiện phần triển khai và đánh giá trên kit, gồm SoC/firmware, benchmark INT8, ước lượng năng lượng, TensorFlow Lite Micro, MNIST FC, UART/GUI, tài nguyên và timing; Chương 6 đã hoàn thiện phần kết luận và hướng phát triển trong tương lai. Báo cáo hiện có hai phụ lục kỹ thuật: phụ lục gem5 để tái mô phỏng và phụ lục SoC để tái lập triển khai Quartus/DE2i-150. File này tiếp tục đóng vai trò bản đồ đối chiếu khi rà soát số liệu, câu chữ kỹ thuật và các lệnh tái lập.
 
 ## 1. Nguyên tắc diễn đạt kỹ thuật
 
@@ -14,6 +14,7 @@ File này giúp tra cứu nhanh khi viết và rà soát phần kỹ thuật c�
 - Phụ lục gem5 chỉ nên đóng vai trò thông tin bổ sung để tái mô phỏng: kho mã nguồn, bản đồ tệp, lệnh chạy, cách đọc đầu ra và đoạn mã tiêu biểu. Không đưa thêm phân tích kết quả mới vào phụ lục nếu nội dung đó thuộc Chương 4 hoặc Chương 5.
 - Trong Chương 5, giữ thứ tự phương pháp đo đã chốt: cách đọc `mcycle`/`minstret`, công thức tính speedup, bảng mốc so sánh, điều kiện kiểm chứng đúng/sai, khác biệt giữa khoảng đo có kiểm chứng và khoảng đo riêng phần suy luận, rồi mới tới quy đổi năng lượng tương đối.
 - Phụ lục SoC chỉ nên là hướng dẫn tái lập triển khai: repo, môi trường, tạo project Quartus, biên dịch firmware, kiểm tra LED/UART và tạo VCD. Không đưa thêm phân tích hiệu năng mới vào phụ lục nếu nội dung đó thuộc Chương 5.
+- Chương 6 chỉ tổng kết các kết quả đã chứng minh trong các chương trước. Không thêm claim kỹ thuật hoặc số liệu mới ở chương kết luận nếu chưa được trình bày và kiểm chứng ở Chương 4/Chương 5.
 
 ## 2. Bản đồ gem5
 
