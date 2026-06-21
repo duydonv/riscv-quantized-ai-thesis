@@ -1,0 +1,39 @@
+\begin{tikzpicture}[
+    font=\scriptsize,
+    block/.style={draw, rounded corners=2pt, align=center, minimum height=1.02cm, text width=3.55cm, fill=gray!8},
+    data/.style={block, fill=yellow!13},
+    train/.style={block, fill=orange!10},
+    artifact/.style={block, fill=blue!8},
+    board/.style={block, fill=green!8},
+    check/.style={block, fill=cyan!8},
+    group/.style={rounded corners=3pt, thick},
+    title/.style={font=\scriptsize\bfseries, align=left, anchor=north west, text width=3.20cm, inner sep=0pt},
+    arrow/.style={-{Latex[length=2mm]}, thick}
+]
+    \draw[group, fill=yellow!4] (-5.85, -4.65) rectangle (5.85, 1.75);
+    \node[title] at (-5.45, 1.48) {Tạo mô hình\\và dữ liệu nhúng\\trên máy tính chủ};
+
+    \node[data] (mnist) at (0, 0.75) {Dữ liệu MNIST\\\(28{\times}28 \rightarrow 784\)};
+    \node[train] (float) at (0, -0.65) {Huấn luyện Keras\\acc. float 96,30\%};
+    \node[artifact] (int8) at (0, -2.05) {Lượng tử hóa TFLite INT8\\2 toán tử FC, acc. 96,28\%};
+    \node[artifact] (carray) at (0, -3.75) {Flatbuffer và mảng C\\28.368 byte, 32 mẫu kiểm chứng};
+
+    \draw[group, fill=green!4] (-5.85, -10.00) rectangle (5.85, -4.95);
+    \node[title] at (-5.45, -5.22) {Chạy và đối chiếu\\trên kit DE2i-150/\\CV32E40P};
+
+    \node[board, text width=3.90cm] (model) at (0, -6.05) {Cùng flatbuffer TFLite\\nhúng trong firmware};
+    \node[board, text width=3.05cm] (ref) at (-2.55, -7.60) {\texttt{tflm\_ref}\\TFLM tham chiếu};
+    \node[board, text width=3.05cm] (opt) at (2.55, -7.60) {\texttt{pulp\_opt}\\\texttt{dot4}, \texttt{p.lw}, \texttt{lp.setup}};
+    \node[check, text width=4.25cm] (verify) at (0, -9.15) {Đối chiếu kết quả\\lớp, điểm đầu ra, checksum};
+    \coordinate (split) at (0, -6.75);
+
+    \draw[arrow] (mnist.south) -- (float.north);
+    \draw[arrow] (float.south) -- (int8.north);
+    \draw[arrow] (int8.south) -- (carray.north);
+    \draw[arrow] (carray.south) -- (model.north);
+    \draw[thick] (model.south) -- (split);
+    \draw[arrow] (split) -| (ref.north);
+    \draw[arrow] (split) -| (opt.north);
+    \draw[arrow] (ref.south) |- (verify.west);
+    \draw[arrow] (opt.south) |- (verify.east);
+\end{tikzpicture}
