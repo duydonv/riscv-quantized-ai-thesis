@@ -1,8 +1,8 @@
 # Bản đồ tham chiếu kỹ thuật
 
-Ngày cập nhật: 2026-06-20
+Ngày cập nhật: 2026-06-21
 
-File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; Chương 3 đã có bản hoàn chỉnh ban đầu cho phần thiết kế, đặc tả ngữ nghĩa và ánh xạ nhóm lệnh mở rộng sang gem5 và DE2i-150/CV32E40P; Chương 4 đã có bản hoàn chỉnh ban đầu cho phần đánh giá qua mô phỏng gem5. Báo cáo cũng đã có phụ lục gem5 bổ sung quy trình thiết lập và tái mô phỏng để người đọc đối chiếu lệnh chạy, tệp liên quan và đoạn mã tiêu biểu mà không làm loãng nội dung Chương 4. File này tiếp tục đóng vai trò bản đồ đối chiếu khi viết Chương 5 về thực nghiệm trên kit và khi rà soát các số liệu kỹ thuật.
+File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. Nó tách rõ phần gem5, phần SoC/FPGA, firmware/benchmark và TFLM. Tính đến bản cập nhật này, Chương 2 đã có bản hoàn chỉnh ban đầu cho phần nền tảng lý thuyết; Chương 3 đã có bản hoàn chỉnh ban đầu cho phần thiết kế, đặc tả ngữ nghĩa và ánh xạ nhóm lệnh mở rộng sang gem5 và DE2i-150/CV32E40P; Chương 4 đã có bản hoàn chỉnh ban đầu cho phần đánh giá qua mô phỏng gem5. Báo cáo cũng đã có phụ lục gem5 bổ sung quy trình thiết lập và tái mô phỏng để người đọc đối chiếu lệnh chạy, tệp liên quan và đoạn mã tiêu biểu mà không làm loãng nội dung Chương 4. Chương 5 đã có bản nháp cho phần mở chương và các mục 5.1--5.4, tập trung vào nền tảng phần cứng, luồng triển khai trên kit, hiện thực CV32E40P/PULP, kiểm thử smoke và phương pháp đo. File này tiếp tục đóng vai trò bản đồ đối chiếu khi viết các mục kết quả còn lại của Chương 5 và khi rà soát các số liệu kỹ thuật.
 
 ## 1. Nguyên tắc diễn đạt kỹ thuật
 
@@ -12,6 +12,7 @@ File này giúp tra cứu nhanh khi viết phần kỹ thuật của báo cáo. 
 - Khi nói "mở rộng tập lệnh", cần làm rõ phạm vi: đồ án đặc tả/đồng bộ ngữ nghĩa các thao tác AI và triển khai qua hai môi trường, trong đó phần cứng thực tế tận dụng các lệnh CORE-V/PULP có sẵn của CV32E40P.
 - Chương 2 chỉ trình bày nền tảng ở mức tổng quan; Chương 3 đã chốt mức đặc tả và ánh xạ tổng quan. Chương 4 đã trình bày các chi tiết gem5, smoke test, benchmark và số liệu mô phỏng; số liệu thực nghiệm trên kit cần để sang Chương 5.
 - Phụ lục gem5 chỉ nên đóng vai trò thông tin bổ sung để tái mô phỏng: kho mã nguồn, bản đồ tệp, lệnh chạy, cách đọc đầu ra và đoạn mã tiêu biểu. Không đưa thêm phân tích kết quả mới vào phụ lục nếu nội dung đó thuộc Chương 4 hoặc Chương 5.
+- Trong Chương 5, giữ thứ tự phương pháp đo đã chốt: cách đọc `mcycle`/`minstret`, công thức tính speedup, bảng mốc so sánh, điều kiện kiểm chứng đúng/sai, khác biệt giữa khoảng đo có kiểm chứng và khoảng đo riêng phần suy luận, rồi mới tới quy đổi năng lượng tương đối.
 
 ## 2. Bản đồ gem5
 
@@ -119,6 +120,9 @@ Nội dung phụ lục đã chốt:
 | `/home/duydonv/de2i150_cv32e40p_soc/fpga_patches/README.md` | Ghi chú patch SV-2012 -> SV-2005/Quartus |
 | `/home/duydonv/de2i150_cv32e40p_soc/de2i150_cv32e40p_top.sdc` | Timing constraints |
 | `/home/duydonv/de2i150_cv32e40p_soc/PIN_ASSIGNMENTS.md` | Pin mapping |
+| `/home/duydonv/Downloads/20225608_PhamDuyDong_20252/Hinh_ve/quartus_cv32e40p_core_rtl_view.png` | Ảnh RTL view lõi CV32E40P từ Quartus, dùng ở Mục 5.1 để minh họa phần lõi trong thiết kế tổng hợp |
+| `/home/duydonv/Downloads/20225608_PhamDuyDong_20252/Hinh_ve/de2i150_soc_experiment_flow.tikz` | Hình tự vẽ về luồng triển khai và thu kết quả trên DE2i-150/CV32E40P |
+| `/home/duydonv/Downloads/20225608_PhamDuyDong_20252/Hinh_ve/fpga_timing_bubble.tikz` | Hình tự vẽ minh họa chèn một chu kỳ rỗng để ngắt phụ thuộc/timing path dài |
 
 Các điểm kỹ thuật nên đưa vào Chương 5 nếu cần:
 
@@ -126,6 +130,8 @@ Các điểm kỹ thuật nên đưa vào Chương 5 nếu cần:
 - `FPGA_TIMING_MODE=1` để đóng timing 50 MHz trên Cyclone IV.
 - Firmware build `rv32im_zicsr`, không dùng `rv32imc` trong giai đoạn benchmark để hardware loop word-aligned và đọc CSR.
 - BRAM 128 KB, byte-lane M9K, UART TX/RX MMIO.
+- Các chỉnh sửa tương thích SystemVerilog-2005/Quartus diễn ra từ giai đoạn tích hợp lõi lên FPGA, trước khi đi sâu vào bật PULP và benchmark. Khi trình bày cần tránh tạo cảm giác các patch SV-2012 sang SV-2005 chỉ xuất hiện ở giai đoạn bật PULP.
+- Mục 5.2 đã trình bày việc xử lý ràng buộc thời gian khi bật PULP theo hướng chèn chu kỳ rỗng ở đường phụ thuộc dài; số liệu benchmark sau đó đã bao gồm chi phí của chu kỳ rỗng này.
 
 ## 4. Firmware, benchmark và TFLM
 
@@ -141,6 +147,8 @@ Các điểm kỹ thuật nên đưa vào Chương 5 nếu cần:
 | `/home/duydonv/de2i150_cv32e40p_soc/firmware/tflm_mnist_uart.cc` | MNIST runtime input over UART |
 | `/home/duydonv/de2i150_cv32e40p_soc/firmware/UART_RX.md` | UART RX MMIO, frame protocol, runners |
 | `/home/duydonv/de2i150_cv32e40p_soc/firmware/mnist_fc/README.md` | MNIST model artifacts, accuracy, board result |
+
+Trạng thái trong báo cáo: Mục 5.3 đã dùng `ai_ops.h` để trình bày lớp hàm bao firmware và kiểm thử smoke. Bảng ánh xạ giữ cột lệnh CORE-V/PULP tương ứng, còn bảng kiểm thử smoke và bảng mốc so sánh ở Mục 5.4 dùng tên giao diện `ai_*`/`AI_*` để tránh lặp lại chi tiết `cv.*` sau khi đã ánh xạ.
 
 ## 5. Mapping operation giữa báo cáo, gem5 và board
 

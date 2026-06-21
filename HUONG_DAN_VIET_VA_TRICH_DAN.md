@@ -1,12 +1,12 @@
 # Hướng dẫn viết và trích dẫn cho báo cáo
 
-Ngày cập nhật: 2026-06-20
+Ngày cập nhật: 2026-06-21
 
 File này tóm tắt các lưu ý quan trọng từ `Chuong/1_Gioi_thieu.tex` và `Chuong/Phu_luc_A.tex`, đồng thời chuyển chúng thành checklist thực hành cho đồ án này.
 
 ## 1. Trạng thái template
 
-Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1, Chương 2, Chương 3 và Chương 4 ở mức nội dung hoàn chỉnh ban đầu. Chương 2 đã hoàn thiện phần nền tảng về ngữ cảnh bài toán, nghiên cứu liên quan, suy luận INT8, RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro. Chương 3 đã hoàn thiện phần thiết kế và đặc tả nhóm lệnh mở rộng, bao gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh, ánh xạ sang gem5/DE2i-150-CV32E40P và đoạn kết nối sang Chương 4. Chương 4 đã hoàn thiện phần đánh giá qua mô phỏng gem5, gồm hiện thực, smoke test, benchmark mô phỏng, phân tích kết quả và mô hình vòng lặp phần cứng trong O3. Báo cáo cũng đã có phụ lục gem5 bổ sung phần thiết lập và tái mô phỏng, gồm kho mã nguồn, bản đồ tệp, lệnh chạy, cách đọc số liệu và đoạn mã tiêu biểu. Các chương từ Chương 5 đến Chương 6 vẫn cần được thay bằng nội dung đồ án khi viết tiếp. Khi viết từng chương:
+Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh, Chương 1, Chương 2, Chương 3 và Chương 4 ở mức nội dung hoàn chỉnh ban đầu. Chương 2 đã hoàn thiện phần nền tảng về ngữ cảnh bài toán, nghiên cứu liên quan, suy luận INT8, RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro. Chương 3 đã hoàn thiện phần thiết kế và đặc tả nhóm lệnh mở rộng, bao gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh, ánh xạ sang gem5/DE2i-150-CV32E40P và đoạn kết nối sang Chương 4. Chương 4 đã hoàn thiện phần đánh giá qua mô phỏng gem5, gồm hiện thực, smoke test, benchmark mô phỏng, phân tích kết quả và mô hình vòng lặp phần cứng trong O3. Báo cáo cũng đã có phụ lục gem5 bổ sung phần thiết lập và tái mô phỏng, gồm kho mã nguồn, bản đồ tệp, lệnh chạy, cách đọc số liệu và đoạn mã tiêu biểu. Chương 5 đã đổi tên thành "Triển khai và đánh giá trên kit DE2i-150/CV32E40P" và đã có bản nháp cho phần mở chương cùng các mục 5.1--5.4; các mục kết quả từ 5.5 trở đi và Chương 6 vẫn cần được thay bằng nội dung đồ án khi viết tiếp. Khi viết từng chương:
 
 - Không giữ nguyên các đoạn "Sinh viên cần..." trong bản thảo cuối.
 - Không để các dòng `\textcolor{red}{Chú ý...}` của template trong bản nộp.
@@ -60,6 +60,8 @@ Ví dụ áp dụng cho đồ án:
 - Kết Chương 4 nên dẫn sang Chương 5 bằng ý: mô phỏng cho thấy xu hướng và kiểm tra logic, còn hiệu quả thực tế cần đánh giá trên kit DE2i-150/CV32E40P.
 - Với Chương 3, bản hiện tại đã chốt mạch từ cơ sở lựa chọn nhóm lệnh đến đặc tả thao tác và ánh xạ sang gem5/CV32E40P. Khi rà soát lại, cần giữ cách diễn đạt hiện có: nhánh gem5 là mô hình thử nghiệm dùng `custom-0`, còn nhánh phần cứng ánh xạ cùng ngữ nghĩa sang CORE-V/PULP thông qua lớp firmware và vẫn bao gồm nhiều công việc tích hợp/kiểm chứng.
 - Với Chương 4, bản hiện tại đã chốt mạch từ hiện thực gem5, kiểm thử chức năng, thiết lập benchmark, phân tích số liệu mô phỏng đến giới hạn của mô hình O3. Khi viết Chương 5, cần giữ cách phân vai này: gem5 dùng để kiểm chứng và phân tích xu hướng, còn kit DE2i-150/CV32E40P dùng để đánh giá hiệu quả thực nghiệm.
+- Với Chương 5, phần mở chương và các mục 5.1--5.4 đã chốt mạch triển khai trên kit: nền tảng phần cứng, hiện thực CV32E40P/PULP và xử lý timing, ánh xạ/kiểm thử smoke nhóm lệnh mở rộng, phương pháp đo và kiểm chứng kết quả. Khi viết tiếp 5.5 trở đi, cần bám mạch này để số liệu benchmark và MNIST được hiểu như phần tiếp nối tự nhiên của phương pháp đo, không mở lại các mốc bring-up như kết quả chính.
+- Trong Mục 5.4, giữ thứ tự đã chốt: đo `mcycle`/`minstret`, tính speedup, quy ước mốc so sánh, kiểm chứng đúng/sai, phân biệt khoảng đo có kiểm chứng với khoảng đo riêng phần suy luận, và cuối cùng là quy đổi năng lượng tương đối.
 - Với phụ lục gem5, cần giữ giọng văn như thông tin bổ sung để người đọc có thể lần theo quy trình tái mô phỏng. Không biến phụ lục thành một tutorial quá dài, cũng không lặp lại đặc tả ngữ nghĩa ở Chương 3 hoặc phân tích kết quả ở Chương 4.
 
 ## 5. Hình, bảng, công thức
@@ -70,6 +72,7 @@ Các quy tắc bắt buộc:
 - Không chèn hình/bảng chỉ để minh họa cho đẹp; phải có đoạn giải thích người đọc cần rút ra điều gì.
 - Caption phải đủ rõ để người đọc hiểu nội dung chính.
 - Với bảng số liệu, cần nói rõ đơn vị, điều kiện đo, baseline và cách tính speedup.
+- Với các công thức quy ước đo trong Chương 5, có thể dùng dạng hiển thị không đánh số nếu không tham chiếu lại bằng "Công thức (x.y)". Chỉ đánh số công thức khi công thức là kết quả lý thuyết quan trọng hoặc được gọi lại nhiều lần trong phần phân tích.
 - Với hình tự vẽ dựa trên kiến trúc repo, vẫn nên ghi rõ trong phần mô tả rằng hình được tổng hợp từ thiết kế/triển khai của đồ án.
 - Các hình TikZ tự vẽ nên đặt trong `Hinh_ve/*.tikz` và nạp bằng `\input{Hinh_ve/...}` để file chương gọn và dễ theo dõi diff.
 - Với phụ lục có đoạn mã dài, cần có đoạn dẫn hoặc bảng đối chiếu giúp người đọc hiểu đoạn mã đang minh họa thao tác nào. Không nên đưa nguyên một listing Assembly mà thiếu giải thích.
