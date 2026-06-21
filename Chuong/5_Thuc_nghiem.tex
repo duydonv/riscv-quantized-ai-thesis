@@ -52,7 +52,7 @@ Bao quanh lõi CV32E40P là module mức đỉnh của SoC. Module này ánh x�
 
 Thiết kế không sử dụng bộ nạp chương trình ở thời gian chạy, nên nội dung BRAM được đưa vào FPGA ngay trong quá trình tổng hợp. Chương trình nhúng sau khi biên dịch được chuyển thành bốn tệp hex theo mẫu \texttt{firmware\_byteN.hex}, với \texttt{N} từ 0 đến 3, rồi được Quartus nạp vào các làn byte của BRAM thông qua \texttt{\$readmemh}. Vì vậy, mỗi phiên bản chương trình dùng cho đo nhân hoặc TensorFlow Lite Micro tương ứng với một tệp cấu hình FPGA có nội dung BRAM đã được cố định.
 
-Bên cạnh cấu trúc phần cứng nêu trên, quá trình xây dựng nền tảng còn bao gồm các chỉnh sửa tương thích với Quartus Lite. Cụ thể, đồ án lựa chọn các tệp RTL cần thiết, thay khối điều khiển cổng xung nhịp dùng cho mô phỏng bằng phiên bản phù hợp với FPGA, chuyển một số cú pháp SystemVerilog-2012 sang dạng SystemVerilog-2005 mà Quartus chấp nhận, viết module mức đỉnh của SoC bằng Verilog-2001 và kiểm tra các chương trình nhúng cơ bản. Các chỉnh sửa này thuộc giai đoạn đưa CV32E40P lên FPGA ban đầu; những thay đổi liên quan tới bật PULP, xử lý ràng buộc thời gian và đo hiệu năng được trình bày riêng ở các mục tiếp theo.
+Bên cạnh cấu trúc phần cứng nêu trên, quá trình xây dựng nền tảng còn bao gồm các chỉnh sửa tương thích với Quartus Lite. Cụ thể, đồ án lựa chọn các tệp RTL cần thiết, thay khối điều khiển cổng xung nhịp dùng cho mô phỏng bằng phiên bản phù hợp với FPGA, chuyển một số cú pháp SystemVerilog-2012 sang dạng SystemVerilog-2005 mà Quartus chấp nhận, viết module mức đỉnh của SoC bằng Verilog-2001 và kiểm tra các chương trình nhúng cơ bản. Các chỉnh sửa này thuộc giai đoạn đưa CV32E40P lên FPGA ban đầu; những thay đổi liên quan tới bật PULP, xử lý ràng buộc thời gian và đo hiệu năng được trình bày riêng ở các mục tiếp theo. Quy trình tái lập các chỉnh sửa này được tóm tắt trong Phụ lục~\ref{app:soc-trien-khai}.
 
 Trên nền tảng đã được cố định đó, các thí nghiệm trong chương này được triển khai theo cùng một luồng, như khái quát trong Hình~\ref{fig:de2i150-soc-experiment-flow}. Trên máy tính điều khiển, chương trình nhúng được biên dịch bằng bộ công cụ RISC-V và chuyển thành các tệp hex theo từng làn byte để khởi tạo BRAM. Quartus tiếp đó tổng hợp thiết kế, tạo tệp cấu hình FPGA và nạp xuống kit. Khi chương trình bắt đầu chạy, CV32E40P thực thi mã lệnh trong BRAM, truy cập UART/LED qua vùng vào/ra ánh xạ bộ nhớ và gửi kết quả đo về máy tính. Sơ đồ này tập trung vào các quan hệ chức năng cần thiết cho quá trình đo, trong khi các chi tiết tín hiệu mức RTL được lược bỏ để giữ mạch trình bày ở mức hệ thống.
 
@@ -243,7 +243,7 @@ Bên cạnh số chu kỳ, đồ án cũng ước lượng năng lượng tươn
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.96\linewidth]{Hinh_ve/questa_dot4_plw_lp_clamp_custom_waveform.png}
-    \caption{Dạng sóng mô phỏng RTL của kịch bản \texttt{dot4\_plw\_lp\_clamp\_custom} dùng để sinh VCD hoạt động}
+    \caption[Dạng sóng RTL sinh VCD cho biến thể dòng dữ liệu tối ưu]{Dạng sóng mô phỏng RTL của kịch bản \texttt{dot4\_plw\_lp\_clamp\_custom} dùng để sinh VCD hoạt động}
     \label{fig:questa-dot4-plw-lp-clamp-waveform}
 \end{figure}
 

@@ -1,12 +1,101 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
+Chương~\ref{chap:thuc-nghiem} đã trình bày quá trình triển khai nhóm thao tác AI
+lượng tử hóa trên kit DE2i-150/CV32E40P và các kết quả thực nghiệm thu được với
+các nhân INT8 cũng như mô hình MNIST FC INT8 chạy bằng TensorFlow Lite Micro.
+Trên cơ sở các kết quả đó, chương này tổng kết lại những vấn đề đồ án đã giải
+quyết được, nêu các hạn chế còn tồn tại và đề xuất một số hướng phát triển tiếp
+theo. Nội dung chương gồm hai phần chính: phần kết luận về kết quả và đóng góp
+của đồ án, sau đó là phần định hướng phát triển trong tương lai.
+
 \section{Kết luận}
 
-Sinh viên nhắc lại các vấn đề mà đồ án đã giải quyết được, cũng như những vấn đề còn tồn đọng của đồ án.  
+Đồ án xuất phát từ bài toán tối ưu phần tính toán của suy luận AI lượng tử hóa
+trên bộ xử lý RISC-V nhúng. Trong bối cảnh các mô hình INT8 giúp giảm kích
+thước dữ liệu nhưng vẫn tạo ra nhiều vòng lặp nhân--cộng, tải dữ liệu tuần tự
+và điều khiển lặp, đồ án lựa chọn hướng tiếp cận ở mức tập lệnh. Mục tiêu của
+hướng này là giảm số lệnh động và chi phí điều khiển trong các đoạn tính toán
+lặp lại, nhưng vẫn giữ mô hình lập trình của một bộ xử lý RISC-V tổng quát thay
+vì chuyển toàn bộ bài toán sang một bộ tăng tốc chuyên dụng.
+
+Về mặt thiết kế, đồ án đã đặc tả một nhóm thao tác phục vụ suy luận INT8 gồm
+\texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw}
+và \texttt{lp.setup}. Các thao tác này lần lượt đại diện cho nhân--cộng tích
+lũy, tích vô hướng trên bốn phần tử INT8 đóng gói, kích hoạt, giới hạn miền giá
+trị, tải dữ liệu kèm hậu tăng địa chỉ và thiết lập vòng lặp phần cứng. Trên cơ
+sở đặc tả đó, đồ án đã xây dựng một luồng đánh giá gồm hai nhánh bổ trợ cho
+nhau: nhánh mô phỏng hiện thực nhóm lệnh bằng mã hóa thử nghiệm trong vùng
+\texttt{custom-0} của gem5, còn nhánh thực nghiệm ánh xạ cùng lớp ngữ nghĩa
+sang các lệnh CORE-V/PULP trên lõi CV32E40P thông qua lớp firmware.
+
+Đồ án cũng đã triển khai một luồng kiểm chứng hoàn chỉnh từ mô phỏng đến phần
+cứng thật. Ở nhánh gem5, nhóm lệnh được đưa vào đường giải mã, lớp lệnh, ngữ
+nghĩa thực thi, định dạng tải hậu tăng và trạng thái vòng lặp phần cứng; các
+kiểm thử chức năng xác nhận những ngữ nghĩa chính hoạt động đúng trên các mô
+hình CPU được chọn. Ở nhánh thực nghiệm, đồ án xây dựng SoC tối thiểu trên kit
+DE2i-150/CV32E40P, xử lý ràng buộc thời gian để thiết kế đạt 50 MHz và đo hiệu
+năng bằng các bộ đếm \texttt{mcycle}/\texttt{minstret}. Các kết quả tiêu biểu
+cho thấy mức tăng tốc đạt 6,33 lần với biến thể dùng \texttt{dot4\_acc} và
+13,10 lần khi kết hợp \texttt{dot4\_acc} với tải hậu tăng cùng vòng lặp phần
+cứng; trong mô hình MNIST FC INT8 chạy bằng TensorFlow Lite Micro, đường tối ưu
+khớp checksum và từng điểm đầu ra INT8 với đường tham chiếu, đồng thời đạt
+12,39 lần ở khoảng đo có kiểm chứng và xấp xỉ 12,52 lần trong chế độ nhận ảnh
+qua UART. Các kết quả này cho thấy hiệu quả của hướng mở rộng tập lệnh không
+nằm ở việc gộp một phép toán riêng lẻ một cách cơ học, mà nằm ở việc rút gọn
+đồng thời nhiều thành phần trong thân vòng lặp INT8, đặc biệt là tổ hợp tích vô
+hướng đóng gói, tải hậu tăng và vòng lặp phần cứng.
+
+Bên cạnh các kết quả đạt được, đồ án vẫn còn một số hạn chế. Thứ nhất, mô hình
+gem5 đã được đồng bộ về ngữ nghĩa với nhánh phần cứng nhưng chưa phải mô hình
+khớp từng chu kỳ với CV32E40P trên kit DE2i-150; do đó các kết quả mô phỏng chỉ
+nên được hiểu như phân tích xu hướng. Thứ hai, đánh giá năng lượng mới dựa trên
+VCD và Quartus Power Analyzer nên phù hợp để so sánh xu hướng tương đối hơn là
+kết luận công suất tuyệt đối của kit. Cuối cùng, phạm vi mô hình thực nghiệm
+hiện tập trung vào các nhân INT8 và mạng kết nối đầy đủ cho MNIST; các mạng có
+cấu trúc tích chập hoặc các bài toán TinyML thực tế hơn chưa được khảo sát
+trong phạm vi đồ án này.
 
 \section{Hướng phát triển trong tương lai}
 
-Sinh viên đề xuất hướng phát triển trong tương lai (nếu có) .  
+Từ các kết quả và hạn chế đã nêu, đồ án có thể được phát triển tiếp theo theo
+ba hướng chính. Các hướng này tập trung vào việc làm cho mô hình đánh giá chính
+xác hơn, lớp phần mềm thuận tiện hơn và phạm vi ứng dụng rộng hơn, thay vì mở
+rộng dàn trải sang quá nhiều nhánh không trực tiếp nối với kết quả hiện tại.
+
+Hướng phát triển thứ nhất là tiếp tục hoàn thiện nhánh mô phỏng. Mô hình gem5
+có thể được điều chỉnh sâu hơn để phản ánh tốt hơn đặc điểm đường ống lệnh, độ
+trễ lệnh và hành vi vòng lặp phần cứng của CV32E40P. Nếu có thêm đối chiếu với
+mô phỏng RTL hoặc với các phép đo chi tiết hơn trên kit, nhánh gem5 sẽ không
+chỉ đóng vai trò kiểm thử ngữ nghĩa mà còn hỗ trợ dự đoán thiết kế và phân tích
+hiệu năng với độ tin cậy cao hơn.
+
+Hướng phát triển thứ hai là cải thiện lớp công cụ phần mềm cho nhóm lệnh mở
+rộng. Trong phiên bản hiện tại, firmware phát sinh các lệnh CORE-V/PULP thông
+qua chỉ thị \texttt{.insn}, giúp kiểm soát chính xác mã lệnh nhưng chưa thuận
+tiện cho lập trình và bảo trì lâu dài. Một bước tiếp theo phù hợp là bổ sung
+hỗ trợ ở mức assembler, disassembler, intrinsic hoặc thư viện nhân tính toán chuẩn hóa
+hơn, để các chương trình C/C++ và các nhân TensorFlow Lite Micro có thể gọi
+nhóm thao tác tối ưu bằng giao diện rõ ràng thay vì phụ thuộc trực tiếp vào mã
+hóa lệnh.
+
+Hướng phát triển thứ ba là mở rộng phạm vi mô hình và toán tử được đánh giá.
+Các kết quả hiện tại cho thấy nhóm thao tác đề xuất đặc biệt hiệu quả với lớp
+kết nối đầy đủ có nhiều tích vô hướng INT8. Trong tương lai, cần tiếp tục thử
+nghiệm với các mạng có lớp tích chập, tích chập theo chiều kênh
+(depthwise convolution) hoặc các mô hình TinyML gần ứng dụng thực tế hơn.
+Hướng này sẽ giúp đánh giá xem lợi ích của tích vô hướng đóng gói, tải hậu
+tăng và vòng lặp phần cứng có duy trì khi dữ liệu có bố cục phức tạp hơn, kích
+thước lớp không đều hơn và quá trình hậu xử lý lượng tử hóa chiếm tỷ trọng lớn
+hơn hay không.
+
+Tổng kết lại, đồ án đã hoàn thành một luồng nghiên cứu và thực nghiệm tương
+đối đầy đủ cho hướng mở rộng tập lệnh RISC-V phục vụ suy luận AI lượng tử hóa:
+từ phân tích bài toán, đặc tả nhóm thao tác, mô phỏng trong gem5, triển khai
+SoC trên FPGA đến đánh giá mô hình suy luận thực tế bằng TensorFlow Lite Micro
+trên phần cứng thật. Các kết quả thu được cho thấy hướng tiếp cận ở mức tập
+lệnh có tiềm năng rõ ràng đối với các vòng lặp INT8 trên hệ nhúng, đồng thời
+mở ra cơ sở để tiếp tục hoàn thiện công cụ, mô hình mô phỏng và phạm vi ứng
+dụng trong các nghiên cứu sau.
 
 \end{document}
