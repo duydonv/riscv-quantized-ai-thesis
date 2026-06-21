@@ -1,0 +1,33 @@
+\begin{tikzpicture}[
+    font=\scriptsize,
+    block/.style={draw, rounded corners=2pt, align=center, minimum height=0.92cm, fill=gray!8},
+    host/.style={block, text width=3.25cm, fill=yellow!15},
+    flow/.style={block, text width=3.25cm, fill=orange!10},
+    core/.style={block, text width=3.10cm, fill=blue!8},
+    mem/.style={block, text width=3.10cm, fill=purple!10},
+    io/.style={block, text width=2.65cm, fill=cyan!8},
+    note/.style={align=center, font=\scriptsize\bfseries},
+    arrow/.style={-{Latex[length=2mm]}, thick},
+    bus/.style={<->, >=Latex, thick},
+    serial/.style={-{Latex[length=2mm]}, thick, densely dashed}
+]
+    \node[host] (host) at (-5.35, 1.10) {Host PC\\RISC-V toolchain\\Quartus};
+    \node[flow] (hex) at (-5.35, -1.10) {Firmware\\\texttt{.elf/.bin}\\byte-lane hex};
+
+    \node[note] at (2.30, 2.65) {DE2i-150/CV32E40P SoC trên FPGA};
+    \draw[rounded corners=3pt, thick, fill=green!4]
+        (-1.65, -2.05) rectangle (6.25, 2.25);
+
+    \node[core] (core) at (0.35, 0.75) {CV32E40P\\\texttt{COREV\_PULP=1}\\\texttt{FPU=0}};
+    \node[mem] (bram) at (0.35, -1.05) {BRAM 128 KB\\4 byte-lane M9K\\\texttt{\$readmemh}};
+    \node[io] (uart) at (4.40, 0.75) {UART TX/RX\\115200 8N1};
+    \node[io] (led) at (4.40, -1.05) {LED status\\heartbeat};
+
+    \draw[arrow] (host) -- node[right, xshift=0.06cm] {build} (hex);
+    \draw[arrow] (hex.east) -- node[above, pos=0.55] {BRAM init} (bram.west);
+    \draw[bus] (core.south) -- node[right] {OBI I/D} (bram.north);
+    \draw[bus] (core.east) -- node[above] {MMIO} (uart.west);
+    \draw[arrow] (core.east) -- ++(0.55,0) |- node[pos=0.70, below] {MMIO} (led.west);
+    \draw[serial] (uart.north) .. controls (3.55,2.45) and (-2.75,2.35) ..
+        (host.north east);
+\end{tikzpicture}
