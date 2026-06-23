@@ -1,0 +1,41 @@
+\begin{tikzpicture}[
+    x=1cm,
+    y=0.38cm,
+    font=\scriptsize,
+    axis/.style={black!75, thick},
+    gridline/.style={black!15, thin},
+    cycles/.style={fill=blue!55!black},
+    instret/.style={fill=orange!80!black},
+    legend/.style={anchor=west, align=left},
+    value/.style={font=\tiny, anchor=south}
+]
+    \draw[axis] (0,0) -- (8.4,0);
+    \draw[axis] (0,0) -- (0,13.4);
+
+    \foreach \y/\lab in {0/{0},3/{3},6/{6},9/{9},12/{12}} {
+        \draw[gridline] (0,\y) -- (8.0,\y);
+        \draw[axis] (-0.06,\y) -- (0.06,\y);
+        \node[anchor=east] at (-0.14,\y) {\lab};
+    }
+
+    \node[rotate=90, anchor=south] at (-0.92,6.7) {Tỷ lệ base/opt};
+
+    \draw[cycles]  (1.05,0) rectangle (1.55,12.39);
+    \draw[instret] (1.65,0) rectangle (2.15,12.30);
+
+    \draw[cycles]  (4.35,0) rectangle (4.85,12.36);
+    \draw[instret] (4.95,0) rectangle (5.45,12.32);
+
+    \node[value] at (1.30,12.55) {12,39};
+    \node[value] at (1.90,12.46) {12,30};
+    \node[value] at (4.60,12.52) {12,36};
+    \node[value] at (5.20,12.48) {12,32};
+
+    \node[align=center, anchor=north] at (1.60,-0.35) {Có\\kiểm chứng};
+    \node[align=center, anchor=north] at (4.90,-0.35) {Chỉ\\suy luận};
+
+    \draw[cycles] (6.25,10.85) rectangle (6.50,11.20);
+    \node[legend] at (6.60,11.03) {Chu kỳ (tăng tốc)};
+    \draw[instret] (6.25,10.10) rectangle (6.50,10.45);
+    \node[legend] at (6.60,10.28) {Lệnh hoàn tất};
+\end{tikzpicture}

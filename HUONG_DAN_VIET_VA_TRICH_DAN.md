@@ -1,12 +1,12 @@
 # Hướng dẫn viết và trích dẫn cho báo cáo
 
-Ngày cập nhật: 2026-06-21
+Ngày cập nhật: 2026-06-23
 
 File này tóm tắt các lưu ý quan trọng từ `Chuong/1_Gioi_thieu.tex` và `Chuong/Phu_luc_A.tex`, đồng thời chuyển chúng thành checklist thực hành cho đồ án này.
 
 ## 1. Trạng thái template
 
-Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và toàn bộ Chương 1 đến Chương 6 ở mức hoàn chỉnh cuối. Chương 2 đã hoàn thiện phần nền tảng về ngữ cảnh bài toán, nghiên cứu liên quan, suy luận INT8, RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro. Chương 3 đã hoàn thiện phần thiết kế và đặc tả nhóm lệnh mở rộng, bao gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh, ánh xạ sang gem5/DE2i-150-CV32E40P và đoạn kết nối sang Chương 4. Chương 4 đã hoàn thiện phần đánh giá qua mô phỏng gem5, gồm hiện thực, smoke test, benchmark mô phỏng, phân tích kết quả và mô hình vòng lặp phần cứng trong O3. Chương 5 đã hoàn thiện phần triển khai và đánh giá trên kit DE2i-150/CV32E40P, gồm SoC/firmware, benchmark INT8, năng lượng ước lượng, TensorFlow Lite Micro, MNIST FC, UART/GUI, tài nguyên/timing và kết chương. Chương 6 đã hoàn thiện phần kết luận và hướng phát triển trong tương lai, tập trung vào đóng góp chính, kết quả tiêu biểu, hạn chế phù hợp và ba hướng phát triển trọng tâm. Báo cáo cũng đã có phụ lục gem5 và phụ lục tái lập triển khai SoC để bổ sung lệnh chạy, bản đồ tệp, đoạn mã tiêu biểu và luồng tạo project Quartus. Khi rà soát từng phần:
+Repo báo cáo hiện đã có bìa, lời cảm ơn, tóm tắt tiếng Việt, abstract tiếng Anh và toàn bộ Chương 1 đến Chương 6 ở mức hoàn chỉnh cuối. Chương 2 đã hoàn thiện phần nền tảng về ngữ cảnh bài toán, nghiên cứu liên quan, suy luận INT8, RISC-V, CV32E40P, gem5 và TensorFlow Lite Micro. Chương 3 đã hoàn thiện phần thiết kế và đặc tả nhóm lệnh mở rộng, bao gồm tổng quan giải pháp, cơ sở lựa chọn nhóm lệnh, đặc tả ngữ nghĩa sáu lệnh, ánh xạ sang gem5/DE2i-150-CV32E40P và đoạn kết nối sang Chương 4. Chương 4 đã hoàn thiện phần đánh giá qua mô phỏng gem5, gồm hiện thực, smoke test, benchmark mô phỏng, phân tích kết quả và mô hình vòng lặp phần cứng trong O3. Chương 5 đã hoàn thiện phần triển khai và đánh giá trên kit DE2i-150/CV32E40P, gồm SoC/firmware, benchmark INT8, biểu đồ tỷ lệ chu kỳ/lệnh hoàn tất, năng lượng ước lượng, TensorFlow Lite Micro, MNIST FC, UART/GUI, tài nguyên/timing và kết chương. Chương 6 đã hoàn thiện phần kết luận và hướng phát triển trong tương lai, tập trung vào đóng góp chính, kết quả tiêu biểu, hạn chế phù hợp và ba hướng phát triển trọng tâm. Báo cáo cũng đã có phụ lục gem5 và phụ lục tái lập triển khai SoC để bổ sung lệnh chạy, bản đồ tệp, đoạn mã tiêu biểu và luồng tạo project Quartus. Khi rà soát từng phần:
 
 - Không giữ nguyên các đoạn "Sinh viên cần..." trong bản thảo cuối.
 - Không để các dòng `\textcolor{red}{Chú ý...}` của template trong bản nộp.
@@ -73,6 +73,7 @@ Các quy tắc bắt buộc:
 - Không chèn hình/bảng chỉ để minh họa cho đẹp; phải có đoạn giải thích người đọc cần rút ra điều gì.
 - Caption phải đủ rõ để người đọc hiểu nội dung chính.
 - Với bảng số liệu, cần nói rõ đơn vị, điều kiện đo, baseline và cách tính speedup.
+- Quy ước trình bày số liệu cuối báo cáo: dùng dấu phẩy cho phần thập phân trong văn bản tiếng Việt, dùng khoảng trắng hoặc `\,` cho hàng nghìn, dùng "lần" trong văn xuôi và dùng `\times` trong bảng/hình khi cần ký hiệu tỷ lệ.
 - Với các công thức quy ước đo trong Chương 5, có thể dùng dạng hiển thị không đánh số nếu không tham chiếu lại bằng "Công thức (x.y)". Chỉ đánh số công thức khi công thức là kết quả lý thuyết quan trọng hoặc được gọi lại nhiều lần trong phần phân tích.
 - Với hình tự vẽ dựa trên kiến trúc repo, vẫn nên ghi rõ trong phần mô tả rằng hình được tổng hợp từ thiết kế/triển khai của đồ án.
 - Các hình TikZ tự vẽ nên đặt trong `Hinh_ve/*.tikz` và nạp bằng `\input{Hinh_ve/...}` để file chương gọn và dễ theo dõi diff.

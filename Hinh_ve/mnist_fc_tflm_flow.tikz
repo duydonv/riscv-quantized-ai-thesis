@@ -16,7 +16,7 @@
     \node[data] (mnist) at (0, 0.75) {Dữ liệu MNIST\\\(28{\times}28 \rightarrow 784\)};
     \node[train] (float) at (0, -0.65) {Huấn luyện Keras\\acc. float 96,30\%};
     \node[artifact] (int8) at (0, -2.05) {Lượng tử hóa TFLite INT8\\2 toán tử FC, acc. 96,28\%};
-    \node[artifact] (carray) at (0, -3.75) {Flatbuffer và mảng C\\28.368 byte, 32 mẫu kiểm chứng};
+    \node[artifact] (carray) at (0, -3.75) {Flatbuffer và mảng C\\28 368 byte, 32 mẫu kiểm chứng};
 
     \draw[group, fill=green!4] (-5.85, -10.00) rectangle (5.85, -4.95);
     \node[title] at (-5.45, -5.22) {Chạy và đối chiếu\\trên kit DE2i-150/\\CV32E40P};

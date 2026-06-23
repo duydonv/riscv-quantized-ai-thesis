@@ -28,7 +28,7 @@ Luồng trên cho thấy giải pháp không chỉ dừng ở việc thêm một
 
 Việc lựa chọn nhóm lệnh mở rộng trong đồ án xuất phát từ đặc điểm lặp lại của suy luận INT8, chứ không bắt đầu từ mong muốn thêm một tập lệnh tùy ý. Như đã trình bày ở Chương~\ref{chap:co-so-ly-thuyet}, lõi tính toán của nhiều lớp kết nối đầy đủ và tích chập có thể quy về các phép tích vô hướng giữa kích hoạt và trọng số lượng tử hóa. Với một lớp fully connected có \(M\) phần tử đầu vào và \(K\) phần tử đầu ra, mỗi mẫu đầu vào cần xấp xỉ \(M \times K\) phép nhân--cộng tích lũy, chưa kể bias, lượng tử hóa lại, kích hoạt và giới hạn miền giá trị. Đối với lớp tích chập, cùng một dạng tích vô hướng còn được lặp trên nhiều vị trí không gian và nhiều kênh đầu ra. Vì vậy, khi kích thước lớp tăng, khối lượng tính toán không phụ thuộc vào số câu lệnh mô tả lớp ở mức mô hình, mà phụ thuộc trực tiếp vào số cặp kích hoạt--trọng số cần nhân và cộng dồn \cite{jacob2018integer,sze2017efficient}.
 
-Hình~\ref{fig:fc-mac-model-layers} minh họa nhận xét trên bằng hai mô hình được dùng trong phần thực nghiệm của đồ án. Ở mô hình TFLM nhỏ \(64 \rightarrow 16 \rightarrow 4\), lớp đầu tiên cần \(64 \times 16 = 1024\) phép MAC cho một mẫu, trong khi lớp thứ hai chỉ cần \(16 \times 4 = 64\) phép MAC. Khi chuyển sang mô hình MNIST FC INT8 \(784 \rightarrow 32 \rightarrow 10\), riêng lớp đầu tiên đã cần \(784 \times 32 = 25088\) phép MAC cho một mẫu, lớn hơn nhiều so với các phần còn lại của cùng mô hình. Cách minh họa này giúp nối trực tiếp công thức tổng quát với các bài đánh giá sẽ được dùng để kiểm chứng ở các chương sau.
+Hình~\ref{fig:fc-mac-model-layers} minh họa nhận xét trên bằng hai mô hình được dùng trong phần thực nghiệm của đồ án. Ở mô hình TFLM nhỏ \(64 \rightarrow 16 \rightarrow 4\), lớp đầu tiên cần \(64 \times 16 = 1\,024\) phép MAC cho một mẫu, trong khi lớp thứ hai chỉ cần \(16 \times 4 = 64\) phép MAC. Khi chuyển sang mô hình MNIST FC INT8 \(784 \rightarrow 32 \rightarrow 10\), riêng lớp đầu tiên đã cần \(784 \times 32 = 25\,088\) phép MAC cho một mẫu, lớn hơn nhiều so với các phần còn lại của cùng mô hình. Cách minh họa này giúp nối trực tiếp công thức tổng quát với các bài đánh giá sẽ được dùng để kiểm chứng ở các chương sau.
 
 \begin{figure}[H]
     \centering
@@ -37,7 +37,7 @@ Hình~\ref{fig:fc-mac-model-layers} minh họa nhận xét trên bằng hai mô 
     \label{fig:fc-mac-model-layers}
 \end{figure}
 
-Cùng công thức \(M \times K\) cũng cho thấy chi phí của lớp fully connected tăng nhanh khi số phần tử đầu ra tăng. Hình~\ref{fig:fc-mac-hidden-growth} giữ số đầu vào bằng 784 như lớp đầu tiên của mô hình MNIST FC, rồi thay đổi số nút ẩn \(H\). Khi \(H\) tăng từ 8 lên 128, số phép MAC cho một mẫu tăng từ 6272 lên 100352. Do các phép MAC này thường được hiện thực bằng các vòng lặp tích vô hướng, mức tăng trên kéo theo số lần lặp và số lệnh động lớn hơn ở phần thân tính toán.
+Cùng công thức \(M \times K\) cũng cho thấy chi phí của lớp fully connected tăng nhanh khi số phần tử đầu ra tăng. Hình~\ref{fig:fc-mac-hidden-growth} giữ số đầu vào bằng 784 như lớp đầu tiên của mô hình MNIST FC, rồi thay đổi số nút ẩn \(H\). Khi \(H\) tăng từ 8 lên 128, số phép MAC cho một mẫu tăng từ \(6\,272\) lên \(100\,352\). Do các phép MAC này thường được hiện thực bằng các vòng lặp tích vô hướng, mức tăng trên kéo theo số lần lặp và số lệnh động lớn hơn ở phần thân tính toán.
 
 \begin{figure}[H]
     \centering

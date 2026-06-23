@@ -1,0 +1,47 @@
+\begin{tikzpicture}[
+    x=1cm,
+    y=0.34cm,
+    font=\scriptsize,
+    axis/.style={black!75, thick},
+    gridline/.style={black!15, thin},
+    cycles/.style={fill=blue!55!black},
+    instret/.style={fill=orange!80!black},
+    legend/.style={anchor=west, align=left},
+    value/.style={font=\tiny, anchor=south}
+]
+    \draw[axis] (0,0) -- (10.4,0);
+    \draw[axis] (0,0) -- (0,15.7);
+
+    \foreach \y/\lab in {0/{0},3/{3},6/{6},9/{9},12/{12},15/{15}} {
+        \draw[gridline] (0,\y) -- (10.0,\y);
+        \draw[axis] (-0.06,\y) -- (0.06,\y);
+        \node[anchor=east] at (-0.14,\y) {\lab};
+    }
+
+    \node[rotate=90, anchor=south] at (-0.92,7.85) {Tỷ lệ base/opt};
+
+    \draw[cycles]  (0.80,0) rectangle (1.22,1.07);
+    \draw[instret] (1.30,0) rectangle (1.72,1.08);
+
+    \draw[cycles]  (3.80,0) rectangle (4.22,6.33);
+    \draw[instret] (4.30,0) rectangle (4.72,7.58);
+
+    \draw[cycles]  (6.80,0) rectangle (7.22,13.10);
+    \draw[instret] (7.30,0) rectangle (7.72,14.27);
+
+    \node[value] at (1.01,1.22) {1,07};
+    \node[value] at (1.51,1.23) {1,08};
+    \node[value] at (4.01,6.48) {6,33};
+    \node[value] at (4.51,7.73) {7,58};
+    \node[value] at (7.01,13.25) {13,10};
+    \node[value] at (7.51,14.42) {14,27};
+
+    \node[align=center, anchor=north] at (1.26,-0.35) {\texttt{mac}\\\texttt{clamp}};
+    \node[align=center, anchor=north] at (4.26,-0.35) {\texttt{dot4\_acc}\\\texttt{clamp}};
+    \node[align=center, anchor=north] at (7.26,-0.35) {\texttt{dot4\_plw}\\\texttt{lp\_clamp}};
+
+    \draw[cycles] (8.55,12.85) rectangle (8.80,13.20);
+    \node[legend] at (8.90,13.03) {Chu kỳ (tăng tốc)};
+    \draw[instret] (8.55,12.10) rectangle (8.80,12.45);
+    \node[legend] at (8.90,12.28) {Lệnh hoàn tất};
+\end{tikzpicture}
