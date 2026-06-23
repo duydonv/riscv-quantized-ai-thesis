@@ -26,7 +26,7 @@ Các thông số chính của nền tảng thực nghiệm được tóm tắt t
         \hline
         Bộ nhớ cục bộ & BRAM 128 KB tại địa chỉ bắt đầu \texttt{0x00000000}, chia thành bốn làn byte để ánh xạ vào các khối M9K. \\
         \hline
-        Giao tiếp ngoại vi & UART TX/RX 115200 8N1 qua vùng vào/ra ánh xạ bộ nhớ tại \texttt{0x02000000}; LED tại \texttt{0x03000000}. \\
+        Giao tiếp ngoại vi & UART TX/RX \(115\,200\) 8N1 qua vùng vào/ra ánh xạ bộ nhớ tại \texttt{0x02000000}; LED tại \texttt{0x03000000}. \\
         \hline
         Chương trình nhúng & Chương trình không hệ điều hành, biên dịch ở chế độ \texttt{rv32im\_zicsr}; không dùng tập lệnh nén trong giai đoạn đo nhân để giữ thân vòng lặp phần cứng thẳng hàng 32 bit. \\
         \hline
@@ -220,11 +220,11 @@ Bảng~\ref{tab:int8-kernel-board-results} trình bày kết quả UART thu đư
         \hline
         \textbf{Benchmark} & \textbf{Ops} & \textbf{Base cycles} & \textbf{Opt cycles} & \textbf{Base instret} & \textbf{Opt instret} & \textbf{Speedup} \\
         \hline
-        \texttt{mac\_clamp} & 16.384 & 281.412 & 263.212 & 226.532 & 208.924 & 1,07x \\
+        \texttt{mac\_clamp} & \(16\,384\) & \(281\,412\) & \(263\,212\) & \(226\,532\) & \(208\,924\) & \(1{,}07\times\) \\
         \hline
-        \texttt{dot4\_acc\_clamp} & 8.192 & 496.830 & 78.516 & 396.974 & 52.388 & 6,33x \\
+        \texttt{dot4\_acc\_clamp} & \(8\,192\) & \(496\,830\) & \(78\,516\) & \(396\,974\) & \(52\,388\) & \(6{,}33\times\) \\
         \hline
-        \texttt{dot4\_plw\_lp\_clamp} & 8.192 & 496.830 & 37.938 & 396.974 & 27.811 & 13,10x \\
+        \texttt{dot4\_plw\_lp\_clamp} & \(8\,192\) & \(496\,830\) & \(37\,938\) & \(396\,974\) & \(27\,811\) & \(13{,}10\times\) \\
         \hline
     \end{tabular}%
     }
@@ -232,11 +232,20 @@ Bảng~\ref{tab:int8-kernel-board-results} trình bày kết quả UART thu đư
     \label{tab:int8-kernel-board-results}
 \end{table}
 
-Kết quả trong Bảng~\ref{tab:int8-kernel-board-results} cho thấy mức tăng tốc phụ thuộc mạnh vào loại thao tác được thay thế. Với \texttt{mac\_clamp}, đường tối ưu chỉ nhanh hơn 1,07 lần. Nguyên nhân là bài đo này vẫn xử lý từng cặp toán hạng 32 bit và đường nền RV32IM đã có lệnh nhân số nguyên; vì vậy \texttt{ai\_mac} chủ yếu gộp phép nhân và phép cộng tích lũy, trong khi chi phí tạo chỉ số, nạp dữ liệu và điều khiển vòng lặp vẫn còn đáng kể. Số lệnh hoàn tất giảm từ 226.532 xuống 208.924, nhưng mức giảm này chưa đủ lớn để tạo ra chênh lệch chu kỳ rõ rệt.
+Nhằm hỗ trợ đối chiếu xu hướng hiệu năng, Hình~\ref{fig:int8-kernel-board-speedup} trực quan hóa hai đại lượng được tính từ Bảng~\ref{tab:int8-kernel-board-results}. Tỷ lệ chu kỳ đường nền/đường tối ưu tương ứng với mức tăng tốc theo thời gian thực thi, còn tỷ lệ lệnh hoàn tất đường nền/đường tối ưu phản ánh mức rút gọn số lệnh động.
 
-Khác với trường hợp trên, \texttt{dot4\_acc\_clamp} thay thế bốn phép nhân INT8 có dấu và các phép cộng dồn tương ứng bằng thao tác \texttt{ai\_dot4\_acc}. Do mỗi thanh ghi 32 bit chứa bốn làn INT8, một thao tác có thể xử lý bốn cặp phần tử thay vì để phần mềm tách byte, mở rộng dấu, nhân và cộng từng làn. Điều này làm số lệnh hoàn tất giảm từ 396.974 xuống 52.388 và số chu kỳ giảm từ 496.830 xuống 78.516, tương ứng mức tăng tốc 6,33 lần. Kết quả này xác nhận rằng thao tác tích vô hướng đóng gói là thành phần đem lại lợi ích chính cho các nhân suy luận INT8.
+\begin{figure}[H]
+    \centering
+    \resizebox{0.88\linewidth}{!}{\input{Hinh_ve/int8_kernel_board_speedup.tikz}}
+    \caption{So sánh tỷ lệ chu kỳ và lệnh hoàn tất của các nhân INT8 trên kit}
+    \label{fig:int8-kernel-board-speedup}
+\end{figure}
 
-Bài đo \texttt{dot4\_plw\_lp\_clamp} tiếp tục giảm số chu kỳ xuống 37.938, đạt mức tăng tốc 13,10 lần so với cùng đường nền vô hướng. Điểm khác biệt của bài đo này là thân vòng lặp không chỉ dùng \texttt{ai\_dot4\_acc}, mà còn dùng \texttt{AI\_PLW\_U32} để đọc tuần tự kích hoạt/trọng số và \texttt{AI\_LP\_SETUP\_L0} để điều khiển vòng lặp bằng phần cứng. Nhờ đó, phần mềm giảm được cả chi phí tính toán, chi phí cập nhật con trỏ và chi phí nhánh vòng lặp. Đây cũng là biến thể gần nhất với cách một nhân kết nối đầy đủ INT8 sẽ truy cập dữ liệu theo dòng trong mô hình MNIST FC ở các mục sau.
+Bảng~\ref{tab:int8-kernel-board-results} và Hình~\ref{fig:int8-kernel-board-speedup} cho thấy mức tăng tốc phụ thuộc mạnh vào loại thao tác được thay thế. Với \texttt{mac\_clamp}, đường tối ưu chỉ nhanh hơn 1,07 lần. Nguyên nhân là bài đo này vẫn xử lý từng cặp toán hạng 32 bit và đường nền RV32IM đã có lệnh nhân số nguyên; vì vậy \texttt{ai\_mac} chủ yếu gộp phép nhân và phép cộng tích lũy, trong khi chi phí tạo chỉ số, nạp dữ liệu và điều khiển vòng lặp vẫn còn đáng kể. Số lệnh hoàn tất giảm từ \(226\,532\) xuống \(208\,924\), nhưng mức giảm này chưa đủ lớn để tạo ra chênh lệch chu kỳ rõ rệt.
+
+Khác với trường hợp trên, \texttt{dot4\_acc\_clamp} thay thế bốn phép nhân INT8 có dấu và các phép cộng dồn tương ứng bằng thao tác \texttt{ai\_dot4\_acc}. Do mỗi thanh ghi 32 bit chứa bốn làn INT8, một thao tác có thể xử lý bốn cặp phần tử thay vì để phần mềm tách byte, mở rộng dấu, nhân và cộng từng làn. Điều này làm số lệnh hoàn tất giảm từ \(396\,974\) xuống \(52\,388\) và số chu kỳ giảm từ \(496\,830\) xuống \(78\,516\), tương ứng mức tăng tốc 6,33 lần. Kết quả này xác nhận rằng thao tác tích vô hướng đóng gói là thành phần đem lại lợi ích chính cho các nhân suy luận INT8.
+
+Bài đo \texttt{dot4\_plw\_lp\_clamp} tiếp tục giảm số chu kỳ xuống \(37\,938\), đạt mức tăng tốc 13,10 lần so với cùng đường nền vô hướng. Điểm khác biệt của bài đo này là thân vòng lặp không chỉ dùng \texttt{ai\_dot4\_acc}, mà còn dùng \texttt{AI\_PLW\_U32} để đọc tuần tự kích hoạt/trọng số và \texttt{AI\_LP\_SETUP\_L0} để điều khiển vòng lặp bằng phần cứng. Nhờ đó, phần mềm giảm được cả chi phí tính toán, chi phí cập nhật con trỏ và chi phí nhánh vòng lặp. Đây cũng là biến thể gần nhất với cách một nhân kết nối đầy đủ INT8 sẽ truy cập dữ liệu theo dòng trong mô hình MNIST FC ở các mục sau.
 
 Bên cạnh số chu kỳ, đồ án cũng ước lượng năng lượng tương đối của các nhân bằng Quartus Power Analyzer. Để tạo dữ liệu hoạt động cho công cụ này, chương trình nhúng được biên dịch ở chế độ \texttt{POWER\_SIM}, trong đó mỗi lượt mô phỏng RTL chỉ chạy một biến thể bài đo. Mô hình kiểm thử Questa bắt đầu ghi VCD khi chương trình nhúng đưa \texttt{LEDR[7:0]} về \texttt{0x40}, tương ứng điểm bắt đầu cửa sổ hoạt động cần đo, và dừng sau khi chương trình nhúng trả trạng thái \texttt{0xA5} nếu giá trị kiểm tra đúng hoặc \texttt{0xEF} nếu giá trị kiểm tra sai. Hình~\ref{fig:questa-dot4-plw-lp-clamp-waveform} minh họa dạng sóng của biến thể dòng dữ liệu tối ưu; các tín hiệu lệnh và dữ liệu OBI trong hình cho thấy lõi đang thực hiện truy cập lệnh, truy cập dữ liệu và cập nhật trạng thái trong cửa sổ sinh VCD. Hình này không được dùng để đọc trực tiếp số chu kỳ hay công suất, mà để làm rõ nguồn hoạt động đưa vào bước ước lượng công suất.
 
@@ -258,11 +267,11 @@ Sau khi sinh VCD, mỗi kịch bản được đưa riêng vào Quartus Power An
         \hline
         \textbf{Benchmark} & \textbf{Base \(P\) (mW)} & \textbf{Opt \(P\) (mW)} & \textbf{Base \(E\) (mJ)} & \textbf{Opt \(E\) (mJ)} & \textbf{\(E\) ratio} \\
         \hline
-        \texttt{mac\_clamp} & 365,45 & 359,88 & 2,057 & 1,894 & 1,09x \\
+        \texttt{mac\_clamp} & \(365{,}45\) & \(359{,}88\) & \(2{,}057\) & \(1{,}894\) & \(1{,}09\times\) \\
         \hline
-        \texttt{dot4\_acc\_clamp} & 370,96 & 362,82 & 3,686 & 0,570 & 6,47x \\
+        \texttt{dot4\_acc\_clamp} & \(370{,}96\) & \(362{,}82\) & \(3{,}686\) & \(0{,}570\) & \(6{,}47\times\) \\
         \hline
-        \texttt{dot4\_plw\_lp\_clamp} & 370,96 & 373,25 & 3,686 & 0,283 & 13,02x \\
+        \texttt{dot4\_plw\_lp\_clamp} & \(370{,}96\) & \(373{,}25\) & \(3{,}686\) & \(0{,}283\) & \(13{,}02\times\) \\
         \hline
     \end{tabular}
     \caption{Ước lượng năng lượng tương đối của các nhân INT8 từ VCD và Quartus Power Analyzer}
@@ -285,13 +294,13 @@ Mô hình được tạo trên máy tính chủ bằng TensorFlow/Keras với c�
     \label{fig:mnist-fc-tflm-flow}
 \end{figure}
 
-Trên máy tính chủ, mô hình float đạt độ chính xác 96,30\% trên tập kiểm tra MNIST. Sau khi chuyển sang TFLite INT8 toàn phần, độ chính xác còn 96,28\%, tương ứng 9.628/10.000 mẫu kiểm tra. Chênh lệch chỉ 0,02 điểm phần trăm cho thấy bước lượng tử hóa gần như không làm suy giảm chất lượng phân loại của mô hình. Tệp TFLite INT8 dạng flatbuffer có kích thước 28.368 byte và được nhúng vào firmware dưới dạng mảng C, kèm 32 véc-tơ MNIST đã lượng tử hóa để kiểm chứng cố định trên kit. Vì vậy, các phép đo ở phần sau chủ yếu phản ánh chi phí thực thi của hai đường chạy thay vì đánh đổi lớn về độ chính xác.
+Trên máy tính chủ, mô hình float đạt độ chính xác 96,30\% trên tập kiểm tra MNIST. Sau khi chuyển sang TFLite INT8 toàn phần, độ chính xác còn 96,28\%, tương ứng \(9\,628/10\,000\) mẫu kiểm tra. Chênh lệch chỉ 0,02 điểm phần trăm cho thấy bước lượng tử hóa gần như không làm suy giảm chất lượng phân loại của mô hình. Tệp TFLite INT8 dạng flatbuffer có kích thước 28\,368 byte và được nhúng vào firmware dưới dạng mảng C, kèm 32 véc-tơ MNIST đã lượng tử hóa để kiểm chứng cố định trên kit. Vì vậy, các phép đo ở phần sau chủ yếu phản ánh chi phí thực thi của hai đường chạy thay vì đánh đổi lớn về độ chính xác.
 
-Trên kit, cùng một flatbuffer TFLite được dùng cho hai đường chạy. Đường \texttt{tflm\_ref} khởi tạo \texttt{MicroInterpreter}, đăng ký duy nhất toán tử \texttt{FullyConnected} qua \texttt{MicroMutableOpResolver}, cấp phát tensor arena 12.288 byte và gọi \texttt{Invoke()} của TensorFlow Lite Micro cho từng mẫu. Đường này đóng vai trò mốc tham chiếu phần mềm vì toàn bộ phép tính kết nối đầy đủ được thực hiện bởi nhân tham chiếu của TFLM.
+Trên kit, cùng một flatbuffer TFLite được dùng cho hai đường chạy. Đường \texttt{tflm\_ref} khởi tạo \texttt{MicroInterpreter}, đăng ký duy nhất toán tử \texttt{FullyConnected} qua \texttt{MicroMutableOpResolver}, cấp phát tensor arena 12\,288 byte và gọi \texttt{Invoke()} của TensorFlow Lite Micro cho từng mẫu. Đường này đóng vai trò mốc tham chiếu phần mềm vì toàn bộ phép tính kết nối đầy đủ được thực hiện bởi nhân tham chiếu của TFLM.
 
 Đường \texttt{pulp\_opt} vẫn đọc cùng mô hình TFLite, nhưng thay phần tính toán của hai lớp kết nối đầy đủ bằng nhân cục bộ dùng CORE-V/PULP. Sau bước \texttt{AllocateTensors()}, firmware phân tích trực tiếp flatbuffer để lấy danh sách toán tử, con trỏ trọng số, bias, kích thước tensor, hệ số tỉ lệ và điểm không của từng lớp. Cách làm này tránh việc tạo một bộ trọng số mã hóa cứng riêng cho đường tối ưu; vì vậy \texttt{tflm\_ref} và \texttt{pulp\_opt} luôn dùng cùng nguồn mô hình, cùng dữ liệu lượng tử hóa và cùng tập véc-tơ kiểm chứng. Sau khi tích lũy INT32, đường tối ưu áp dụng lại quy ước lượng tử hóa của TFLite để điểm đầu ra INT8 có thể đối chiếu trực tiếp với kết quả tham chiếu, không chỉ so sánh riêng lớp dự đoán.
 
-Trong nhân tối ưu, lớp \(784 \rightarrow 32\) là phần quan trọng nhất vì chiếm \(784 \times 32 = 25.088\) phép MAC trên mỗi mẫu. Với trường hợp dữ liệu được căn chỉnh theo từ 32 bit, firmware xử lý bốn nút ẩn cùng lúc: mỗi vòng lặp tải một từ kích hoạt, tải bốn từ trọng số bằng \texttt{AI\_PLW\_U32}, rồi cập nhật bốn bộ tích lũy độc lập bằng \texttt{ai\_dot4\_acc}. Phần lặp qua các từ INT8 đóng gói được điều khiển bằng \texttt{AI\_LP\_SETUP\_L0}. Nếu con trỏ dữ liệu không thỏa điều kiện căn chỉnh, firmware rơi về đường \texttt{dot4} đóng gói đơn giản hơn để vẫn giữ đúng kết quả. Lớp \(32 \rightarrow 10\) có số MAC nhỏ hơn nhiều nên dùng cùng cơ chế tích vô hướng đóng gói nhưng không cần biến thể xử lý bốn đầu ra cùng lúc.
+Trong nhân tối ưu, lớp \(784 \rightarrow 32\) là phần quan trọng nhất vì chiếm \(784 \times 32 = 25\,088\) phép MAC trên mỗi mẫu. Với trường hợp dữ liệu được căn chỉnh theo từ 32 bit, firmware xử lý bốn nút ẩn cùng lúc: mỗi vòng lặp tải một từ kích hoạt, tải bốn từ trọng số bằng \texttt{AI\_PLW\_U32}, rồi cập nhật bốn bộ tích lũy độc lập bằng \texttt{ai\_dot4\_acc}. Phần lặp qua các từ INT8 đóng gói được điều khiển bằng \texttt{AI\_LP\_SETUP\_L0}. Nếu con trỏ dữ liệu không thỏa điều kiện căn chỉnh, firmware rơi về đường \texttt{dot4} đóng gói đơn giản hơn để vẫn giữ đúng kết quả. Lớp \(32 \rightarrow 10\) có số MAC nhỏ hơn nhiều nên dùng cùng cơ chế tích vô hướng đóng gói nhưng không cần biến thể xử lý bốn đầu ra cùng lúc.
 
 Để đi tới luồng MNIST FC nêu trên, firmware TFLM được đưa lên kit qua một số mốc kiểm chứng tăng dần, tóm tắt trong Bảng~\ref{tab:tflm-bring-up}. Các mốc này không phải kết quả hiệu năng chính, nhưng giúp tách riêng từng nhóm rủi ro trong quá trình triển khai: môi trường thực thi TFLM và vùng nhớ tĩnh, nhân tối ưu trên một mô hình nhỏ, giao tiếp UART nhận dữ liệu ở thời gian chạy, rồi hai chế độ chạy cố định và nhận ảnh của mô hình MNIST FC.
 
@@ -328,20 +337,29 @@ Sau khi mô hình và hai đường chạy đã được tích hợp vào firmwa
     \footnotesize
     \setlength{\tabcolsep}{3pt}
     \renewcommand{\arraystretch}{1.18}
-    \begin{tabular}{|>{\raggedright\arraybackslash}p{1.75cm}|>{\centering\arraybackslash}p{1.90cm}|>{\centering\arraybackslash}p{1.40cm}|>{\centering\arraybackslash}p{1.65cm}|>{\centering\arraybackslash}p{1.35cm}|>{\centering\arraybackslash}p{1.25cm}|>{\centering\arraybackslash}p{1.25cm}|>{\centering\arraybackslash}p{1.10cm}|}
+    \begin{tabular}{|>{\raggedright\arraybackslash}p{1.75cm}|>{\centering\arraybackslash}p{1.90cm}|>{\centering\arraybackslash}p{1.40cm}|>{\centering\arraybackslash}p{1.65cm}|>{\centering\arraybackslash}p{1.35cm}|>{\centering\arraybackslash}p{1.25cm}|>{\centering\arraybackslash}p{1.25cm}|>{\centering\arraybackslash}p{1.20cm}|}
         \hline
         \textbf{Chế độ đo} & \textbf{Chu kỳ ref} & \textbf{Chu kỳ opt} & \textbf{Lệnh ref} & \textbf{Lệnh opt} & \textbf{Chu kỳ/MAC ref} & \textbf{Chu kỳ/MAC opt} & \textbf{Tăng tốc} \\
         \hline
-        Có kiểm chứng & 11.172.961 & 901.789 & 7.687.470 & 624.902 & 13,74 & 1,11 & 12,39x \\
+        Có kiểm chứng & \(11\,172\,961\) & \(901\,789\) & \(7\,687\,470\) & \(624\,902\) & \(13{,}74\) & \(1{,}11\) & \(12{,}39\times\) \\
         \hline
-        Chỉ suy luận & 10.817.077 & 874.897 & 7.493.516 & 608.100 & 13,30 & 1,08 & 12,36x \\
+        Chỉ suy luận & \(10\,817\,077\) & \(874\,897\) & \(7\,493\,516\) & \(608\,100\) & \(13{,}30\) & \(1{,}08\) & \(12{,}36\times\) \\
         \hline
     \end{tabular}
     \caption{Kết quả thực nghiệm MNIST FC INT8 với 32 véc-tơ cố định trên kit}
     \label{tab:mnist-fc-fixed-vector-result}
 \end{table}
 
-Trong Bảng~\ref{tab:mnist-fc-fixed-vector-result}, chế độ có kiểm chứng bao gồm cả thao tác chuẩn bị đầu vào, suy luận, lấy lớp dự đoán, tính checksum và phần ghi nhận kết quả kiểm chứng. Ngược lại, chế độ chỉ suy luận chỉ đo khoảng thời gian thực thi lõi suy luận: với \texttt{tflm\_ref} là lời gọi \texttt{Invoke()}, còn với \texttt{pulp\_opt} là hàm suy luận cục bộ. Hai mức tăng tốc 12,39 lần và 12,36 lần rất gần nhau, cho thấy lợi ích chính đến từ phần tính toán của nhân kết nối đầy đủ, không phải do khác biệt trong phần kiểm tra hay ghi nhận kết quả. Với 32 véc-tơ cố định, cả hai đường đều khớp lớp kỳ vọng 32/32 và khớp từng điểm đầu ra INT8; giá trị khớp nhãn thật 31/32 chỉ phản ánh một mẫu mà bản thân mô hình INT8 dự đoán khác nhãn thật, không phải sai khác giữa đường tham chiếu và đường tối ưu.
+Với kết quả MNIST FC, Hình~\ref{fig:mnist-fc-board-speedup} sử dụng cùng cách biểu diễn để so sánh hai khoảng đo trong Bảng~\ref{tab:mnist-fc-fixed-vector-result}. Tỷ lệ chu kỳ cho biết mức tăng tốc của đường tối ưu, trong khi tỷ lệ lệnh hoàn tất cho thấy mức rút gọn số lệnh động tương ứng.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.76\linewidth}{!}{\input{Hinh_ve/mnist_fc_board_speedup.tikz}}
+    \caption{So sánh tỷ lệ chu kỳ và lệnh hoàn tất của MNIST FC trên kit}
+    \label{fig:mnist-fc-board-speedup}
+\end{figure}
+
+Trong Bảng~\ref{tab:mnist-fc-fixed-vector-result} và Hình~\ref{fig:mnist-fc-board-speedup}, chế độ có kiểm chứng bao gồm cả thao tác chuẩn bị đầu vào, suy luận, lấy lớp dự đoán, tính checksum và phần ghi nhận kết quả kiểm chứng. Ngược lại, chế độ chỉ suy luận chỉ đo khoảng thời gian thực thi lõi suy luận: với \texttt{tflm\_ref} là lời gọi \texttt{Invoke()}, còn với \texttt{pulp\_opt} là hàm suy luận cục bộ. Hai mức tăng tốc 12,39 lần và 12,36 lần rất gần nhau; đồng thời hai cặp cột chu kỳ và lệnh hoàn tất trong hình cũng nằm sát nhau. Điều này cho thấy lợi ích chính đến từ phần tính toán của nhân kết nối đầy đủ, không phải do khác biệt trong phần kiểm tra hay ghi nhận kết quả. Với 32 véc-tơ cố định, cả hai đường đều khớp lớp kỳ vọng 32/32 và khớp từng điểm đầu ra INT8; giá trị khớp nhãn thật 31/32 chỉ phản ánh một mẫu mà bản thân mô hình INT8 dự đoán khác nhãn thật, không phải sai khác giữa đường tham chiếu và đường tối ưu.
 
 Phép đo thứ hai chuyển đầu vào ra ngoài firmware: ảnh MNIST được gửi từ máy tính chủ qua UART thay vì dùng dữ liệu nhúng cố định. Mỗi ảnh ở dạng PGM (Portable Graymap) \(28 \times 28\) được phần mềm trên máy tính chủ chuyển thành tensor INT8 bằng công thức \(x_\text{int8} = \text{pixel} - 128\), sau đó đóng vào khung lệnh \texttt{0x11} dài 784 byte. Firmware nhận từng khung, chạy cả hai đường \texttt{tflm\_ref}/\texttt{pulp\_opt}, rồi trả về lớp dự đoán, điểm đầu ra, checksum, số chu kỳ và trạng thái đối chiếu.
 
@@ -354,7 +372,7 @@ Phép đo thứ hai chuyển đầu vào ra ngoài firmware: ảnh MNIST đượ
 
 Hình~\ref{fig:mnist-fc-uart-gui} minh họa giao diện kiểm thử được xây dựng để quan sát luồng UART trực quan hơn: danh sách ảnh đầu vào, ảnh đang chạy, hai véc-tơ điểm đầu ra của TFLM và nhân tối ưu, số chu kỳ, bảng kết quả từng mẫu và nhật ký UART thô. Giao diện này dùng cùng giao thức yêu cầu--phản hồi với chương trình kiểm thử dòng lệnh, tức là vẫn gửi từng khung và chờ phản hồi trước khi gửi mẫu tiếp theo; vì vậy nó không thay đổi bản chất phép đo trên kit mà chủ yếu giúp kiểm tra, trình diễn và phát hiện lỗi thuận tiện hơn.
 
-Trong lượt chạy hàng loạt minh họa ở Hình~\ref{fig:mnist-fc-uart-gui}, 200 ảnh MNIST PGM được gửi tuần tự qua UART. Cả 200/200 mẫu đều có phản hồi hợp lệ và hai đường chạy khớp nhau; số mẫu khớp nhãn thật là 199/200, được báo cáo riêng để phản ánh chất lượng của mô hình thay vì độ đúng giữa hai đường thực thi. Sai khác điểm đầu ra bằng 0 trên toàn bộ 200 ảnh, nghĩa là véc-tơ điểm INT8 của \texttt{pulp\_opt} khớp từng byte với \texttt{tflm\_ref} khi đầu vào thay đổi theo từng khung UART. Tính theo trung bình mỗi ảnh, đường tham chiếu cần 350.618 chu kỳ, trong khi đường tối ưu cần 28.006 chu kỳ; mức tăng tốc tổng hợp là 12,52 lần. Giá trị này gần với hai mức tăng tốc 12,39 lần và 12,36 lần ở phép đo véc-tơ cố định, cho thấy kết quả vẫn ổn định khi chuyển từ dữ liệu nhúng sẵn sang dữ liệu nhận ở thời gian chạy. Như vậy, đường nhận dữ liệu qua UART hoạt động ổn định với khung 784 byte, đồng thời củng cố kết luận rằng nhóm thao tác INT8 đóng gói, tải hậu tăng và vòng lặp phần cứng đem lại lợi ích rõ rệt khi được đặt trong một luồng suy luận TFLM hoàn chỉnh.
+Trong lượt chạy hàng loạt minh họa ở Hình~\ref{fig:mnist-fc-uart-gui}, 200 ảnh MNIST PGM được gửi tuần tự qua UART. Cả 200/200 mẫu đều có phản hồi hợp lệ và hai đường chạy khớp nhau; số mẫu khớp nhãn thật là 199/200, được báo cáo riêng để phản ánh chất lượng của mô hình thay vì độ đúng giữa hai đường thực thi. Sai khác điểm đầu ra bằng 0 trên toàn bộ 200 ảnh, nghĩa là véc-tơ điểm INT8 của \texttt{pulp\_opt} khớp từng byte với \texttt{tflm\_ref} khi đầu vào thay đổi theo từng khung UART. Tính theo trung bình mỗi ảnh, đường tham chiếu cần \(350\,618\) chu kỳ, trong khi đường tối ưu cần \(28\,006\) chu kỳ; mức tăng tốc tổng hợp là 12,52 lần. Giá trị này gần với hai mức tăng tốc 12,39 lần và 12,36 lần ở phép đo véc-tơ cố định, cho thấy kết quả vẫn ổn định khi chuyển từ dữ liệu nhúng sẵn sang dữ liệu nhận ở thời gian chạy. Như vậy, đường nhận dữ liệu qua UART hoạt động ổn định với khung 784 byte, đồng thời củng cố kết luận rằng nhóm thao tác INT8 đóng gói, tải hậu tăng và vòng lặp phần cứng đem lại lợi ích rõ rệt khi được đặt trong một luồng suy luận TFLM hoàn chỉnh.
 
 \section{Tổng hợp tài nguyên và ràng buộc thời gian sau triển khai}
 
@@ -368,17 +386,17 @@ Các phép đo trên kit được tạo theo cùng một luồng triển khai: b
         \hline
         \textbf{Thông số} & \textbf{Giá trị} \\
         \hline
-        Logic elements & 13.381 \\
+        Logic elements & \(13\,381\) \\
         \hline
-        Registers & 2.793 \\
+        Registers & \(2\,793\) \\
         \hline
-        Memory bits & 2.097.152 \\
+        Memory bits & \(2\,097\,152\) \\
         \hline
         DSP blocks & 16 \\
         \hline
-        Setup slack tại 50 MHz & \(+0,256~\text{ns}\) \\
+        Setup slack tại 50 MHz & \(+0{,}256~\text{ns}\) \\
         \hline
-        Hold slack tại 50 MHz & \(+0,375~\text{ns}\) \\
+        Hold slack tại 50 MHz & \(+0{,}375~\text{ns}\) \\
         \hline
     \end{tabular}
     \caption{Tài nguyên và ràng buộc thời gian của cấu hình MNIST FC cuối trên FPGA}

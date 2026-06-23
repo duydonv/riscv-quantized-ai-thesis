@@ -225,7 +225,7 @@ make tflm_mnist_uart CROSS=/path/to/riscv-none-elf-
 
 Hai firmware MNIST có vai trò khác nhau. \path|tflm_mnist_fc| chạy tập vector cố định đã nhúng trong firmware và phù hợp để kiểm tra bit-exact giữa \texttt{tflm\_ref} và \texttt{pulp\_opt}. \path|tflm_mnist_uart| nhận một tensor đầu vào 784 byte qua UART, phù hợp cho thử nghiệm với dữ liệu gửi từ máy tính và cho giao diện đồ họa đã minh họa ở Chương~\ref{chap:thuc-nghiem}.
 
-Sau khi nạp \path|.sof| tương ứng, có thể chạy các script host qua cổng UART 115200 8N1. Đoạn mã~\ref{lst:phuluc-soc-uart-run} đưa ra các lệnh thường dùng nhất cho đường UART. Tên cổng \path|/dev/ttyUSB0| cần được thay theo thiết bị thực tế trên máy.
+Sau khi nạp \path|.sof| tương ứng, có thể chạy các script host qua cổng UART \(115\,200\) 8N1. Đoạn mã~\ref{lst:phuluc-soc-uart-run} đưa ra các lệnh thường dùng nhất cho đường UART. Tên cổng \path|/dev/ttyUSB0| cần được thay theo thiết bị thực tế trên máy.
 
 \begin{lstlisting}[
     style=phulucsoc,

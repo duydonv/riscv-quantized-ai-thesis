@@ -20,7 +20,7 @@
 
     \node[core] (core) at (0.35, 0.75) {CV32E40P\\\texttt{COREV\_PULP=1}\\\texttt{FPU=0}};
     \node[mem] (bram) at (0.35, -1.05) {BRAM 128 KB\\4 byte-lane M9K\\\texttt{\$readmemh}};
-    \node[io] (uart) at (4.40, 0.75) {UART TX/RX\\115200 8N1};
+    \node[io] (uart) at (4.40, 0.75) {UART TX/RX\\115 200 8N1};
     \node[io] (led) at (4.40, -1.05) {LED status\\heartbeat};
 
     \draw[arrow] (host) -- node[right, xshift=0.06cm] {build} (hex);
