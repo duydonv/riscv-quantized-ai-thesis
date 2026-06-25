@@ -1,15 +1,7 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương~\ref{chap:thuc-nghiem} đã trình bày quá trình triển khai nhóm thao tác AI
-lượng tử hóa trên kit DE2i-150/CV32E40P và các kết quả thực nghiệm thu được với
-các nhân INT8 cũng như mô hình MNIST FC INT8 chạy bằng TensorFlow Lite Micro.
-Trên cơ sở các kết quả đó, chương này tổng kết lại những vấn đề đồ án đã giải
-quyết được, nêu các hạn chế còn tồn tại và đề xuất một số hướng phát triển tiếp
-theo. Nội dung chương gồm hai phần chính: phần kết luận về kết quả và đóng góp
-của đồ án, sau đó là phần định hướng phát triển trong tương lai.
-
-\section{Kết luận}
+\section{Kết quả đạt được}
 
 Đồ án xuất phát từ bài toán tối ưu phần tính toán của suy luận AI lượng tử hóa
 trên bộ xử lý RISC-V nhúng. Trong bối cảnh các mô hình INT8 giúp giảm kích
@@ -46,15 +38,15 @@ nằm ở việc gộp một phép toán riêng lẻ một cách cơ học, mà 
 đồng thời nhiều thành phần trong thân vòng lặp INT8, đặc biệt là tổ hợp tích vô
 hướng đóng gói, tải hậu tăng và vòng lặp phần cứng.
 
-Bên cạnh các kết quả đạt được, đồ án vẫn còn một số hạn chế. Thứ nhất, mô hình
-gem5 đã được đồng bộ về ngữ nghĩa với nhánh phần cứng nhưng chưa phải mô hình
-khớp từng chu kỳ với CV32E40P trên kit DE2i-150; do đó các kết quả mô phỏng chỉ
-nên được hiểu như phân tích xu hướng. Thứ hai, đánh giá năng lượng mới dựa trên
-VCD và Quartus Power Analyzer nên phù hợp để so sánh xu hướng tương đối hơn là
-kết luận công suất tuyệt đối của kit. Cuối cùng, phạm vi mô hình thực nghiệm
-hiện tập trung vào các nhân INT8 và mạng kết nối đầy đủ cho MNIST; các mạng có
-cấu trúc tích chập hoặc các bài toán TinyML thực tế hơn chưa được khảo sát
-trong phạm vi đồ án này.
+Các kết quả trên cần được nhìn nhận cùng một số giới hạn của phạm vi đồ án. Thứ
+nhất, mô hình gem5 đã được đồng bộ về ngữ nghĩa với nhánh phần cứng nhưng chưa
+phải mô hình khớp từng chu kỳ với CV32E40P trên kit DE2i-150; do đó các kết quả
+mô phỏng chỉ nên được hiểu như phân tích xu hướng. Thứ hai, đánh giá năng lượng
+mới dựa trên VCD và Quartus Power Analyzer nên phù hợp để so sánh xu hướng tương
+đối hơn là kết luận công suất tuyệt đối của kit. Cuối cùng, phạm vi mô hình thực
+nghiệm hiện tập trung vào các nhân INT8 và mạng kết nối đầy đủ cho MNIST; các
+mạng có cấu trúc tích chập hoặc các bài toán TinyML thực tế hơn chưa được khảo
+sát trong phạm vi đồ án này.
 
 \section{Hướng phát triển trong tương lai}
 

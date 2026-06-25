@@ -206,14 +206,25 @@ python3 tests/gem5/riscv_ai_ext/run_perf_compare.py --skip-build --no-cache
 python3 tests/gem5/riscv_ai_ext/run_perf_compare.py --skip-build --no-cache --memory fast-ram
 \end{lstlisting}
 
-Kết quả của mỗi lần chạy được lưu thành các tệp \texttt{summary.json} và \texttt{summary.csv}. Các chỉ số được trích xuất gồm số chu kỳ trong vùng đo, số tick mô phỏng, số lệnh đã thực thi, IPC/CPI và một số thống kê liên quan tới dự đoán nhánh. Trong phần phân tích kết quả, thước đo chính là số chu kỳ mô phỏng của vùng nhân; mức tăng tốc được tính bằng tỉ số giữa chu kỳ của \texttt{baseline\_scalar} và chu kỳ của \texttt{update\_custom}, còn \texttt{update\_scalar} đóng vai trò kiểm soát để đánh giá độ lệch của bản gem5 đã chỉnh sửa.
+Như vậy, các ca chạy trong benchmark được giữ thống nhất về vùng đo, cấu hình mô phỏng và cách ghi thống kê. Phần tiếp theo trình bày cách trích lọc các trường cần thiết từ đầu ra của gem5 và phân tích xu hướng hiệu năng thu được.
 
 \section{Kết quả mô phỏng và phân tích xu hướng}
 \label{sec:ket-qua-mo-phong-gem5}
+\raggedbottom
 
-Nguồn số liệu của mục này là các tệp tổng hợp do chương trình chạy benchmark sinh ra sau khi cập nhật mô hình vòng lặp phần cứng trong O3. Ba cấu hình được sử dụng tương ứng với các lệnh chạy ở Đoạn mã~\ref{lst:gem5-perf-command}: O3 có cache, NoCache DDR3 và NoCache fast-ram. Trong cả ba lần chạy, giá trị kiểm tra của \texttt{baseline\_scalar}, \texttt{update\_scalar} và \texttt{update\_custom} đều khớp nhau. Ngoài ra, số chu kỳ của \texttt{update\_scalar} trùng với \texttt{baseline\_scalar}, cho thấy các thay đổi trong gem5 không làm lệch kết quả của đường scalar dùng làm mốc.
+Nguồn số liệu của mục này là phần thống kê vùng đo trong \texttt{stats.txt} do gem5 sinh ra sau khi chạy benchmark. Hình~\ref{fig:gem5-stats-txt-excerpt} minh họa một trích đoạn rút gọn của tệp thống kê này. Trong đầu ra thô, các trường phục vụ so sánh như số lệnh mô phỏng và số chu kỳ xuất hiện cùng nhiều thống kê khác của gem5, nên đồ án cần trích lọc đúng các trường thuộc phần thống kê đầu tiên tương ứng với vùng nhân đã được khoanh bằng m5ops trước khi lập bảng kết quả.
 
-Bảng~\ref{tab:gem5-perf-results} trình bày số chu kỳ mô phỏng và số lệnh động trong vùng nhân của hai bản scalar và custom, cùng mức tăng tốc so với mốc scalar. Các giá trị tăng tốc được tính theo công thức \(S = C_{\text{scalar}} / C_{\text{custom}}\), trong đó \(C\) là số chu kỳ được trích từ lần ghi thống kê ngay sau vùng nhân. Các chỉ số gắn trực tiếp với cơ chế vòng lặp phần cứng, như đổi hướng PC, tra cứu BTB và dự đoán nhánh, được tách sang Mục~\ref{sec:phan-tich-hwloop-o3} để phần này tập trung vào xu hướng hiệu năng chung của các kernel.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Hinh_ve/gem5_stats_txt_excerpt.png}
+    \caption{Ví dụ trích đoạn đầu ra thống kê thô trong tệp \texttt{stats.txt} của gem5}
+    \label{fig:gem5-stats-txt-excerpt}
+\end{figure}
+\afterpage{\flushbottom}
+
+Quy trình trích lọc trên được áp dụng cho ba cấu hình tương ứng với các lệnh chạy ở Đoạn mã~\ref{lst:gem5-perf-command}: O3 có cache, NoCache DDR3 và NoCache fast-ram. Trước khi đưa số liệu vào so sánh, giá trị kiểm tra của \texttt{baseline\_scalar}, \texttt{update\_scalar} và \texttt{update\_custom} đều được đối chiếu và cho kết quả khớp nhau. Ngoài ra, số chu kỳ của \texttt{update\_scalar} trùng với \texttt{baseline\_scalar}, cho thấy các thay đổi trong gem5 không làm lệch đường scalar dùng làm mốc.
+
+Trên cơ sở các lần chạy đã được trích lọc và đối chiếu nhất quán, Bảng~\ref{tab:gem5-perf-results} tổng hợp số chu kỳ mô phỏng và số lệnh động trong vùng nhân của hai bản scalar và custom, cùng mức tăng tốc so với mốc scalar. Các giá trị tăng tốc được tính theo công thức \(S = C_{\text{scalar}} / C_{\text{custom}}\), trong đó \(C\) là số chu kỳ được trích từ lần ghi thống kê ngay sau vùng nhân. Các chỉ số gắn trực tiếp với cơ chế vòng lặp phần cứng, như đổi hướng PC, tra cứu BTB và dự đoán nhánh, được tách sang Mục~\ref{sec:phan-tich-hwloop-o3} để phần này tập trung vào xu hướng hiệu năng chung của các kernel.
 
 \begin{table}[H]
     \centering
