@@ -160,7 +160,7 @@ Lệnh \texttt{p.lw} phục vụ mẫu truy cập bộ nhớ tuần tự. Dạng
     \label{eq:plw-semantics}
 \end{equation}
 
-Trong đó, \(\mathrm{EA}\) là địa chỉ hiệu dụng, tức địa chỉ được dùng cho lần truy cập bộ nhớ.
+Trong đó, \(\mathrm{EA}\) (Effective Address) là địa chỉ hiệu dụng, tức địa chỉ được dùng cho lần truy cập bộ nhớ.
 
 Thứ tự ``tải trước, cập nhật sau'' là phần cốt lõi của ngữ nghĩa lệnh. Với các mảng kích hoạt hoặc trọng số được quét tuần tự, mỗi lần lặp thường cần tải word hiện tại rồi tăng con trỏ thêm 4 byte để trỏ sang word kế tiếp. \texttt{p.lw} gộp hai thao tác này vào một lệnh, giảm một lệnh cộng địa chỉ trong thân vòng lặp. Hằng dịch có dấu cũng cho phép biểu diễn các mẫu quét lùi hoặc các bước nhảy khác 4 byte khi cần.
 

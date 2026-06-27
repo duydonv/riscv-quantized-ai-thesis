@@ -11,21 +11,24 @@ hướng này là giảm số lệnh động và chi phí điều khiển trong 
 lặp lại, nhưng vẫn giữ mô hình lập trình của một bộ xử lý RISC-V tổng quát thay
 vì chuyển toàn bộ bài toán sang một bộ tăng tốc chuyên dụng.
 
-Về mặt thiết kế, đồ án đã đặc tả một nhóm thao tác phục vụ suy luận INT8 gồm
+Về mặt thiết kế, đồ án đã đặc tả ngữ nghĩa một nhóm lệnh mở rộng phục vụ suy
+luận INT8 gồm
 \texttt{mac}, \texttt{dot4\_acc}, \texttt{relu}, \texttt{clamp}, \texttt{p.lw}
-và \texttt{lp.setup}. Các thao tác này lần lượt đại diện cho nhân--cộng tích
+và \texttt{lp.setup}. Các lệnh này lần lượt đại diện cho nhân--cộng tích
 lũy, tích vô hướng trên bốn phần tử INT8 đóng gói, kích hoạt, giới hạn miền giá
-trị, tải dữ liệu kèm hậu tăng địa chỉ và thiết lập vòng lặp phần cứng. Trên cơ
-sở đặc tả đó, đồ án đã xây dựng một luồng đánh giá gồm hai nhánh bổ trợ cho
-nhau: nhánh mô phỏng hiện thực nhóm lệnh bằng mã hóa thử nghiệm trong vùng
-\texttt{custom-0} của gem5, còn nhánh thực nghiệm ánh xạ cùng lớp ngữ nghĩa
-sang các lệnh CORE-V/PULP trên lõi CV32E40P thông qua lớp firmware.
+trị, tải dữ liệu kèm hậu tăng địa chỉ và thiết lập vòng lặp phần cứng. Qua đó,
+nhóm lệnh tạo thành một tập hợp thống nhất, bao quát ba thành phần chính
+trong thân vòng lặp INT8: tính toán, truy cập dữ liệu và điều khiển lặp.
 
-Đồ án cũng đã triển khai một luồng kiểm chứng hoàn chỉnh từ mô phỏng đến phần
-cứng thật. Ở nhánh gem5, nhóm lệnh được đưa vào đường giải mã, lớp lệnh, ngữ
-nghĩa thực thi, định dạng tải hậu tăng và trạng thái vòng lặp phần cứng; các
-kiểm thử chức năng xác nhận những ngữ nghĩa chính hoạt động đúng trên các mô
-hình CPU được chọn. Ở nhánh thực nghiệm, đồ án xây dựng SoC tối thiểu trên kit
+Trên cơ sở đặc tả đó, đồ án đã xây dựng một luồng kiểm chứng và đánh giá hoàn
+chỉnh từ mô phỏng đến triển khai thực tế: nhóm lệnh trước hết được hiện
+thực bằng mã hóa thử nghiệm trong vùng \texttt{custom-0} để kiểm chứng trên
+gem5, sau đó được ánh xạ theo cùng ngữ nghĩa sang các lệnh CORE-V/PULP trên lõi
+CV32E40P thông qua lớp firmware để đánh giá trên phần cứng thật. Ở nhánh gem5,
+nhóm lệnh được đưa vào đường giải mã, lớp lệnh, ngữ nghĩa thực thi, định dạng
+tải hậu tăng và trạng thái vòng lặp phần cứng; các kiểm thử chức năng xác nhận
+những ngữ nghĩa chính hoạt động đúng trên các mô hình CPU được chọn. Ở nhánh
+thực nghiệm, đồ án xây dựng SoC tối thiểu trên kit
 DE2i-150/CV32E40P, xử lý ràng buộc thời gian để thiết kế đạt 50 MHz và đo hiệu
 năng bằng các bộ đếm \texttt{mcycle}/\texttt{minstret}. Các kết quả tiêu biểu
 cho thấy mức tăng tốc đạt 6,33 lần với biến thể dùng \texttt{dot4\_acc} và
@@ -67,12 +70,12 @@ rộng. Trong phiên bản hiện tại, firmware phát sinh các lệnh CORE-V/
 qua chỉ thị \texttt{.insn}, giúp kiểm soát chính xác mã lệnh nhưng chưa thuận
 tiện cho lập trình và bảo trì lâu dài. Một bước tiếp theo phù hợp là bổ sung
 hỗ trợ ở mức assembler, disassembler, intrinsic hoặc thư viện nhân tính toán chuẩn hóa
-hơn, để các chương trình C/C++ và các nhân TensorFlow Lite Micro có thể gọi
-nhóm thao tác tối ưu bằng giao diện rõ ràng thay vì phụ thuộc trực tiếp vào mã
-hóa lệnh.
+hơn, để các chương trình C/C++ và các nhân TensorFlow Lite Micro có thể khai
+thác nhóm lệnh mở rộng qua một giao diện rõ ràng thay vì phụ thuộc trực tiếp
+vào mã hóa lệnh.
 
 Hướng phát triển thứ ba là mở rộng phạm vi mô hình và toán tử được đánh giá.
-Các kết quả hiện tại cho thấy nhóm thao tác đề xuất đặc biệt hiệu quả với lớp
+Các kết quả hiện tại cho thấy nhóm lệnh đề xuất đặc biệt hiệu quả với lớp
 kết nối đầy đủ có nhiều tích vô hướng INT8. Trong tương lai, cần tiếp tục thử
 nghiệm với các mạng có lớp tích chập, tích chập theo chiều kênh
 (depthwise convolution) hoặc các mô hình TinyML gần ứng dụng thực tế hơn.
@@ -83,8 +86,8 @@ hơn hay không.
 
 Tổng kết lại, đồ án đã hoàn thành một luồng nghiên cứu và thực nghiệm tương
 đối đầy đủ cho hướng mở rộng tập lệnh RISC-V phục vụ suy luận AI lượng tử hóa:
-từ phân tích bài toán, đặc tả nhóm thao tác, mô phỏng trong gem5, triển khai
-SoC trên FPGA đến đánh giá mô hình suy luận thực tế bằng TensorFlow Lite Micro
+từ phân tích bài toán, đặc tả ngữ nghĩa nhóm lệnh, mô phỏng trong gem5, triển
+khai SoC trên FPGA đến đánh giá mô hình suy luận thực tế bằng TensorFlow Lite Micro
 trên phần cứng thật. Các kết quả thu được cho thấy hướng tiếp cận ở mức tập
 lệnh có tiềm năng rõ ràng đối với các vòng lặp INT8 trên hệ nhúng, đồng thời
 mở ra cơ sở để tiếp tục hoàn thiện công cụ, mô hình mô phỏng và phạm vi ứng
